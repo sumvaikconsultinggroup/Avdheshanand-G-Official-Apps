@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { registerForPushNotifications } from '../../services/notifications';
+import { resolveUserApiBaseUrl } from '../../services/api';
 import { colors, spacing, borderRadius, shadows } from '../../theme';
 
 const STORAGE_KEY_NOTIF = '@panchang_notification_prefs';
@@ -44,18 +45,12 @@ const LANGUAGE_OPTIONS = [
   { code: 'or', label: 'Odia', labelNative: 'ଓଡ଼ିଆ' },
 ];
 
-async function getApiBaseUrl(): Promise<string> {
-  const fromEnv = process.env.EXPO_PUBLIC_API_URL;
-  if (fromEnv) return fromEnv.replace(/\/+$/, '');
-  return 'http://localhost:3000';
-}
-
 async function syncPrefsToServer(pushToken: string, prefs: NotificationPrefs) {
   try {
     const storedCity = await AsyncStorage.getItem(STORAGE_KEY_CITY);
     const city = storedCity ? JSON.parse(storedCity) : { name: 'Haridwar', lat: 29.9457, lng: 78.1642, timezone: 'Asia/Kolkata' };
     
-    const baseUrl = await getApiBaseUrl();
+    const baseUrl = await resolveUserApiBaseUrl();
     await fetch(`${baseUrl}/api/notifications/preferences`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

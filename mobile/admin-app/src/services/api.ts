@@ -10,6 +10,16 @@ const KNOWN_NON_API_BASE_URLS = new Set([
 const PRODUCTION_API_FALLBACKS = [
   'https://admin.avdheshanandg.org',
 ];
+const LOCAL_DEV_API_FALLBACKS = [
+  'http://10.0.2.2:3001',
+  'http://10.0.2.2:3000',
+  'http://10.0.3.2:3001',
+  'http://10.0.3.2:3000',
+  'http://localhost:3001',
+  'http://localhost:3000',
+  'http://127.0.0.1:3001',
+  'http://127.0.0.1:3000',
+];
 
 let cachedWorkingBaseUrl: string | null = null;
 const invalidBaseUrls = new Set<string>();
@@ -18,6 +28,18 @@ function normalizeBaseUrl(url?: string | null): string | null {
   if (!url) return null;
   const normalized = url.trim().replace(/\/+$/, '');
   return normalized || null;
+}
+
+function isLocalDevBaseUrl(url?: string | null): boolean {
+  const normalized = normalizeBaseUrl(url);
+  if (!normalized) return false;
+
+  return (
+    normalized.includes('localhost') ||
+    normalized.includes('127.0.0.1') ||
+    normalized.includes('10.0.2.2') ||
+    normalized.includes('10.0.3.2')
+  );
 }
 
 function getExpoDevHost(): string | null {
@@ -34,7 +56,10 @@ function getCandidateBaseUrls(): string[] {
   const fromEnv = normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   const expoHost = getExpoDevHost();
   const shouldPreferLocalDev =
-    __DEV__ && (!fromEnv || KNOWN_NON_API_BASE_URLS.has(fromEnv));
+    __DEV__ &&
+    (!fromEnv ||
+      KNOWN_NON_API_BASE_URLS.has(fromEnv) ||
+      isLocalDevBaseUrl(fromEnv));
 
   const candidates: string[] = [];
   const push = (value?: string | null) => {
@@ -48,10 +73,7 @@ function getCandidateBaseUrls(): string[] {
   if (shouldPreferLocalDev) {
     push(expoHost ? `http://${expoHost}:3001` : null);
     push(expoHost ? `http://${expoHost}:3000` : null);
-    push('http://localhost:3001');
-    push('http://localhost:3000');
-    push('http://127.0.0.1:3001');
-    push('http://127.0.0.1:3000');
+    LOCAL_DEV_API_FALLBACKS.forEach(push);
   }
 
   if (fromEnv && !KNOWN_NON_API_BASE_URLS.has(fromEnv)) {
@@ -63,10 +85,7 @@ function getCandidateBaseUrls(): string[] {
   if (!shouldPreferLocalDev && __DEV__) {
     push(expoHost ? `http://${expoHost}:3001` : null);
     push(expoHost ? `http://${expoHost}:3000` : null);
-    push('http://localhost:3001');
-    push('http://localhost:3000');
-    push('http://127.0.0.1:3001');
-    push('http://127.0.0.1:3000');
+    LOCAL_DEV_API_FALLBACKS.forEach(push);
   }
 
   return candidates;
@@ -79,7 +98,7 @@ function isHtmlPayload(data: unknown): boolean {
 async function probeBaseUrl(baseUrl: string): Promise<boolean> {
   try {
     const response = await axios.get(`${baseUrl}/api/health`, {
-      timeout: 5000,
+      timeout: 1800,
       headers: { Accept: 'application/json' },
     });
 

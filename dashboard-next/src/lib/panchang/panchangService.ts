@@ -1,5 +1,12 @@
 import citiesData from '@/data/cities.json';
-import { getMoonLongitude, getMoonSunAngle, getSunLongitude } from '@/lib/panchang/astronomy';
+import {
+  getLahiriAyanamsha,
+  getMoonLongitude,
+  getMoonSiderealLongitude,
+  getMoonSunAngle,
+  getSunLongitude,
+  getSunSiderealLongitude,
+} from '@/lib/panchang/astronomy';
 import { calculateAyana, calculateHinduMonth, calculateKarana, calculateNakshatra, calculateRitu, calculateShakaSamvat, calculateTithi, calculateVikramSamvat, calculateYoga } from '@/lib/panchang/calculator';
 import {
   getMoonRashi, getSunRashi, getCurrentHora, getDishaShool,
@@ -19,6 +26,8 @@ import {
   getSunTimes,
 } from '@/lib/panchang/muhurta';
 import { EKADASHI_NAMES } from '@/lib/panchang/types';
+
+export const PANCHANG_ENGINE_VERSION = 'sidereal-lahiri-v1';
 
 interface CityEntry {
   name: string;
@@ -127,6 +136,11 @@ export function buildPanchangData({
   timezone,
 }: BuildPanchangArgs) {
   const dateKey = formatDateKey(date, timezone);
+  const ayanamshaDegrees = getLahiriAyanamsha(date);
+  const tropicalSunLongitude = getSunLongitude(date);
+  const tropicalMoonLongitude = getMoonLongitude(date);
+  const siderealSunLongitude = getSunSiderealLongitude(date);
+  const siderealMoonLongitude = getMoonSiderealLongitude(date);
   const sunTimes = getSunTimes(date, lat, lng);
   const moonTimes = getMoonTimes(date, lat, lng);
   const nextDaySunrise = getSunTimes(
@@ -300,8 +314,26 @@ export function buildPanchangData({
     // Auspicious activities (NEW)
     auspiciousActivities,
     // Raw astronomical data
-    sunLongitude: getSunLongitude(date),
-    moonLongitude: getMoonLongitude(date),
+    sunLongitude: siderealSunLongitude,
+    moonLongitude: siderealMoonLongitude,
+    tropicalSunLongitude,
+    tropicalMoonLongitude,
+    ayanamsha: {
+      name: 'Lahiri',
+      degrees: Math.round(ayanamshaDegrees * 10000) / 10000,
+      mode: 'approximate' as const,
+    },
+    calculationMethod: {
+      engineVersion: PANCHANG_ENGINE_VERSION,
+      zodiac: 'sidereal' as const,
+      ayanamsha: 'Approximate Lahiri',
+      locationBased: true,
+      observanceGrade: 'beta' as const,
+      notes: [
+        'Core Panchang zodiac fields use a sidereal correction instead of raw tropical longitudes.',
+        'Festival, vrat, and lunar month observance logic is still under active validation and should be verified for high-stakes ritual use.',
+      ],
+    },
     timezone,
     generatedAtIso: date.toISOString(),
     sunriseDisplay: formatTime(sunTimes.sunrise, timezone),

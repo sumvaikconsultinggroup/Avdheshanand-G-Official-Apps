@@ -1,10 +1,11 @@
 /**
- * Enhanced Panchang Calculator — World-Class
- * Adds: Rashi, Hora, Disha Shool, Dur Muhurta, Varjyam,
- * Tarabalam, Chandrabalam, Parana time, Samvat Name, Eclipse warnings
+ * Enhanced Panchang calculator.
+ *
+ * These helpers enrich the core Panchang response, but they should stay honest
+ * about method limitations instead of branding themselves as "world class".
  */
 
-import { getSunLongitude, getMoonLongitude } from './astronomy';
+import { getMoonSiderealLongitude, getSunSiderealLongitude } from './astronomy';
 
 // ─── RASHI (Zodiac Sign) ─────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ export interface RashiInfo {
 }
 
 export function getMoonRashi(date: Date): RashiInfo {
-  const moonLon = getMoonLongitude(date);
+  const moonLon = getMoonSiderealLongitude(date);
   const rashiIndex = Math.floor(moonLon / 30);
   const degree = moonLon % 30;
 
@@ -48,7 +49,7 @@ export function getMoonRashi(date: Date): RashiInfo {
 }
 
 export function getSunRashi(date: Date): RashiInfo {
-  const sunLon = getSunLongitude(date);
+  const sunLon = getSunSiderealLongitude(date);
   const rashiIndex = Math.floor(sunLon / 30);
   const degree = sunLon % 30;
 

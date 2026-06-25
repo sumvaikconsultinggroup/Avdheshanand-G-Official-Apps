@@ -82,6 +82,21 @@ export interface PanchangResult {
   vratDays: string[];
   sunLongitude: number;
   moonLongitude: number;
+  tropicalSunLongitude?: number;
+  tropicalMoonLongitude?: number;
+  ayanamsha?: {
+    name: string;
+    degrees: number;
+    mode: 'approximate';
+  };
+  calculationMethod?: {
+    engineVersion: string;
+    zodiac: 'sidereal';
+    ayanamsha: string;
+    locationBased: boolean;
+    observanceGrade: 'beta';
+    notes: string[];
+  };
 }
 
 // Tithi names (1-30)

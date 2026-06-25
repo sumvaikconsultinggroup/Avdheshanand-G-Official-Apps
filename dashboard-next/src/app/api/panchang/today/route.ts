@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import PanchangCache from '@/models/PanchangCache';
 import {
+  PANCHANG_ENGINE_VERSION,
   buildObservationDate,
   buildPanchangData,
   formatDateKey,
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
     }
 
     const dateKey = formatDateKey(date, timezone);
-    const locationKey = `${lat.toFixed(4)}_${lng.toFixed(4)}`;
+    const locationKey = `${lat.toFixed(4)}_${lng.toFixed(4)}_${PANCHANG_ENGINE_VERSION}`;
 
     let dbAvailable = true;
     try {

@@ -95,6 +95,7 @@ export function ScheduleScreen() {
   const [schedules, setSchedules] = useState<GroupedSchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [registering, setRegistering] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'events' | 'schedules'>('schedules');
   const [requestModalVisible, setRequestModalVisible] = useState(false);
@@ -151,24 +152,43 @@ export function ScheduleScreen() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [eventsRes, schedulesRes] = await Promise.all([
-        api.get('/events').catch(() => ({ data: [] })),
-        api.get('/schedule').catch(() => ({ data: [] })),
+      setScheduleError(null);
+
+      const [eventsRes, schedulesRes] = await Promise.allSettled([
+        api.get('/events'),
+        api.get('/schedule'),
       ]);
 
-      const sortedEvents = (eventsRes.data || []).sort(
-        (a: Event, b: Event) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
-      );
-      setEvents(sortedEvents);
+      if (eventsRes.status === 'fulfilled') {
+        const sortedEvents = (eventsRes.value.data || []).sort(
+          (a: Event, b: Event) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
+        );
+        setEvents(sortedEvents);
+      } else {
+        console.error('Error fetching events:', eventsRes.reason);
+        setEvents([]);
+      }
 
-      const rawSchedules = (schedulesRes.data || []).filter((item: Schedule) => !item.isBlocked || item.appointment);
-      setSchedules(groupSchedulesByMonth(rawSchedules));
+      if (schedulesRes.status === 'fulfilled') {
+        const rawSchedules = (schedulesRes.value.data || []).filter(
+          (item: Schedule) => !item.isBlocked || item.appointment
+        );
+        setSchedules(groupSchedulesByMonth(rawSchedules));
+      } else {
+        console.error('Error fetching schedules:', schedulesRes.reason);
+        setSchedules([]);
+        setScheduleError(
+          schedulesRes.reason instanceof Error
+            ? schedulesRes.reason.message
+            : t('common.somethingWentWrong')
+        );
+      }
     } catch (error) {
       console.error('Error fetching schedule data:', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchData();
@@ -706,11 +726,25 @@ export function ScheduleScreen() {
           }
           ListEmptyComponent={() => (
             <View style={styles.sectionWrap}>
-              <EmptyStateCard
-                icon="calendar-clock"
-                title={t('schedule.noSchedulesAvailable')}
-                subtitle={t('schedule.emptySchedulesSubtitle')}
-              />
+              {scheduleError ? (
+                <SurfaceCard compact style={styles.errorCard}>
+                  <EmptyStateCard
+                    icon="alert-circle-outline"
+                    title={t('common.somethingWentWrong')}
+                    subtitle={scheduleError}
+                  />
+                  <TouchableOpacity style={styles.retryButton} onPress={onRefresh} activeOpacity={0.85}>
+                    <Icon name="refresh" size={16} color={colors.text.white} />
+                    <Text style={styles.retryButtonText}>{t('common.tryAgain')}</Text>
+                  </TouchableOpacity>
+                </SurfaceCard>
+              ) : (
+                <EmptyStateCard
+                  icon="calendar-clock"
+                  title={t('schedule.noSchedulesAvailable')}
+                  subtitle={t('schedule.emptySchedulesSubtitle')}
+                />
+              )}
             </View>
           )}
         />
@@ -776,6 +810,24 @@ const styles = StyleSheet.create({
   },
   sectionWrap: {
     paddingHorizontal: spacing.lg,
+  },
+  errorCard: {
+    alignItems: 'center',
+  },
+  retryButton: {
+    marginTop: spacing.md,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary.saffron,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  retryButtonText: {
+    ...typography.label,
+    color: colors.text.white,
+    marginLeft: spacing.xs,
   },
   sectionHeader: {
     flexDirection: 'row',

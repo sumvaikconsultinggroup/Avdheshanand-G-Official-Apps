@@ -48,6 +48,15 @@ interface PanchangData {
   vratDays?: string[];
   dayName?: string;
   dayNameHindi?: string;
+  ayanamsha?: { name?: string; degrees?: number; mode?: string };
+  calculationMethod?: {
+    engineVersion?: string;
+    zodiac?: string;
+    ayanamsha?: string;
+    locationBased?: boolean;
+    observanceGrade?: string;
+    notes?: string[];
+  };
   choghadiya?: {
     day?: Array<{ name?: string; start?: string; end?: string; nature?: string }>;
     night?: Array<{ name?: string; start?: string; end?: string; nature?: string }>;
@@ -179,7 +188,7 @@ export default function EnhancedPanchangPage() {
       setPanchang(null);
       setErrorMessage(
         process.env.NODE_ENV === 'development'
-          ? 'Unable to connect to Panchang service. Start the dashboard API on port 3000 or configure NEXT_PUBLIC_API_URL.'
+          ? 'Unable to connect to Panchang service. Start the dashboard API on port 3001 or configure NEXT_PUBLIC_API_URL.'
           : t('retry')
       );
     }
@@ -604,6 +613,42 @@ export default function EnhancedPanchangPage() {
               </div>
             </div>
           </Section>
+
+          {panchang.calculationMethod && (
+            <Section title="Calculation Method" icon={Compass} defaultOpen={false}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="bg-white/60 rounded-lg p-3 border border-gold-100/50">
+                  <p className="text-xs text-spiritual-warmGray">Zodiac</p>
+                  <p className="font-semibold text-spiritual-maroon capitalize">{panchang.calculationMethod.zodiac || '--'}</p>
+                </div>
+                <div className="bg-white/60 rounded-lg p-3 border border-gold-100/50">
+                  <p className="text-xs text-spiritual-warmGray">Ayanamsha</p>
+                  <p className="font-semibold text-spiritual-maroon">
+                    {panchang.ayanamsha?.name || panchang.calculationMethod.ayanamsha || '--'}
+                    {typeof panchang.ayanamsha?.degrees === 'number' ? ` (${panchang.ayanamsha.degrees.toFixed(4)}°)` : ''}
+                  </p>
+                </div>
+                <div className="bg-white/60 rounded-lg p-3 border border-gold-100/50">
+                  <p className="text-xs text-spiritual-warmGray">Engine Version</p>
+                  <p className="font-semibold text-spiritual-maroon">{panchang.calculationMethod.engineVersion || '--'}</p>
+                </div>
+                <div className="bg-white/60 rounded-lg p-3 border border-gold-100/50">
+                  <p className="text-xs text-spiritual-warmGray">Ritual Confidence</p>
+                  <p className="font-semibold text-spiritual-maroon capitalize">{panchang.calculationMethod.observanceGrade || '--'}</p>
+                </div>
+              </div>
+              {panchang.calculationMethod.notes && panchang.calculationMethod.notes.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {panchang.calculationMethod.notes.map((note, index) => (
+                    <div key={index} className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <span>{note}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Section>
+          )}
 
         </section>
       )}

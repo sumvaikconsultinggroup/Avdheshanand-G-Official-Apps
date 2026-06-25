@@ -10,12 +10,34 @@ const KNOWN_NON_API_BASE_URLS = new Set([
   'https://www.avdheshanandg.org',
 ]);
 const PRODUCTION_API_FALLBACKS = ['https://admin.avdheshanandg.org'];
+const LOCAL_PANCHANG_API_FALLBACKS = [
+  'http://10.0.2.2:3000',
+  'http://10.0.2.2:4010',
+  'http://10.0.3.2:3000',
+  'http://10.0.3.2:4010',
+  'http://localhost:3000',
+  'http://localhost:4010',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:4010',
+];
 
 let cachedWorkingBaseUrl: string | null = null;
 const invalidBaseUrls = new Set<string>();
 
 function normalizeBaseUrl(url?: string): string {
   return (url || '').trim().replace(/\/+$/, '');
+}
+
+function isLocalDevBaseUrl(url?: string | null): boolean {
+  const normalized = normalizeBaseUrl(url || undefined);
+  if (!normalized) return false;
+
+  return (
+    normalized.includes('localhost') ||
+    normalized.includes('127.0.0.1') ||
+    normalized.includes('10.0.2.2') ||
+    normalized.includes('10.0.3.2')
+  );
 }
 
 function getExpoHostIp(): string | null {
@@ -32,7 +54,10 @@ function getCandidateBaseUrls(): string[] {
   const fromEnv = normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   const expoHost = getExpoHostIp();
   const shouldPreferLocalDev =
-    __DEV__ && (!fromEnv || KNOWN_NON_API_BASE_URLS.has(fromEnv));
+    __DEV__ &&
+    (!fromEnv ||
+      KNOWN_NON_API_BASE_URLS.has(fromEnv) ||
+      isLocalDevBaseUrl(fromEnv));
 
   const candidates: string[] = [];
   const push = (value?: string | null) => {
@@ -49,10 +74,7 @@ function getCandidateBaseUrls(): string[] {
     push(`http://${expoHost}:4010`);
   }
   if (shouldPreferLocalDev) {
-    push('http://localhost:3000');
-    push('http://localhost:4010');
-    push('http://127.0.0.1:3000');
-    push('http://127.0.0.1:4010');
+    LOCAL_PANCHANG_API_FALLBACKS.forEach(push);
   }
   if (fromEnv && !KNOWN_NON_API_BASE_URLS.has(fromEnv)) {
     push(fromEnv);
@@ -63,10 +85,7 @@ function getCandidateBaseUrls(): string[] {
     push(`http://${expoHost}:4010`);
   }
   if (!shouldPreferLocalDev && __DEV__) {
-    push('http://localhost:3000');
-    push('http://localhost:4010');
-    push('http://127.0.0.1:3000');
-    push('http://127.0.0.1:4010');
+    LOCAL_PANCHANG_API_FALLBACKS.forEach(push);
   }
 
   return candidates;

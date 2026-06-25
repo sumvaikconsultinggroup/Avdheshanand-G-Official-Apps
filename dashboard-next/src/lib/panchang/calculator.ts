@@ -1,5 +1,12 @@
 // dashboard-next/src/lib/panchang/calculator.ts
-import { getSunLongitude, getMoonLongitude, getMoonSunAngle, findAngleCrossing, findMoonLongitudeCrossing } from './astronomy';
+import {
+  findAngleCrossing,
+  findSiderealMoonLongitudeCrossing,
+  getMoonSiderealLongitude,
+  getMoonSunAngle,
+  getSunLongitude,
+  getSunSiderealLongitude,
+} from './astronomy';
 import {
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo,
   TITHI_NAMES, NAKSHATRA_NAMES, NAKSHATRA_DEITIES, NAKSHATRA_PLANETS,
@@ -55,7 +62,7 @@ export function calculateTithi(date: Date): TithiInfo {
  * Each Nakshatra spans 13 degrees 20 minutes (13.333...).
  */
 export function calculateNakshatra(date: Date): NakshatraInfo {
-  const moonLon = getMoonLongitude(date);
+  const moonLon = getMoonSiderealLongitude(date);
   const nakshatraSpan = 360 / 27; // 13.333...
 
   const nakshatraIndex = Math.floor(moonLon / nakshatraSpan);
@@ -80,8 +87,8 @@ export function calculateNakshatra(date: Date): NakshatraInfo {
   let endTime: Date;
 
   try {
-    startTime = findMoonLongitudeCrossing(searchStart, date, nakshatraStartLon % 360);
-    endTime = findMoonLongitudeCrossing(date, searchEnd, nakshatraEndLon % 360);
+    startTime = findSiderealMoonLongitudeCrossing(searchStart, date, nakshatraStartLon % 360);
+    endTime = findSiderealMoonLongitudeCrossing(date, searchEnd, nakshatraEndLon % 360);
   } catch {
     startTime = date;
     endTime = new Date(date.getTime() + 24 * 60 * 60 * 1000);
@@ -103,8 +110,8 @@ export function calculateNakshatra(date: Date): NakshatraInfo {
  * Yoga = (Sun longitude + Moon longitude) / (360/27)
  */
 export function calculateYoga(date: Date): YogaInfo {
-  const sunLon = getSunLongitude(date);
-  const moonLon = getMoonLongitude(date);
+  const sunLon = getSunSiderealLongitude(date);
+  const moonLon = getMoonSiderealLongitude(date);
 
   const sumLon = (sunLon + moonLon) % 360;
   const yogaSpan = 360 / 27;
@@ -149,8 +156,8 @@ export function calculateKarana(tithiNumber: number): KaranaInfo {
 
 /**
  * Determine the Hindu month from the Sun longitude.
- * The Sun enters a new rashi roughly every 30 days.
- * Month is determined by the solar ingress.
+ * This remains an approximation for now and should eventually be replaced
+ * with a proper lunar month / observance-grade month engine.
  */
 export function calculateHinduMonth(date: Date): string {
   const sunLon = getSunLongitude(date);

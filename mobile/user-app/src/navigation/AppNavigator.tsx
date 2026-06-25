@@ -480,8 +480,8 @@ export function AppNavigator() {
             }}
           />
         </Stack.Navigator>
+        <PublicAppDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
       </NavigationContainer>
-      <PublicAppDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />
     </AppShellProvider>
   );
 }

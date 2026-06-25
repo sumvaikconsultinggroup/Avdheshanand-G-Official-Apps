@@ -28,7 +28,7 @@ export function AboutSwamiScreen({ navigation }: any) {
       description: t('aboutSwami.milestones.himalaya.description'),
     },
     {
-      icon: 'flame',
+      icon: 'fire',
       title: t('aboutSwami.milestones.lineage.title'),
       description: t('aboutSwami.milestones.lineage.description'),
     },
