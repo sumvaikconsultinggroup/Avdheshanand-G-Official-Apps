@@ -73,22 +73,38 @@ export async function POST(req: NextRequest) {
     const title = String(body.title).trim();
     const noteBody = String(body.body).trim();
     const mentionedMembers = await detectMentionedMembers(`${title} ${noteBody}`);
-    const primaryAssignee = mentionedMembers[0];
+    const autoAssignee = mentionedMembers[0];
+
+    // An explicit assignee chosen in the app always wins over fuzzy name-detection.
+    const hasExplicit = Boolean(body.assignedToId || body.assignedToName);
+    const assignee = hasExplicit
+      ? {
+          memberId: body.assignedToId ? String(body.assignedToId) : undefined,
+          name: body.assignedToName ? String(body.assignedToName) : autoAssignee?.name || 'Team Member',
+        }
+      : autoAssignee;
+    const assignmentStatus = assignee
+      ? hasExplicit
+        ? 'assigned'
+        : 'auto_assigned'
+      : 'unassigned';
 
     const note = await SmartNoteModel.create({
       title,
       body: noteBody,
       tags: Array.isArray(body.tags) ? body.tags.map((tag: string) => String(tag).trim()).filter(Boolean) : [],
-      assignedToId: body.assignedToId || primaryAssignee?.memberId,
-      assignedToName: body.assignedToName || primaryAssignee?.name,
+      priority: body.priority || 'medium',
+      city: body.city ? String(body.city).trim() : undefined,
+      assignedToId: assignee?.memberId,
+      assignedToName: assignee?.name,
       mentionedMembers,
-      assignmentStatus: primaryAssignee ? 'auto_assigned' : 'unassigned',
+      assignmentStatus,
       createTask: body.createTask !== false,
       createdById: body.createdById,
       createdByName: body.createdByName,
     });
 
-    if ((body.createTask !== false) && primaryAssignee) {
+    if ((body.createTask !== false) && assignee) {
       const task = await SevaTaskModel.create({
         title,
         description: noteBody,
@@ -97,8 +113,8 @@ export async function POST(req: NextRequest) {
         city: body.city || '',
         dueDate: body.dueDate ? new Date(body.dueDate) : undefined,
         assignedToType: 'team',
-        assignedToId: primaryAssignee.memberId,
-        assignedToName: primaryAssignee.name,
+        assignedToId: assignee.memberId,
+        assignedToName: assignee.name,
         status: 'assigned',
         createdById: body.createdById,
         createdByName: body.createdByName,
@@ -110,8 +126,8 @@ export async function POST(req: NextRequest) {
 
       try {
         await notifyAdminSevaTaskAssigned({
-          assignedToId: primaryAssignee.memberId,
-          assignedToName: primaryAssignee.name,
+          assignedToId: assignee.memberId,
+          assignedToName: assignee.name,
           taskId: String(task._id),
           taskTitle: title,
           dueDate: body.dueDate,
@@ -125,11 +141,11 @@ export async function POST(req: NextRequest) {
       } catch (notificationError) {
         console.error('Error notifying assigned admin for linked seva task:', notificationError);
       }
-    } else if (primaryAssignee) {
+    } else if (assignee) {
       try {
         await notifyAdminSmartNoteAssigned({
-          assignedToId: primaryAssignee.memberId,
-          assignedToName: primaryAssignee.name,
+          assignedToId: assignee.memberId,
+          assignedToName: assignee.name,
           noteId: String(note._id),
           noteTitle: title,
           createdByName: body.createdByName,
@@ -143,8 +159,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: primaryAssignee
-        ? `Smart note created and assigned to ${primaryAssignee.name}`
+      message: assignee
+        ? `Smart note created and assigned to ${assignee.name}`
         : 'Smart note created successfully',
       data: note,
     }, { status: 201 });

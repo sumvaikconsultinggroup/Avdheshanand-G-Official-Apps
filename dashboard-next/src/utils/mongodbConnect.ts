@@ -1,8 +1,8 @@
 import { MongoClient, Db } from "mongodb";
 
 const uris: Record<string, string> = {
-  DB: process.env.MONGO_URI || "",
- 
+  DB: process.env.MONGO_URI || process.env.MONGODB_URI || "",
+
 };
 
 const cachedClients: Record<string, MongoClient | null> = {

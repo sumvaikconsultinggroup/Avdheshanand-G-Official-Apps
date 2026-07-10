@@ -5,3 +5,4 @@ export { SurfaceCard } from './SurfaceCard';
 export { SectionHeader } from './SectionHeader';
 export { ScreenHeader } from './ScreenHeader';
 export { EmptyStateCard } from './EmptyStateCard';
+export { FloatingInput } from './FloatingInput';

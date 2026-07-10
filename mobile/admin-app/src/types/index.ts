@@ -382,10 +382,12 @@ export interface SmartNote {
   title: string;
   body: string;
   tags?: string[];
+  priority?: 'low' | 'medium' | 'high';
+  city?: string;
   assignedToId?: string;
   assignedToName?: string;
   mentionedMembers?: SmartNoteMention[];
-  assignmentStatus?: 'unassigned' | 'auto_assigned' | 'acknowledged' | 'completed';
+  assignmentStatus?: 'unassigned' | 'assigned' | 'auto_assigned' | 'acknowledged' | 'completed';
   linkedSevaTaskId?: string;
   createTask?: boolean;
   createdById?: string;

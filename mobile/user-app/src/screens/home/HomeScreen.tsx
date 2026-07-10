@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,8 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import api from '../../services/api';
 import { useAppShell } from '../../context/AppShellContext';
-import { colors, spacing, borderRadius, shadows, typography } from '../../theme';
+import { spacing, borderRadius, shadows, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import DailyVicharCard from './DailyVicharCard';
 import PanchangCard from './PanchangCard';
 import LanguageDrawer from '../../components/LanguageDrawer';
@@ -57,6 +58,8 @@ export function HomeScreen() {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
   const { openDrawer } = useAppShell();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
@@ -230,9 +233,6 @@ export function HomeScreen() {
         title={t('home.welcome')}
         subtitle={t('home.heroQuote')}
         icon="brightness-5"
-        rightActionIcon="menu"
-        onRightActionPress={openDrawer}
-        rightActionLabel={t('appDrawer.openMenu')}
       />
 
       <View style={styles.section}>
@@ -254,8 +254,12 @@ export function HomeScreen() {
                 <View style={styles.pathwayIconWrap}>
                   <Icon name={item.icon} size={22} color={colors.primary.saffron} />
                 </View>
-                <Text style={styles.pathwayTitle}>{item.title}</Text>
-                <Text style={styles.pathwaySubtitle}>{item.subtitle}</Text>
+                <Text style={styles.pathwayTitle} numberOfLines={1}>
+                  {item.title}
+                </Text>
+                <Text style={styles.pathwaySubtitle} numberOfLines={2}>
+                  {item.subtitle}
+                </Text>
               </SurfaceCard>
             </TouchableOpacity>
           ))}
@@ -494,7 +498,7 @@ export function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -556,8 +560,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   pathwayCard: {
-    minHeight: 152,
-    justifyContent: 'space-between',
+    height: 160,
+    justifyContent: 'flex-start',
   },
   pathwayIconWrap: {
     width: 42,
@@ -585,6 +589,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   eventCardSurface: {
+    height: 248,
     padding: 0,
     overflow: 'hidden',
   },
@@ -600,6 +605,7 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   eventContent: {
+    flex: 1,
     padding: spacing.md,
   },
   eventName: {
@@ -623,7 +629,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   articleCardSurface: {
-    minHeight: 210,
+    height: 248,
   },
   articleImagePlaceholder: {
     height: 96,
@@ -764,7 +770,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   quickLinkCard: {
-    minHeight: 124,
+    height: 124,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { colors } from '../theme';
+
+const LOGO_SOURCE = require('../../assets/images/avdheshanandg-mission-logo.png');
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -39,6 +41,17 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
 
   return (
     <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.logoCircle,
+          {
+            transform: [{ scale: omScale }],
+            opacity: omOpacity,
+          },
+        ]}
+      >
+        <Image source={LOGO_SOURCE} resizeMode="contain" style={styles.logo} />
+      </Animated.View>
       <Animated.Text
         style={[
           styles.omSymbol,
@@ -65,8 +78,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.background.parchment,
   },
+  logoCircle: {
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#F0D8AF',
+    shadowColor: colors.gold.dark,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  logo: {
+    width: 116,
+    height: 116,
+  },
   omSymbol: {
-    fontSize: 80,
+    fontSize: 64,
     color: colors.gold.main,
     marginBottom: 24,
   },

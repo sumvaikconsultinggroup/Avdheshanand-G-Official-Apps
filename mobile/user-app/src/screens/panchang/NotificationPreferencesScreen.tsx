@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { registerForPushNotifications } from '../../services/notifications';
 import { resolveUserApiBaseUrl } from '../../services/api';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 const STORAGE_KEY_NOTIF = '@panchang_notification_prefs';
 const STORAGE_KEY_PUSH_TOKEN = '@push_notification_token';
@@ -76,7 +77,9 @@ export default function NotificationPreferencesScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const [prefs, setPrefs] = useState<NotificationPrefs>({
     dailyPanchang: true,
     festivalAlerts: true,
@@ -293,7 +296,7 @@ export default function NotificationPreferencesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background.parchment },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.parchment },
   scrollContent: { paddingBottom: spacing.xxl },

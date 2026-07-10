@@ -114,15 +114,20 @@ export default function ConnectPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 bg-[#FFF8E7] dark:bg-transparent min-h-screen">
       <Toaster position="top-right" />
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 border-b border-[#EEE1C6] dark:border-border pb-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Contact Submissions</h1>
-          <p className="text-muted-foreground">View and manage all contact form submissions</p>
+          <h1 className="text-3xl font-bold mb-2 text-[#800020] dark:text-[#D4A017]">Contact Submissions</h1>
+          <p className="text-[#B8860B] dark:text-muted-foreground">View and manage all contact form submissions</p>
         </div>
-        <Button onClick={handleRefresh} variant="outline" disabled={refreshing || loading}>
+        <Button
+          onClick={handleRefresh}
+          variant="outline"
+          disabled={refreshing || loading}
+          className="border-[#EEE1C6] text-[#800020] hover:bg-[#800020]/[0.06] hover:text-[#800020] focus:ring-[#800020]/20 dark:border-border dark:text-[#D4A017]"
+        >
           {refreshing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -139,8 +144,8 @@ export default function ConnectPage() {
 
       {loading && !refreshing ? (
         <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Loading contact submissions...</span>
+          <Loader2 className="h-8 w-8 animate-spin text-[#800020] dark:text-[#D4A017]" />
+          <span className="ml-2 text-[#B8860B] dark:text-muted-foreground">Loading contact submissions...</span>
         </div>
       ) : error ? (
         <Card className="bg-destructive/10">
@@ -152,26 +157,30 @@ export default function ConnectPage() {
             <p>{error}</p>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleRefresh} variant="outline">
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              className="border-[#EEE1C6] text-[#800020] hover:bg-[#800020]/[0.06] hover:text-[#800020] focus:ring-[#800020]/20 dark:border-border dark:text-[#D4A017]"
+            >
               Try Again
             </Button>
           </CardFooter>
         </Card>
       ) : contacts.length === 0 ? (
-        <Card>
+        <Card className="border-[#EEE1C6] bg-[#FFF8E7] dark:border-border dark:bg-card">
           <CardHeader>
-            <CardTitle>No Submissions</CardTitle>
-            <CardDescription>No contact form submissions found</CardDescription>
+            <CardTitle className="text-[#800020] dark:text-[#D4A017]">No Submissions</CardTitle>
+            <CardDescription className="text-[#B8860B] dark:text-muted-foreground">No contact form submissions found</CardDescription>
           </CardHeader>
           <CardContent>
             <p>There are currently no contact form submissions to display.</p>
           </CardContent>
         </Card>
       ) : (
-        <div className="rounded-md border">
+        <div className="rounded-md border border-[#EEE1C6] dark:border-border overflow-hidden">
           <Table>
-            <TableHeader>
-              <TableRow>
+            <TableHeader className="bg-gradient-to-br from-[#800020] to-[#4A0010] [&_th]:text-white/90">
+              <TableRow className="hover:bg-transparent border-[#EEE1C6] dark:border-border">
                 <TableHead className="w-[200px]">Name</TableHead>
                 <TableHead className="w-[250px]">Email</TableHead>
                 <TableHead>Subject</TableHead>
@@ -182,8 +191,11 @@ export default function ConnectPage() {
             </TableHeader>
             <TableBody>
               {contacts.map(contact => (
-                <TableRow key={contact._id}>
-                  <TableCell className="font-medium">{contact.fullName}</TableCell>
+                <TableRow
+                  key={contact._id}
+                  className="border-[#EEE1C6] hover:bg-[#800020]/[0.06] dark:border-border"
+                >
+                  <TableCell className="font-medium text-[#800020] dark:text-[#D4A017]">{contact.fullName}</TableCell>
                   <TableCell>{contact.email}</TableCell>
                   <TableCell className="max-w-[250px] truncate">{contact.subject}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
@@ -191,17 +203,22 @@ export default function ConnectPage() {
                   </TableCell>
                   <TableCell>
                     {contact.isRead ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                      <Badge variant="outline" className="border-[#EEE1C6] bg-[#FFF8E7] text-[#B8860B] dark:border-border dark:bg-transparent dark:text-[#D4A017]">
                         Read
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                      <Badge variant="outline" className="border-[#800020]/30 bg-[#800020]/[0.08] text-[#800020] dark:border-[#A3123A]/40 dark:bg-transparent dark:text-[#A3123A]">
                         New
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleViewContact(contact)}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleViewContact(contact)}
+                      className="text-[#800020] hover:bg-[#800020]/[0.06] hover:text-[#800020] focus:ring-[#800020]/20 dark:text-[#D4A017]"
+                    >
                       <Eye className="h-4 w-4" />
                       <span className="sr-only">View details</span>
                     </Button>
@@ -216,10 +233,10 @@ export default function ConnectPage() {
       {/* Modal for contact details */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         {selectedContact && (
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto border-[#EEE1C6] bg-[#FFF8E7] dark:border-border dark:bg-card">
             <DialogHeader>
-              <DialogTitle>Contact Submission Details</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-[#800020] dark:text-[#D4A017]">Contact Submission Details</DialogTitle>
+              <DialogDescription className="text-[#B8860B] dark:text-muted-foreground">
                 Detailed information about the contact submission
               </DialogDescription>
             </DialogHeader>
@@ -231,10 +248,10 @@ export default function ConnectPage() {
 
                 <div className="font-semibold text-muted-foreground">Email:</div>
                 <div className="flex items-center">
-                  <Mail className="mr-2 h-4 w-4" />
+                  <Mail className="mr-2 h-4 w-4 text-[#800020] dark:text-[#D4A017]" />
                   <a
                     href={`mailto:${selectedContact.email}`}
-                    className="text-primary hover:underline"
+                    className="text-[#800020] hover:underline dark:text-[#D4A017]"
                   >
                     {selectedContact.email}
                   </a>
@@ -242,7 +259,7 @@ export default function ConnectPage() {
 
                 <div className="font-semibold text-muted-foreground">Date:</div>
                 <div className="flex items-center">
-                  <Calendar className="mr-2 h-4 w-4" />
+                  <Calendar className="mr-2 h-4 w-4 text-[#800020] dark:text-[#D4A017]" />
                   {formatDate(selectedContact.createdAt)}
                 </div>
 
@@ -252,14 +269,19 @@ export default function ConnectPage() {
 
               <div className="space-y-2">
                 <div className="font-semibold text-muted-foreground">Message:</div>
-                <div className="p-4 rounded-md bg-muted whitespace-pre-wrap">
+                <div className="p-4 rounded-md border border-[#EEE1C6] bg-white whitespace-pre-wrap dark:border-border dark:bg-muted">
                   {selectedContact.message}
                 </div>
               </div>
             </div>
 
             <DialogFooter>
-              <Button onClick={() => setModalOpen(false)}>Close</Button>
+              <Button
+                onClick={() => setModalOpen(false)}
+                className="bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110 focus:ring-[#800020]/20"
+              >
+                Close
+              </Button>
             </DialogFooter>
           </DialogContent>
         )}

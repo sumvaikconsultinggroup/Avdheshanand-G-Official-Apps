@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
 import { getPanchangCities } from '../../services/panchangApi';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface City {
   _id: string;
@@ -31,7 +32,7 @@ interface CityPickerModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectCity: (city: City) => void;
-  onUseGPS: (lat: number, lng: number) => void;
+  onUseGPS: (lat: number, lng: number, cityName?: string, timezone?: string) => void;
 }
 
 export default function CityPickerModal({
@@ -41,6 +42,8 @@ export default function CityPickerModal({
   onUseGPS,
 }: CityPickerModalProps) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [search, setSearch] = useState('');
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(false);
@@ -100,9 +103,24 @@ export default function CityPickerModal({
         return;
       }
       const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.High,
       });
-      onUseGPS(location.coords.latitude, location.coords.longitude);
+      const { latitude, longitude } = location.coords;
+
+      // Resolve a human-readable place name and the device timezone so the
+      // Panchang is computed for the user's real location/zone (not a default).
+      let cityName: string | undefined;
+      try {
+        const places = await Location.reverseGeocodeAsync({ latitude, longitude });
+        const place = places[0];
+        cityName =
+          place?.city || place?.subregion || place?.district || place?.region || undefined;
+      } catch {
+        // Reverse geocoding is best-effort; fall back to a generic label.
+      }
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+
+      onUseGPS(latitude, longitude, cityName, timezone);
       onClose();
     } catch (error) {
       Alert.alert(t('panchang.cityPicker.locationErrorTitle'), t('panchang.cityPicker.locationErrorMessage'));
@@ -252,7 +270,7 @@ export default function CityPickerModal({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

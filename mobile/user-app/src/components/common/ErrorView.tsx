@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, borderRadius } from '../../theme';
+import { spacing, borderRadius, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ErrorViewProps {
   message?: string;
@@ -12,6 +13,8 @@ export function ErrorView({
   message,
   onRetry,
 }: ErrorViewProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
   const resolvedMessage = message || t('common.somethingWentWrong');
 
@@ -28,7 +31,7 @@ export function ErrorView({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

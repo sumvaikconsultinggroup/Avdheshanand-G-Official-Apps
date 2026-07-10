@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { SurfaceCard } from './SurfaceCard';
 
 interface EmptyStateCardProps {
@@ -11,6 +12,8 @@ interface EmptyStateCardProps {
 }
 
 export function EmptyStateCard({ icon, title, subtitle }: EmptyStateCardProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <SurfaceCard style={styles.card}>
       <View style={styles.iconWrap}>
@@ -22,7 +25,7 @@ export function EmptyStateCard({ icon, title, subtitle }: EmptyStateCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   card: {
     alignItems: 'center',
     paddingVertical: spacing.xl,

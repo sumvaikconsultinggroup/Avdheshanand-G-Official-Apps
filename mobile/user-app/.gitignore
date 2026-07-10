@@ -18,6 +18,11 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Firebase service-account keys — SECRET, never commit/bundle (backend/EAS only)
+*firebase-adminsdk*
+*-adminsdk-*.json
+service-account*.json
+
 # Metro
 .metro-health-check*
 

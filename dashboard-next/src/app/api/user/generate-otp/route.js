@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/models/User';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '@/utils/sendEmail';
 
 // Helper functions for API responses
 function errorResponse(message, status = 500, error) {
@@ -29,56 +29,6 @@ function successResponse(message, data = null, status = 200) {
   }
 
   return NextResponse.json(response, { status });
-}
-
-// Email sending function
-async function sendEmail(to, subject, text, html) {
-  try {
-    // Create transporter with config from environment variables
-    const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      debug: process.env.NODE_ENV === 'development',
-    });
-
-    console.log('Email configuration:', {
-      service: process.env.EMAIL_SERVICE,
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      user: process.env.EMAIL_USER ? 'Set' : 'Not set',
-    });
-
-    const mailOptions = {
-      from: {
-        name: process.env.EMAIL_FROM_NAME || 'SwamiG Dashboard',
-        address: process.env.EMAIL_USER || '',
-      },
-      to,
-      subject,
-      text,
-      ...(html && { html }), // Only include html if provided
-    };
-
-    console.log('Sending email to:', to);
-
-    // Send email
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
-
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    throw error;
-  }
 }
 
 export async function POST(req) {

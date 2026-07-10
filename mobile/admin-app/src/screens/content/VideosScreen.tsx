@@ -19,7 +19,6 @@ import {
 import {
   Card,
   ActivityIndicator,
-  Chip,
   FAB,
   TextInput,
   Button,
@@ -27,7 +26,17 @@ import {
   Portal,
   Snackbar,
 } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { AdminHero, Badge } from '../../components/common';
+import { LinearGradient } from 'expo-linear-gradient';
+import {
+  colors,
+  spacing,
+  borderRadius,
+  typography,
+  shadows,
+  gradients,
+} from '../../theme';
 import api from '../../services/api';
 import { pickImage } from '../../services/imageUpload';
 import { VideoSeries } from '../../types';
@@ -155,10 +164,14 @@ export function VideosScreen() {
       const config = { headers: { 'Content-Type': 'multipart/form-data' } };
       if (editingSeries) {
         await api.put(`/videoseries/${editingSeries._id}`, fd, config);
-        showSnackbar('Series updated successfully');
+        showSnackbar(
+          'Series updated — your changes are now live on the user app and the website.',
+        );
       } else {
         await api.post('/videoseries', fd, config);
-        showSnackbar('Series created successfully');
+        showSnackbar(
+          'Series published — the new series is now live on the user app and the website.',
+        );
       }
       setModalVisible(false);
       fetchVideoSeries();
@@ -228,6 +241,9 @@ export function VideosScreen() {
             <Text style={styles.videoThumbIcon}>▶</Text>
           </View>
         )}
+        <View style={styles.videoPlayBadge}>
+          <Text style={styles.videoPlayBadgeIcon}>▶</Text>
+        </View>
         {video.duration ? (
           <View style={styles.videoDurationBadge}>
             <Text style={styles.videoDurationText}>{video.duration}</Text>
@@ -245,23 +261,32 @@ export function VideosScreen() {
         ) : null}
         <View style={styles.videoMeta}>
           {video.views !== undefined ? (
-            <Text style={styles.videoMetaText}>
-              {formatViews(video.views)} views
-            </Text>
+            <View style={styles.videoMetaItem}>
+              <Text style={styles.videoMetaIcon}>◍</Text>
+              <Text style={styles.videoMetaText}>
+                {formatViews(video.views)} views
+              </Text>
+            </View>
           ) : null}
           {video.likes !== undefined ? (
-            <Text style={styles.videoMetaText}>
-              {formatViews(video.likes)} likes
-            </Text>
+            <View style={styles.videoMetaItem}>
+              <Text style={styles.videoMetaIcon}>♥</Text>
+              <Text style={styles.videoMetaText}>
+                {formatViews(video.likes)} likes
+              </Text>
+            </View>
           ) : null}
           {video.publishedAt ? (
-            <Text style={styles.videoMetaText}>
-              {new Date(video.publishedAt).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-            </Text>
+            <View style={styles.videoMetaItem}>
+              <Text style={styles.videoMetaIcon}>◔</Text>
+              <Text style={styles.videoMetaText}>
+                {new Date(video.publishedAt).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })}
+              </Text>
+            </View>
           ) : null}
         </View>
       </View>
@@ -278,67 +303,73 @@ export function VideosScreen() {
           activeOpacity={0.7}
           onPress={() => toggleExpand(item._id)}
         >
-          <View style={styles.cardRow}>
-            <View style={styles.thumbnailContainer}>
-              {item.coverImage ? (
-                <Image
-                  source={{ uri: item.coverImage }}
-                  style={styles.thumbnail}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.thumbnailPlaceholder}>
-                  <Text style={styles.placeholderIcon}>🎬</Text>
-                </View>
-              )}
-              <View style={styles.countOverlay}>
-                <Text style={styles.countOverlayText}>{videoCount}</Text>
+          {/* Full-width cover banner */}
+          <View style={styles.coverWrap}>
+            {item.coverImage ? (
+              <Image
+                source={{ uri: item.coverImage }}
+                style={styles.cover}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.coverPlaceholder}>
+                <Icon name="movie-open-outline" size={44} color={colors.gold.light} />
               </View>
+            )}
+            <LinearGradient
+              colors={['transparent', 'rgba(74,0,16,0.9)']}
+              style={styles.coverScrim}
+            />
+            <View style={styles.playBadge}>
+              <Icon name="play" size={24} color={colors.text.white} style={{ marginLeft: 2 }} />
             </View>
-            <View style={styles.contentSection}>
+            <View style={styles.coverCountPill}>
+              <Icon name="video" size={13} color={colors.gold.light} />
+              <Text style={styles.coverCountText}>
+                {videoCount} {videoCount === 1 ? 'video' : 'videos'}
+              </Text>
+            </View>
+          </View>
+
+          {/* Content below the cover */}
+          <View style={styles.contentSection}>
+            <View style={styles.titleRow}>
               <Text style={styles.seriesTitle} numberOfLines={2}>
                 {item.title}
               </Text>
-              {item.description ? (
-                <Text style={styles.seriesDescription} numberOfLines={2}>
-                  {item.description}
-                </Text>
-              ) : null}
-              <View style={styles.chipRow}>
-                <Chip
-                  style={styles.countChip}
-                  textStyle={styles.countChipText}
-                  icon="video"
-                  compact
-                >
-                  {videoCount} {videoCount === 1 ? 'video' : 'videos'}
-                </Chip>
-                {item.category ? (
-                  <Chip
-                    style={styles.categoryChip}
-                    textStyle={styles.categoryChipText}
-                    compact
-                  >
-                    {item.category}
-                  </Chip>
-                ) : null}
-              </View>
-            </View>
-            <View style={styles.expandIcon}>
               <IconButton
                 icon={isExpanded ? 'chevron-up' : 'chevron-down'}
-                size={20}
-                iconColor={colors.text.secondary}
+                size={22}
+                iconColor={colors.primary.maroon}
+                style={styles.chevron}
               />
             </View>
+            {item.description ? (
+              <Text style={styles.seriesDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+            ) : null}
+            {item.category ? (
+              <View style={styles.chipRow}>
+                <Badge label={item.category} tone={colors.primary.saffron} variant="soft" />
+              </View>
+            ) : null}
           </View>
         </TouchableOpacity>
 
         <View style={styles.cardActions}>
+          <View style={styles.cardFooterBadge}>
+            <Badge
+              label="Live on app & website"
+              tone={colors.status.success}
+              variant="soft"
+              dot
+            />
+          </View>
           <IconButton
             icon="pencil"
             size={18}
-            iconColor={colors.accent.peacock}
+            iconColor={colors.primary.maroon}
             onPress={() => openEditModal(item)}
           />
           <IconButton
@@ -367,7 +398,9 @@ export function VideosScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>🎥</Text>
+      <View style={styles.emptyStateIconWell}>
+        <Text style={styles.emptyStateIcon}>🎥</Text>
+      </View>
       <Text style={styles.emptyStateText}>No video series</Text>
       <Text style={styles.emptyStateSubtext}>
         Tap + to create your first series
@@ -375,23 +408,17 @@ export function VideosScreen() {
     </View>
   );
 
-  const renderHeader = () => {
-    const totalSeries = series.length;
-    const totalVideos = series.reduce(
-      (sum, s) => sum + (s.videoCount || s.videos?.length || 0),
-      0,
-    );
-
-    return (
-      <View style={styles.headerCard}>
-        <Text style={styles.headerTitle}>Video Series</Text>
-        <Text style={styles.headerSubtitle}>
-          {totalSeries} {totalSeries === 1 ? 'series' : 'series'} ·{' '}
-          {totalVideos} total videos
-        </Text>
-      </View>
-    );
-  };
+  const renderHeader = () => (
+    <View style={styles.heroWrap}>
+      <AdminHero
+        eyebrow="Manage"
+        title="Video Series"
+        subtitle="Publish once — every series appears instantly on the user app and the website."
+        badge={`${series.length} live`}
+        actions={[{ label: 'New Series', icon: 'plus', onPress: openCreateModal }]}
+      />
+    </View>
+  );
 
   const renderModal = () => (
     <Modal
@@ -404,21 +431,34 @@ export function VideosScreen() {
         style={styles.modalContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.modalHeader}>
+        <LinearGradient
+          colors={gradients.maroon as readonly [string, string, ...string[]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.modalHeader}
+        >
           <Text style={styles.modalTitle}>
             {editingSeries ? 'Edit Series' : 'Add Series'}
           </Text>
           <IconButton
             icon="close"
             size={24}
+            iconColor={colors.text.white}
             onPress={() => setModalVisible(false)}
           />
-        </View>
+        </LinearGradient>
         <ScrollView
           style={styles.modalBody}
           contentContainerStyle={styles.modalBodyContent}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.publishBanner}>
+            <Icon name="broadcast" size={18} color={colors.status.success} />
+            <Text style={styles.publishBannerText}>
+              Saved series publish instantly to the user app and the website.
+            </Text>
+          </View>
+
           <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
             {form.coverImageUri ? (
               <Image
@@ -467,16 +507,36 @@ export function VideosScreen() {
             activeOutlineColor={colors.primary.saffron}
           />
 
-          <Button
-            mode="contained"
+          <TouchableOpacity
+            activeOpacity={0.85}
             onPress={handleSubmit}
-            loading={submitting}
             disabled={submitting}
-            style={styles.submitButton}
-            buttonColor={colors.primary.saffron}
-            textColor={colors.text.white}
+            style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
           >
-            {editingSeries ? 'Update Series' : 'Create Series'}
+            <LinearGradient
+              colors={gradients.maroon as readonly [string, string, ...string[]]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.submitButtonGradient}
+            >
+              {submitting ? (
+                <ActivityIndicator size="small" color={colors.text.white} />
+              ) : (
+                <Text style={styles.submitButtonText}>
+                  {editingSeries ? 'Update Series' : 'Create Series'}
+                </Text>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
+
+          <Button
+            mode="outlined"
+            onPress={() => setModalVisible(false)}
+            disabled={submitting}
+            style={styles.cancelButton}
+            textColor={colors.primary.maroon}
+          >
+            Cancel
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -486,7 +546,7 @@ export function VideosScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading video series...</Text>
       </View>
     );
@@ -515,8 +575,8 @@ export function VideosScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -565,10 +625,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   retryButton: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
+    ...shadows.maroonGlow,
   },
   retryButtonText: {
     color: colors.text.white,
@@ -576,82 +637,121 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
-    paddingBottom: 80,
+    paddingBottom: 96,
   },
-  headerCard: {
+  heroWrap: {
     marginBottom: spacing.lg,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.primary.maroon,
+  publishBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(46, 125, 50, 0.25)',
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
   },
-  headerSubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginTop: spacing.xs,
+  publishBannerText: {
+    ...typography.bodySm,
+    flex: 1,
+    color: colors.status.success,
+    fontWeight: '600',
   },
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 3,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
     overflow: 'hidden',
+    ...shadows.soft,
   },
-  cardRow: {
-    flexDirection: 'row',
-  },
-  thumbnailContainer: {
-    width: 120,
-    height: 90,
-    position: 'relative',
-  },
-  thumbnail: {
+  coverWrap: {
     width: '100%',
-    height: '100%',
+    height: 184,
+    position: 'relative',
     backgroundColor: colors.background.sandstone,
   },
-  thumbnailPlaceholder: {
+  cover: {
+    width: '100%',
+    height: '100%',
+  },
+  coverPlaceholder: {
     width: '100%',
     height: '100%',
     backgroundColor: colors.primary.maroon,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderIcon: {
-    fontSize: 32,
-  },
-  countOverlay: {
+  coverScrim: {
     position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    flexDirection: 'row',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 72,
+  },
+  playBadge: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: 52,
+    height: 52,
+    marginTop: -26,
+    marginLeft: -26,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(128, 0, 32, 0.86)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 213, 79, 0.95)',
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  countOverlayText: {
-    color: colors.text.white,
+  coverCountPill: {
+    position: 'absolute',
+    bottom: spacing.sm,
+    left: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(74, 0, 16, 0.82)',
+    borderRadius: borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 213, 79, 0.4)',
+  },
+  coverCountText: {
+    color: colors.gold.light,
     fontSize: 11,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   contentSection: {
-    flex: 1,
     padding: spacing.md,
-    justifyContent: 'center',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
   seriesTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text.primary,
+    ...typography.title,
+    flex: 1,
+    color: colors.primary.maroon,
+    fontWeight: '700',
     marginBottom: spacing.xs,
   },
+  chevron: {
+    margin: 0,
+    marginTop: -4,
+    marginRight: -8,
+  },
   seriesDescription: {
-    fontSize: 12,
+    ...typography.bodySm,
+    fontSize: 13,
     color: colors.text.secondary,
-    lineHeight: 17,
+    lineHeight: 19,
     marginBottom: spacing.sm,
   },
   chipRow: {
@@ -659,31 +759,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     flexWrap: 'wrap',
-  },
-  countChip: {
-    backgroundColor: colors.accent.peacock,
-    height: 24,
-  },
-  countChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-  },
-  categoryChip: {
-    backgroundColor: colors.gold.main,
-    height: 24,
-  },
-  categoryChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  expandIcon: {
-    justifyContent: 'center',
+    marginTop: spacing.xs,
   },
   cardActions: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'flex-end',
     paddingHorizontal: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.gold,
+  },
+  cardFooterBadge: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: spacing.xs,
   },
   videosContainer: {
     paddingHorizontal: spacing.md,
@@ -699,11 +789,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   videoThumbContainer: {
-    width: 100,
-    height: 60,
-    borderRadius: borderRadius.sm,
+    width: 104,
+    height: 62,
+    borderRadius: borderRadius.md,
     overflow: 'hidden',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: colors.border.gold,
   },
   videoThumb: {
     width: '100%',
@@ -721,17 +813,37 @@ const styles = StyleSheet.create({
     color: colors.text.white,
     fontSize: 18,
   },
+  videoPlayBadge: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    width: 26,
+    height: 26,
+    marginTop: -13,
+    marginLeft: -13,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(128, 0, 32, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 213, 79, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  videoPlayBadgeIcon: {
+    color: colors.text.white,
+    fontSize: 10,
+    marginLeft: 1,
+  },
   videoDurationBadge: {
     position: 'absolute',
     bottom: 2,
     right: 2,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(74, 0, 16, 0.85)',
     borderRadius: 4,
     paddingHorizontal: 4,
     paddingVertical: 1,
   },
   videoDurationText: {
-    color: colors.text.white,
+    color: colors.gold.light,
     fontSize: 9,
     fontWeight: '600',
   },
@@ -742,7 +854,7 @@ const styles = StyleSheet.create({
   },
   videoTitle: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text.primary,
     lineHeight: 18,
   },
@@ -756,6 +868,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.xs,
     flexWrap: 'wrap',
+  },
+  videoMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  videoMetaIcon: {
+    fontSize: 9,
+    color: colors.primary.saffron,
   },
   videoMetaText: {
     fontSize: 10,
@@ -775,14 +896,24 @@ const styles = StyleSheet.create({
     padding: spacing.xxl,
     alignItems: 'center',
   },
+  emptyStateIconWell: {
+    width: 96,
+    height: 96,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(163, 18, 58, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(163, 18, 58, 0.28)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
   emptyStateIcon: {
-    fontSize: 48,
-    marginBottom: spacing.md,
+    fontSize: 44,
   },
   emptyStateText: {
-    color: colors.text.secondary,
+    color: colors.primary.maroon,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   emptyStateSubtext: {
     color: colors.text.secondary,
@@ -794,8 +925,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     borderRadius: borderRadius.full,
+    ...shadows.maroonGlow,
   },
   modalContainer: {
     flex: 1,
@@ -807,14 +939,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.gold,
-    backgroundColor: colors.background.warmWhite,
+    borderBottomLeftRadius: borderRadius.xl,
+    borderBottomRightRadius: borderRadius.xl,
+    ...shadows.maroonGlow,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.primary.maroon,
+    ...typography.title,
+    color: colors.text.white,
   },
   modalBody: {
     flex: 1,
@@ -826,10 +957,10 @@ const styles = StyleSheet.create({
   imagePicker: {
     width: '100%',
     height: 180,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
     marginBottom: spacing.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border.gold,
     borderStyle: 'dashed',
   },
@@ -847,14 +978,35 @@ const styles = StyleSheet.create({
   imagePickerText: {
     color: colors.text.secondary,
     fontSize: 14,
+    fontWeight: '600',
   },
   input: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
   },
   submitButton: {
-    marginTop: spacing.md,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.xs,
+    marginTop: spacing.lg,
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    ...shadows.maroonGlow,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonGradient: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitButtonText: {
+    color: colors.text.white,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  cancelButton: {
+    marginTop: spacing.sm,
+    borderRadius: borderRadius.lg,
+    borderColor: colors.border.maroon,
   },
 });

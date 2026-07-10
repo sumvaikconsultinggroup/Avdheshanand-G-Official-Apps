@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
   StyleProp,
@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 type AppButtonVariant = 'primary' | 'secondary' | 'ghost';
 
@@ -32,6 +33,8 @@ export function AppButton({
   loading,
   style,
 }: AppButtonProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const content = (
     <>
       {loading ? (
@@ -92,7 +95,7 @@ export function AppButton({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   buttonBase: {
     minHeight: 52,
     borderRadius: borderRadius.lg,

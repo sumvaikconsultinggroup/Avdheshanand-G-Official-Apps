@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,8 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { getPanchangToday } from '../../services/panchangApi';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface PanchangSummary {
   tithi?: { name?: string; paksha?: string };
@@ -44,6 +45,8 @@ function unwrapPayload<T = unknown>(payload: unknown, maxDepth = 3): T | null {
 export default function PanchangCard({ onPress }: PanchangCardProps) {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [data, setData] = useState<PanchangSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -187,7 +190,7 @@ export default function PanchangCard({ onPress }: PanchangCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     marginHorizontal: spacing.lg,
     marginVertical: spacing.sm,

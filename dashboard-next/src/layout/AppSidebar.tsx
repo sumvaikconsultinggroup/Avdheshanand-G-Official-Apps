@@ -124,9 +124,9 @@ const AppSidebar: React.FC = () => {
               <button
                 onClick={() => toggleSubmenu(item.key)}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+                  'flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[#800020]/[0.06] dark:hover:bg-white/5',
                   isActive || isSubActive
-                    ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50'
+                    ? 'bg-[#800020]/[0.08] text-[#800020] dark:bg-[#FFD54F]/10 dark:text-[#FFD54F] font-semibold'
                     : 'text-gray-700 dark:text-gray-300'
                 )}
               >
@@ -144,9 +144,9 @@ const AppSidebar: React.FC = () => {
                         href={subItem.href}
                         onClick={isMobile ? toggleMobileSidebar : undefined}
                         className={cn(
-                          'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+                          'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-[#800020]/[0.06] dark:hover:bg-white/5',
                           pathname === subItem.href
-                            ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50'
+                            ? 'bg-[#800020]/[0.08] text-[#800020] dark:bg-[#FFD54F]/10 dark:text-[#FFD54F] font-semibold'
                             : 'text-gray-600 dark:text-gray-400'
                         )}
                       >
@@ -163,9 +163,9 @@ const AppSidebar: React.FC = () => {
               href={item.href}
               onClick={isMobile ? toggleMobileSidebar : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+                'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[#800020]/[0.06] dark:hover:bg-white/5',
                 isActive
-                  ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50'
+                  ? 'bg-[#800020]/[0.08] text-[#800020] dark:bg-[#FFD54F]/10 dark:text-[#FFD54F] font-semibold'
                   : 'text-gray-700 dark:text-gray-300'
               )}
             >
@@ -183,12 +183,12 @@ const AppSidebar: React.FC = () => {
       {/* Mobile Sidebar Sheet */}
       <Sheet open={isMobileOpen} onOpenChange={toggleMobileSidebar}>
         <SheetContent side="left" className="w-72 p-0 border-r">
-          <div className="flex h-full flex-col bg-white dark:bg-gray-900">
+          <div className="flex h-full flex-col bg-[#FBF7EF] dark:bg-gray-900">
             {/* Mobile Sidebar Header */}
-            <div className="flex h-16 items-center justify-between border-b px-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
-              <Link href="/dashboard" className="flex items-center gap-2" onClick={toggleMobileSidebar}>
-                <span className="text-xl">ॐ</span>
-                <span className="text-lg font-semibold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">{t('app.name')}</span>
+            <div className="flex h-16 items-center justify-between border-b border-[#5A0016] px-4 bg-gradient-to-br from-[#7A0018] to-[#38000F]">
+              <Link href="/dashboard" className="flex items-center gap-2.5" onClick={toggleMobileSidebar}>
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-lg text-[#FFD54F] ring-1 ring-[#FFD54F]/40">ॐ</span>
+                <span className="text-[15px] font-bold leading-tight text-white">Swami Avdheshanand G</span>
               </Link>
               <Button
                 variant="ghost"
@@ -208,12 +208,12 @@ const AppSidebar: React.FC = () => {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="fixed top-0 left-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 text-gray-900 hidden lg:flex lg:w-64 lg:flex-col transition-all duration-300 ease-in-out z-40">
+      <aside className="fixed top-0 left-0 h-screen bg-[#FBF7EF] dark:bg-gray-900 border-r border-[#E7DCC6] dark:border-gray-800 text-gray-900 hidden lg:flex lg:w-64 lg:flex-col transition-all duration-300 ease-in-out z-40">
         {/* Desktop Sidebar Header */}
-        <div className="flex h-16 items-center border-b border-gray-200 dark:border-gray-800 px-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
-          <Link href="/dashboard" className="flex items-center gap-2 group">
-            <span className="text-xl group-hover:scale-110 transition-transform duration-300">ॐ</span>
-            <span className="text-lg font-semibold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">{t('app.name')}</span>
+        <div className="flex h-16 items-center border-b border-[#5A0016] px-4 bg-gradient-to-br from-[#7A0018] to-[#38000F]">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-lg text-[#FFD54F] ring-1 ring-[#FFD54F]/40 transition-transform duration-300 group-hover:scale-105">ॐ</span>
+            <span className="text-[15px] font-bold leading-tight text-white">Swami Avdheshanand G</span>
           </Link>
         </div>
         {/* Desktop Navigation */}

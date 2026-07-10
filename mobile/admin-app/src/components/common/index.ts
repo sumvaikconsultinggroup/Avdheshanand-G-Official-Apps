@@ -7,3 +7,5 @@ export { AdminSectionHeader } from './AdminSectionHeader';
 export { AdminMetricCard } from './AdminMetricCard';
 export { AdminPill } from './AdminPill';
 export { AdminEmptyState } from './AdminEmptyState';
+export { Badge } from './Badge';
+export { Avatar } from './Avatar';

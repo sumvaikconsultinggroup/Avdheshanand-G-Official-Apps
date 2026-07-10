@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import MantraDiksha, { IMantraDiksha } from '@/models/MantraDiksha';
 import getCloudinary from '@/utils/cloudinary';
+import { sendResendEmail, buildDikshaConfirmationEmail } from '@/utils/resendMailer';
 
 interface ApiResponse {
   success: boolean;
@@ -35,192 +36,12 @@ interface RegistrationData {
   passportDocument?: string | null;
 }
 
-// Helper function to send congratulations email
-async function sendCongratulationsEmail(
-  email: string,
-  fullName: string,
-  registrationDate: Date
-): Promise<boolean> {
-  try {
-    const emailPayload = {
-      to: email,
-      subject: '🙏 Congratulations! Your Mantra Diksha Registration is Complete',
-      text: `
-Dear ${fullName},
-
-Namaste! 🙏
-
-Congratulations on successfully registering for Mantra Diksha. Your spiritual journey with us begins now.
-
-Registration Details:
-- Name: ${fullName}
-- Registration Date: ${registrationDate.toLocaleDateString('en-IN', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      })}
-- Registration Time: ${registrationDate.toLocaleTimeString('en-IN')}
-
-What's Next:
-- Our team will review your application within 2-3 business days
-- You will receive further instructions via email once your application is approved
-- Please keep your mobile phone accessible as we may contact you for any clarifications
-
-Important Notes:
-- Please arrive 30 minutes early on the day of your diksha
-- Bring a clean white cloth and some flowers as offerings
-- Maintain a peaceful and receptive state of mind
-- Avoid non-vegetarian food and alcohol 24 hours before the ceremony
-
-Spiritual Guidelines:
-- Practice daily meditation and prayer
-- Read spiritual texts to prepare your mind
-- Maintain purity in thoughts, words, and actions
-- Approach the diksha with complete faith and devotion
-
-May this sacred initiation bring you peace, wisdom, and spiritual enlightenment.
-
-Om Shanti Shanti Shanti 🕉️
-
-With Divine Blessings,
-SwamiG Spiritual Center
-
-For any queries, please contact us:
-📞 Phone: [Your Contact Number]
-📧 Email: [Your Email]
-🌐 Website: [Your Website]
-
-Note: This is an automated message. Please do not reply to this email.
-      `,
-      html: `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mantra Diksha Registration Confirmation</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #ff6b35, #f7931e); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="color: white; margin: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-            🙏 Mantra Diksha Registration
-        </h1>
-        <p style="color: white; margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">
-            Congratulations ${fullName}!
-        </p>
-    </div>
-    
-    <div style="background: white; padding: 30px; border: 1px solid #ddd; border-top: none;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 48px; margin-bottom: 10px;">🕉️</div>
-            <h2 style="color: #B82A1E; margin: 0;">Namaste!</h2>
-        </div>
-        
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            We are delighted to confirm that your registration for <strong>Mantra Diksha</strong> has been successfully completed. 
-            Your spiritual journey with us begins now.
-        </p>
-        
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #B82A1E;">
-            <h3 style="color: #B82A1E; margin-top: 0;">📋 Registration Details</h3>
-            <p style="margin: 5px 0;"><strong>Name:</strong> ${fullName}</p>
-            <p style="margin: 5px 0;"><strong>Registration Date:</strong> ${registrationDate.toLocaleDateString('en-IN', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
-            })}</p>
-            <p style="margin: 5px 0;"><strong>Registration Time:</strong> ${registrationDate.toLocaleTimeString('en-IN')}</p>
-        </div>
-        
-        <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
-            <h3 style="color: #28a745; margin-top: 0;">✨ What's Next?</h3>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li>Our team will review your application within <strong>2-3 business days</strong></li>
-                <li>You will receive further instructions via email once approved</li>
-                <li>Keep your mobile phone accessible for any clarifications</li>
-            </ul>
-        </div>
-        
-        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <h3 style="color: #856404; margin-top: 0;">📝 Important Guidelines</h3>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li>Arrive <strong>30 minutes early</strong> on the day of diksha</li>
-                <li>Bring a clean white cloth and fresh flowers as offerings</li>
-                <li>Avoid non-vegetarian food and alcohol <strong>24 hours before</strong> the ceremony</li>
-                <li>Maintain purity in thoughts, words, and actions</li>
-            </ul>
-        </div>
-        
-        <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #007bff;">
-            <h3 style="color: #004085; margin-top: 0;">🧘‍♀️ Spiritual Preparation</h3>
-            <ul style="margin: 10px 0; padding-left: 20px;">
-                <li>Practice daily meditation and prayer</li>
-                <li>Read spiritual texts to prepare your mind</li>
-                <li>Approach the diksha with complete faith and devotion</li>
-                <li>Maintain a peaceful and receptive state of mind</li>
-            </ul>
-        </div>
-        
-        <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #ff6b35, #f7931e); border-radius: 8px;">
-            <p style="color: white; font-size: 18px; margin: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
-                May this sacred initiation bring you peace, wisdom, and spiritual enlightenment.
-            </p>
-            <p style="color: white; font-size: 20px; margin: 10px 0 0 0; font-weight: bold;">
-                Om Shanti Shanti Shanti 🕉️
-            </p>
-        </div>
-        
-        <div style="border-top: 2px solid #eee; padding-top: 20px; margin-top: 30px;">
-            <p style="margin: 10px 0; color: #666;">
-                <strong>With Divine Blessings,</strong><br>
-                SwamiG Spiritual Center
-            </p>
-            
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
-                <p style="margin: 5px 0; font-size: 14px; color: #666;">
-                    <strong>Contact Us:</strong><br>
-                    📞 Phone: [Your Contact Number]<br>
-                    📧 Email: [Your Email]<br>
-                    🌐 Website: [Your Website]
-                </p>
-            </div>
-            
-            <p style="font-size: 12px; color: #999; margin-top: 20px; text-align: center;">
-                This is an automated message. Please do not reply to this email.
-            </p>
-        </div>
-    </div>
-</body>
-</html>
-      `,
-    };
-
-    // Call the email API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/sendemail`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(emailPayload),
-    });
-
-    const result = await response.json();
-    
-    if (result.success) {
-      // console.log('Congratulations email sent successfully to:', email);
-      return true;
-    } else {
-      console.error('Failed to send congratulations email:', result.error);
-      return false;
-    }
-  } catch (error) {
-    console.error('Error sending congratulations email:', error);
-    return false;
-  }
-}
-
-// Helper function to upload file to Cloudinary
-async function uploadToCloudinary(file: File, folder: string): Promise<string> {
+// Helper function to upload file to Cloudinary. Returns the secure URL plus the
+// public_id so the asset can be cleaned up if the registration later fails.
+async function uploadToCloudinary(
+  file: File,
+  folder: string
+): Promise<{ url: string; publicId: string }> {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
@@ -237,12 +58,27 @@ async function uploadToCloudinary(file: File, folder: string): Promise<string> {
           if (error) {
             reject(error);
           } else {
-            resolve(result?.secure_url || '');
+            resolve({ url: result?.secure_url || '', publicId: result?.public_id || '' });
           }
         }
       )
       .end(buffer);
   });
+}
+
+// Best-effort cleanup of orphaned Cloudinary assets. Never throws — used when a
+// registration fails after its documents were already uploaded, so that a failed
+// submission leaves nothing behind (no DB record AND no stored documents).
+async function deleteFromCloudinary(publicIds: string[]): Promise<void> {
+  if (!publicIds.length) return;
+  try {
+    const cloudinary = getCloudinary();
+    await Promise.all(
+      publicIds.filter(Boolean).map((id) => cloudinary.uploader.destroy(id))
+    );
+  } catch (cleanupError) {
+    console.error('Error cleaning up orphaned Cloudinary assets:', cleanupError);
+  }
 }
 
 // GET - Fetch all Mantra Diksha registrations
@@ -429,28 +265,38 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       );
     }
 
-    // Upload files to Cloudinary
+    // Upload files to Cloudinary. Track public_ids so we can remove the assets
+    // if the registration fails to save (no orphaned documents on failure).
     let aadhaarDocumentUrl = '';
     let passportDocumentUrl = '';
     let recentPhotoUrl = '';
+    const uploadedPublicIds: string[] = [];
 
     try {
       // Upload Aadhaar document for Indian nationality
       if (isIndian && aadhaarDocument && aadhaarDocument.size > 0) {
-        aadhaarDocumentUrl = await uploadToCloudinary(aadhaarDocument, 'aadhaar-documents');
+        const result = await uploadToCloudinary(aadhaarDocument, 'aadhaar-documents');
+        aadhaarDocumentUrl = result.url;
+        if (result.publicId) uploadedPublicIds.push(result.publicId);
       }
 
       // Upload passport document for non-Indian nationality
       if (!isIndian && passportDocument && passportDocument.size > 0) {
-        passportDocumentUrl = await uploadToCloudinary(passportDocument, 'passport-documents');
+        const result = await uploadToCloudinary(passportDocument, 'passport-documents');
+        passportDocumentUrl = result.url;
+        if (result.publicId) uploadedPublicIds.push(result.publicId);
       }
 
       // Upload recent photo (optional for all)
       if (recentPhoto && recentPhoto.size > 0) {
-        recentPhotoUrl = await uploadToCloudinary(recentPhoto, 'photos');
+        const result = await uploadToCloudinary(recentPhoto, 'photos');
+        recentPhotoUrl = result.url;
+        if (result.publicId) uploadedPublicIds.push(result.publicId);
       }
     } catch (uploadError) {
       console.error('Error uploading files:', uploadError);
+      // Roll back any document that did upload before the failure.
+      await deleteFromCloudinary(uploadedPublicIds);
       return NextResponse.json(
         {
           success: false,
@@ -486,23 +332,38 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       registrationData.passportDocument = passportDocumentUrl || null;
     }
 
-    // Create new registration
+    // Create new registration. If the save fails, remove the just-uploaded
+    // documents so a failed submission never leaves orphaned files behind.
     const newRegistration = new MantraDiksha(registrationData);
-    const savedRegistration = await newRegistration.save();
+    let savedRegistration;
+    try {
+      savedRegistration = await newRegistration.save();
+    } catch (saveError) {
+      await deleteFromCloudinary(uploadedPublicIds);
+      throw saveError;
+    }
 
-    // Send congratulations email (don't block the response if email fails)
+    // Send a branded confirmation email via Resend. Non-blocking: a failure
+    // here must never fail the registration, and the helper no-ops when
+    // RESEND_API_KEY is not configured.
     if (email) {
-      sendCongratulationsEmail(email, fullName, registrationData.registrationDate)
-        .then((success) => {
-          if (success) {
-            console.log('✅ Congratulations email sent successfully');
-          } else {
-            console.log('⚠️ Failed to send congratulations email, but registration was successful');
-          }
+      const confirmation = buildDikshaConfirmationEmail({
+        fullName,
+        registrationDate: registrationData.registrationDate,
+      });
+      sendResendEmail({
+        to: email,
+        subject: confirmation.subject,
+        html: confirmation.html,
+        text: confirmation.text,
+        replyTo: process.env.CONTACT_NOTIFY_EMAIL || 'office@avdheshanandg.org',
+      })
+        .then((res) => {
+          if (res.success) console.log('✅ Diksha confirmation email sent');
+          else if (res.skipped) console.log('⚠️ Diksha email skipped (no RESEND_API_KEY)');
+          else console.log('⚠️ Diksha email not sent:', res.error);
         })
-        .catch((error) => {
-          console.error('❌ Error in email sending process:', error);
-        });
+        .catch((error) => console.error('❌ Error sending diksha email:', error));
     }
 
     return NextResponse.json(

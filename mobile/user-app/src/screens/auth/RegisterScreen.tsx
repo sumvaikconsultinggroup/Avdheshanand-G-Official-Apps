@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,14 @@ import {
 } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, borderRadius } from '../../theme';
+import { spacing, borderRadius, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 
 export function RegisterScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -23,8 +27,27 @@ export function RegisterScreen({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { register, googleLogin } = useAuth();
   const { t } = useTranslation();
+
+  const { signIn: googleSignIn } = useGoogleSignIn(
+    async (idToken) => {
+      setGoogleLoading(true);
+      try {
+        await googleLogin(idToken);
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+      } catch (error: any) {
+        Alert.alert(
+          t('auth.registerFlow.errors.failedTitle'),
+          error?.response?.data?.message || t('common.networkError')
+        );
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    (message) => Alert.alert(t('auth.registerFlow.errors.failedTitle'), message)
+  );
 
   const handleRegister = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
@@ -37,7 +60,7 @@ export function RegisterScreen({ navigation }: any) {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       Alert.alert(t('common.error'), t('auth.registerFlow.errors.passwordMin'));
       return;
     }
@@ -50,10 +73,18 @@ export function RegisterScreen({ navigation }: any) {
         password,
         phone: phone.trim() || undefined,
       });
+      // Registration logs the user in; dismiss the auth modal (and any
+      // onboarding screens beneath it) by resetting the stack to the app home.
+      navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } catch (error: any) {
+      const backendMessage = error?.response?.data?.message;
+      const isUnreachable = error?.isApiUnavailable || !error?.response;
       Alert.alert(
         t('auth.registerFlow.errors.failedTitle'),
-        error.response?.data?.message || t('auth.registerFlow.errors.failedMessage')
+        backendMessage ||
+          (isUnreachable
+            ? t('common.networkError')
+            : t('auth.registerFlow.errors.failedMessage'))
       );
     } finally {
       setLoading(false);
@@ -172,13 +203,15 @@ export function RegisterScreen({ navigation }: any) {
 
           <Button
             mode="outlined"
-            disabled
+            onPress={googleSignIn}
+            loading={googleLoading}
+            disabled={googleLoading}
             textColor={colors.primary.maroon}
             style={styles.googleButton}
             contentStyle={styles.buttonContent}
             icon="google"
           >
-            {t('auth.registerFlow.googleSignUpComingSoon')}
+            {t('auth.continueWithGoogle')}
           </Button>
         </View>
 
@@ -194,7 +227,7 @@ export function RegisterScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

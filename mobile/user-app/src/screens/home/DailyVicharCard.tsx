@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useTranslation } from "react-i18next";
-import { borderRadius, colors, spacing, typography } from "../../theme";
+import { borderRadius, spacing, typography, type ColorPalette } from "../../theme";
+import { useTheme } from "../../context/ThemeContext";
 import api from "../../services/api";
 import { SurfaceCard } from "../../components/common";
 
@@ -16,6 +17,8 @@ interface Vichar {
 
 export default function DailyVicharCard() {
   const { t, i18n } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [vichar, setVichar] = useState<Vichar | null>(null);
 
   const preferredLanguage = useMemo<"hindi" | "english">(() => {
@@ -57,7 +60,7 @@ export default function DailyVicharCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     marginHorizontal: spacing.lg,
     marginVertical: spacing.sm,

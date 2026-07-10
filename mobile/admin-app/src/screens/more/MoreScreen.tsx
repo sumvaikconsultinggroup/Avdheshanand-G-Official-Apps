@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePermissions } from '../../context/PermissionContext';
 import type { ModuleId } from '../../context/PermissionContext';
 import { useI18n } from '../../i18n/I18nProvider';
@@ -44,6 +45,7 @@ const SCREEN_TO_MODULE: Record<string, ModuleId> = {
 export function MoreScreen({ navigation }: any) {
   const { t } = useI18n();
   const { role, canAccessModule } = usePermissions();
+  const insets = useSafeAreaInsets();
 
   const allItems = [
     { label: t('tabs.schedule'), screen: 'ScheduleStack', group: 'Operations' },
@@ -74,7 +76,11 @@ export function MoreScreen({ navigation }: any) {
   }, {});
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md }]}
+      showsVerticalScrollIndicator={false}
+    >
       <AdminHero
         eyebrow="All sections"
         title={t('admin.allSections')}

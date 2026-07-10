@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { colors, spacing } from '../../theme';
+import { spacing, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface LoadingSpinnerProps {
   message?: string;
 }
 
 export function LoadingSpinner({ message = 'Loading...' }: LoadingSpinnerProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color={colors.primary.saffron} />
@@ -15,7 +18,7 @@ export function LoadingSpinner({ message = 'Loading...' }: LoadingSpinnerProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

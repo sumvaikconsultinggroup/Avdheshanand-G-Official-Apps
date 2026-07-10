@@ -43,7 +43,7 @@ const english = {
   },
   auth: {
     title: 'Admin Dashboard',
-    subtitle: 'Swami Avdheshanand Mission',
+    subtitle: 'Swami Avdheshanand G',
     username: 'Username',
     password: 'Password',
     signIn: 'Sign In',
@@ -57,6 +57,7 @@ const english = {
     donations: 'Donations',
     content: 'Content',
     smartNotes: 'Smart Notes',
+    notes: 'Notes',
     more: 'More',
     schedule: 'Schedule',
   },
@@ -117,7 +118,7 @@ const hindi = {
   },
   auth: {
     title: 'एडमिन डैशबोर्ड',
-    subtitle: 'स्वामी अवधेशानंद मिशन',
+    subtitle: 'स्वामी अवधेशानंद जी',
     username: 'यूज़रनेम',
     password: 'पासवर्ड',
     signIn: 'साइन इन',
@@ -131,6 +132,7 @@ const hindi = {
     donations: 'दान',
     content: 'सामग्री',
     smartNotes: 'स्मार्ट नोट्स',
+    notes: 'नोट्स',
     more: 'और',
     schedule: 'कार्यक्रम',
   },

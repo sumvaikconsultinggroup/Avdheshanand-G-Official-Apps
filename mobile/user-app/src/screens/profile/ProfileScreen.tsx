@@ -11,11 +11,13 @@ import {
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useAppShell } from '../../context/AppShellContext';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import LanguageDrawer from '../../components/LanguageDrawer';
-import { AppButton, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
+import { AppButton, ScreenHeader, SurfaceCard } from '../../components/common';
 import api from '../../services/api';
 
 interface MenuItem {
@@ -23,6 +25,7 @@ interface MenuItem {
   title: string;
   subtitle?: string;
   onPress: () => void;
+  comingSoon?: boolean;
 }
 
 type DonationSummary = {
@@ -38,9 +41,12 @@ function formatCurrency(amount: number) {
 }
 
 export function ProfileScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const { openDrawer } = useAppShell();
   const [languageDrawerVisible, setLanguageDrawerVisible] = useState(false);
   const [summary, setSummary] = useState<DonationSummary | null>(null);
@@ -104,10 +110,10 @@ export function ProfileScreen() {
 
   const menuItems: MenuItem[] = [
     {
-      icon: 'calendar-check',
-      title: t('profile.menu.registrations.title'),
-      subtitle: t('profile.menu.registrations.subtitle'),
-      onPress: () => handleMenuPress(t('profile.menu.registrations.title')),
+      icon: 'account-edit-outline',
+      title: t('profile.editProfile'),
+      subtitle: user?.email || undefined,
+      onPress: () => navigation.navigate('EditProfile'),
     },
     {
       icon: 'hand-heart',
@@ -122,15 +128,30 @@ export function ProfileScreen() {
       onPress: () => setLanguageDrawerVisible(true),
     },
     {
+      icon: 'calendar-check',
+      title: t('profile.menu.registrations.title'),
+      subtitle: t('profile.menu.registrations.subtitle'),
+      onPress: () => navigation.navigate('MyRegistrations'),
+    },
+    {
+      icon: 'lock-reset',
+      title: t('auth.forgotPassword'),
+      onPress: () => navigation.navigate('ForgotPassword'),
+    },
+    {
       icon: 'cog-outline',
       title: t('profile.settings'),
       subtitle: t('profile.menu.settings.subtitle'),
-      onPress: () => handleMenuPress(t('profile.settings')),
+      onPress: () => navigation.navigate('Settings'),
     },
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingTop: insets.top }}
+      showsVerticalScrollIndicator={false}
+    >
       <ScreenHeader
         eyebrow={t('profile.title')}
         title={user?.name || t('profile.devoteeFallback')}
@@ -155,59 +176,55 @@ export function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <SectionHeader
-          title={t('profile.title')}
-          subtitle={t('profile.appTagline')}
-          icon="star-four-points"
-        />
-        <SurfaceCard style={styles.statsCard}>
-          {loadingSummary ? (
-            <View style={styles.summaryLoading}>
-              <ActivityIndicator color={colors.primary.saffron} />
+        <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate('DonationHistory')}>
+          <SurfaceCard compact style={styles.donationSummary}>
+            <View style={styles.summaryIcon}>
+              <Icon name="hand-heart" size={20} color={colors.primary.saffron} />
             </View>
-          ) : (
-            <>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>
-                  {summary ? formatCurrency(summary.totals.totalAmount) : '—'}
+            <View style={styles.summaryContent}>
+              <Text style={styles.summaryLabel}>{t('donate.history.totalGiven')}</Text>
+              {loadingSummary ? (
+                <ActivityIndicator color={colors.primary.saffron} style={{ alignSelf: 'flex-start', marginTop: 4 }} />
+              ) : (
+                <Text style={styles.summaryValue}>
+                  {summary ? formatCurrency(summary.totals.totalAmount) : '₹0'}
+                  <Text style={styles.summaryMeta}>
+                    {'   ·   '}{summary?.totals.donationsCount ?? 0} {t('donate.history.totalDonations')}
+                  </Text>
                 </Text>
-                <Text style={styles.statLabel}>{t('donate.history.totalGiven')}</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{summary?.totals.donationsCount ?? '—'}</Text>
-                <Text style={styles.statLabel}>{t('donate.history.totalDonations')}</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{summary?.totals.subscriptionCount ?? '—'}</Text>
-                <Text style={styles.statLabel}>{t('donate.history.monthlyCount')}</Text>
-              </View>
-            </>
-          )}
-        </SurfaceCard>
+              )}
+            </View>
+            <Icon name="chevron-right" size={20} color={colors.gold.dark} />
+          </SurfaceCard>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <SectionHeader
-          title={t('profile.title')}
-          subtitle={t('profile.menu.settings.subtitle')}
-          icon="view-grid-outline"
-        />
-        {menuItems.map((item) => (
-          <TouchableOpacity key={item.title} onPress={item.onPress} style={styles.menuItemWrap}>
-            <SurfaceCard compact style={styles.menuItem}>
+        <View style={styles.menuCard}>
+          {menuItems.map((item, index) => (
+            <TouchableOpacity
+              key={item.title}
+              onPress={item.onPress}
+              style={[styles.menuItem, index < menuItems.length - 1 && styles.menuItemDivider]}
+              activeOpacity={0.7}
+            >
               <View style={styles.menuIconContainer}>
-                <Icon name={item.icon} size={20} color={colors.primary.saffron} />
+                <Icon name={item.icon} size={19} color={colors.primary.maroon} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuTitle}>{item.title}</Text>
                 {item.subtitle ? <Text style={styles.menuSubtitle}>{item.subtitle}</Text> : null}
               </View>
-              <Icon name="chevron-right" size={22} color={colors.text.secondary} />
-            </SurfaceCard>
-          </TouchableOpacity>
-        ))}
+              {item.comingSoon ? (
+                <View style={styles.comingSoonBadge}>
+                  <Text style={styles.comingSoonText}>{t('common.comingSoon')}</Text>
+                </View>
+              ) : (
+                <Icon name="chevron-right" size={20} color={colors.gold.dark} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -218,7 +235,7 @@ export function ProfileScreen() {
           icon="logout"
           style={styles.logoutButton}
         />
-        <Text style={styles.appVersion}>AvdheshanandG Mission App v1.0.0</Text>
+        <Text style={styles.appVersion}>Swami Avdheshanand G • v1.0.0</Text>
       </View>
 
       <View style={{ height: spacing.xxl }} />
@@ -228,7 +245,7 @@ export function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -259,49 +276,62 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
   },
-  statsCard: {
+  donationSummary: {
     flexDirection: 'row',
-    alignItems: 'stretch',
-    paddingVertical: spacing.lg,
-  },
-  summaryLoading: {
-    width: '100%',
     alignItems: 'center',
-    paddingVertical: spacing.md,
   },
-  statItem: {
-    flex: 1,
+  summaryIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.background.cream,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
+    marginRight: spacing.md,
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: colors.border.gold as string,
+  summaryContent: {
+    flex: 1,
   },
-  statValue: {
+  summaryLabel: {
+    ...typography.label,
+    color: colors.gold.dark,
+  },
+  summaryValue: {
     ...typography.h3,
     color: colors.primary.maroon,
-    textAlign: 'center',
+    marginTop: 2,
   },
-  statLabel: {
+  summaryMeta: {
     ...typography.bodySm,
     color: colors.text.secondary,
-    textAlign: 'center',
-    marginTop: spacing.xs,
+    fontWeight: '600',
   },
-  menuItemWrap: {
-    marginBottom: spacing.sm,
+  menuCard: {
+    backgroundColor: colors.background.warmWhite,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    overflow: 'hidden',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  menuItemDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(212,160,23,0.16)',
   },
   menuIconContainer: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.background.cream,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFF2DB',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.25)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
@@ -317,6 +347,19 @@ const styles = StyleSheet.create({
     ...typography.bodySm,
     color: colors.text.secondary,
     marginTop: 2,
+  },
+  comingSoonBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.sandstone,
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.3)',
+  },
+  comingSoonText: {
+    ...typography.caption,
+    color: colors.gold.dark,
+    fontWeight: '700',
   },
   logoutButton: {
     marginBottom: spacing.md,

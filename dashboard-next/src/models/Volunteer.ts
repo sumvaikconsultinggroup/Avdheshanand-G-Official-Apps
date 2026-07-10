@@ -5,6 +5,7 @@ export interface IVolunteer extends Document {
   fullName: string;
   email: string;
   phone: string;
+  location?: string; // Actual field used by the app (city/place text)
   city?: string; // Added city field
   state?: string; // Added state field
   country?: string; // Added country field
@@ -63,6 +64,11 @@ const VolunteerSchema = new Schema<IVolunteer>(
       required: [true, 'Age is required'],
       min: [18, 'Minimum age is 18 years'],
       max: [100, 'Maximum age is 100 years'],
+    },
+    location: {
+      type: String,
+      trim: true,
+      required: false,
     },
     city: {
       type: String,

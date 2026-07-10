@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '../theme';
+import { type ColorPalette } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
 export function PlaceholderScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
   return (
     <View style={styles.container}>
@@ -13,7 +16,7 @@ export function PlaceholderScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

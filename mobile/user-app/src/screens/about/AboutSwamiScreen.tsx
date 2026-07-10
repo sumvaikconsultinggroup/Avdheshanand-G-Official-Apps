@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Image,
   ScrollView,
@@ -9,11 +9,14 @@ import {
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { AppButton, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 const SWAMIJI_SOURCE = require('../../../assets/images/swamiji-onboarding.jpg');
 
 export function AboutSwamiScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
 
   const milestones = [
@@ -140,7 +143,7 @@ export function AboutSwamiScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

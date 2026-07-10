@@ -19,10 +19,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { WebView } from 'react-native-webview';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppShell } from '../../context/AppShellContext';
 import api from '../../services/api';
-import { colors, spacing, borderRadius, shadows, typography } from '../../theme';
-import { AppButton, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
+import { spacing, borderRadius, shadows, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { AppButton, FloatingInput, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
 
 const { width } = Dimensions.get('window');
 type LocalizedText = Record<string, string | undefined>;
@@ -179,7 +181,7 @@ function buildCheckoutHtml({
           key: ${JSON.stringify(key)},
           amount: ${Math.round(amount * 100)},
           currency: 'INR',
-          name: 'AvdheshanandG Mission',
+          name: 'Swami Avdheshanand G',
           description: ${JSON.stringify(mode === 'subscription' ? 'Monthly Seva Donation' : 'One-Time Donation')},
           prefill: {
             name: ${safeName},
@@ -220,7 +222,10 @@ function buildCheckoutHtml({
 
 export function DonateScreen() {
   const { t, i18n } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { openDrawer } = useAppShell();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [recentDonations, setRecentDonations] = useState<RecentDonation[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
@@ -419,6 +424,7 @@ export function DonateScreen() {
     <>
       <ScrollView
         style={styles.container}
+        contentContainerStyle={{ paddingTop: insets.top }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -531,61 +537,53 @@ export function DonateScreen() {
               />
 
               <View style={styles.formGrid}>
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.amountPlaceholder')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.amountLabel')}
+                  leftIcon="currency-inr"
                   keyboardType="numeric"
                   value={form.amount}
                   onChangeText={(value) => setField('amount', value.replace(/[^\d]/g, ''))}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.fullNameLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.fullNameLabel')}
+                  leftIcon="account"
                   value={form.fullName}
                   onChangeText={(value) => setField('fullName', value)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.emailLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.emailLabel')}
+                  leftIcon="email"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   value={form.email}
                   onChangeText={(value) => setField('email', value)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.mobileLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.mobileLabel')}
+                  leftIcon="phone"
                   keyboardType="phone-pad"
                   value={form.mobile}
                   onChangeText={(value) => setField('mobile', value)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.nationalityLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.nationalityLabel')}
+                  leftIcon="earth"
                   value={form.nationality}
                   onChangeText={(value) => setField('nationality', value)}
                 />
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.panLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.panLabel')}
+                  leftIcon="card-account-details-outline"
                   autoCapitalize="characters"
                   value={form.panNumber}
                   onChangeText={(value) => setField('panNumber', value.toUpperCase())}
                 />
               </View>
 
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder={t('donate.addressLabel')}
-                placeholderTextColor={colors.text.secondary}
+              <FloatingInput
+                label={t('donate.addressLabel')}
+                leftIcon="map-marker-outline"
                 multiline
-                numberOfLines={3}
                 value={form.address}
                 onChangeText={(value) => setField('address', value)}
               />
@@ -613,19 +611,16 @@ export function DonateScreen() {
                     </TouchableOpacity>
                   ))}
                 </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('donate.dedicatedToLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.dedicatedToLabel')}
+                  leftIcon="account-heart-outline"
                   value={form.dedicatedTo}
                   onChangeText={(value) => setField('dedicatedTo', value)}
                 />
-                <TextInput
-                  style={[styles.input, styles.textArea]}
-                  placeholder={t('donate.messageLabel')}
-                  placeholderTextColor={colors.text.secondary}
+                <FloatingInput
+                  label={t('donate.messageLabel')}
+                  leftIcon="message-text-outline"
                   multiline
-                  numberOfLines={3}
                   value={form.dedicationMessage}
                   onChangeText={(value) => setField('dedicationMessage', value)}
                 />
@@ -666,6 +661,7 @@ export function DonateScreen() {
                 onPress={handleCheckout}
                 loading={submitting}
                 icon={mode === 'subscription' ? 'repeat' : 'gift'}
+                style={styles.payButton}
               />
             </>
           )}
@@ -799,7 +795,7 @@ export function DonateScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -861,6 +857,11 @@ const styles = StyleSheet.create({
   },
   toggleButtonActive: {
     backgroundColor: colors.primary.maroon,
+    shadowColor: colors.primary.maroon,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 3,
   },
   toggleText: {
     ...typography.bodySm,
@@ -877,34 +878,38 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   quickAmountButton: {
-    minWidth: '47%',
+    flexGrow: 1,
+    flexBasis: '47%',
     borderRadius: borderRadius.full,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border.gold as string,
     backgroundColor: colors.background.parchment,
-    paddingVertical: spacing.sm + 2,
+    paddingVertical: spacing.md,
     alignItems: 'center',
   },
   quickAmountButtonActive: {
-    backgroundColor: colors.background.sandstone,
-    borderColor: colors.gold.main,
+    backgroundColor: colors.primary.maroon,
+    borderColor: colors.primary.maroon,
+    shadowColor: colors.primary.maroon,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   quickAmountText: {
-    ...typography.bodySm,
-    color: colors.text.primary,
-    fontWeight: '600',
+    ...typography.body,
+    color: colors.primary.maroon,
+    fontWeight: '700',
   },
   quickAmountTextActive: {
-    color: colors.primary.maroon,
+    color: colors.text.white,
   },
   sectionTitle: {
     ...typography.h3,
     color: colors.text.primary,
     marginBottom: spacing.md,
   },
-  formGrid: {
-    gap: spacing.sm,
-  },
+  formGrid: {},
   input: {
     borderRadius: borderRadius.lg,
     borderWidth: 1,
@@ -987,6 +992,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     color: colors.status.error,
     ...typography.bodySm,
+  },
+  payButton: {
+    marginTop: spacing.lg,
   },
   successCard: {
     borderRadius: borderRadius.xl,

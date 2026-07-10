@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { sendResendEmail } from '@/utils/resendMailer';
 import { sendWhatsAppMessage, sendWhatsAppTemplateMessage } from '@/lib/whatsapp';
 
 type ReceiptSource = {
@@ -118,36 +118,14 @@ export async function sendDonationReceiptEmail({
     return { success: false, skipped: true, error: 'Recipient email is missing' };
   }
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    return { success: false, skipped: true, error: 'Email provider is not configured' };
+  const result = await sendResendEmail({ to, subject, html, text });
+  if (!result.success) {
+    return { success: false, skipped: result.skipped, error: result.error || 'Email could not be sent' };
   }
-
-  const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE,
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT || '587', 10),
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    debug: process.env.NODE_ENV === 'development',
-  });
-
-  const info = await transporter.sendMail({
-    from: {
-      name: process.env.EMAIL_FROM_NAME || 'AvdheshanandG Mission',
-      address: process.env.EMAIL_USER,
-    },
-    to,
-    subject,
-    text,
-    html,
-  });
 
   return {
     success: true,
-    messageId: info.messageId,
+    messageId: result.id,
   };
 }
 

@@ -121,148 +121,85 @@ export default function MainDashBoard() {
 
   const filteredCards = dashboardCards.filter(card => hasPermission(card.serviceKey));
 
+  const statCards = [
+    { key: 'totalEvents', label: t('dashboardPage.stats.totalEvents'), value: stats?.totalEvents ?? 0, Icon: Calendar, tone: '#800020', growth: stats?.growth?.events },
+    { key: 'donations', label: t('dashboardPage.stats.donations'), value: stats?.activeCampaigns ?? 0, Icon: Heart, tone: '#A3123A', growth: stats?.growth?.donations },
+    { key: 'activeUsers', label: t('dashboardPage.stats.activeUsers'), value: (stats?.totalUsers ?? 0).toLocaleString(), Icon: Users, tone: '#B8860B', growth: stats?.growth?.users },
+    { key: 'volunteers', label: t('dashboardPage.stats.volunteers'), value: (stats?.totalVolunteers ?? 0).toLocaleString(), Icon: HeartHandshake, tone: '#2E9E5B', growth: stats?.growth?.volunteers },
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      {/* Welcome Section with Gradient */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-950 dark:via-amber-950 dark:to-yellow-950 p-8 md:p-10">
-        {/* Decorative Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-500 rounded-full blur-3xl"></div>
+      {/* Welcome banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#7A0018] via-[#5E0016] to-[#38000F] p-8 text-white md:p-10">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.14]">
+          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-[#FFD54F] blur-3xl" />
+          <div className="absolute -bottom-12 -left-10 h-48 w-48 rounded-full bg-[#A3123A] blur-3xl" />
         </div>
-
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl shadow-lg">
-              <span className="text-2xl text-white">🙏</span>
-            </div>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-3xl text-[#FFD54F] ring-1 ring-[#FFD54F]/40">ॐ</div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-                {t('dashboardPage.welcomeTitle')}
-              </h1>
-              <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mt-1">
-                {t('dashboardPage.welcomeSubtitle')}
-              </p>
+              <h1 className="font-serif text-3xl font-bold tracking-tight md:text-4xl">{t('dashboardPage.welcomeTitle')}</h1>
+              <p className="mt-1 text-sm text-[#EAD9BC] md:text-base">{t('dashboardPage.welcomeSubtitle')}</p>
             </div>
           </div>
-          <p className="text-gray-700 dark:text-gray-300 max-w-2xl">
-            {t('dashboardPage.welcomeDescription')}
-          </p>
+          <p className="max-w-2xl text-[15px] leading-relaxed text-[#E6D3B4]">{t('dashboardPage.welcomeDescription')}</p>
         </div>
       </div>
 
       {/* Quick Stats — REAL data from DB */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600 dark:text-orange-400">{t('dashboardPage.stats.totalEvents')}</p>
-                <h3 className="text-3xl font-bold text-orange-900 dark:text-orange-100 mt-2">{statsLoading ? '...' : (stats?.totalEvents ?? 0)}</h3>
-                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> {t('dashboardPage.stats.growthThisMonth', { value: stats?.growth?.events ?? '+0%' })}
-                </p>
+        {statCards.map(({ key, label, value, Icon, tone, growth }) => (
+          <Card key={key} className="relative overflow-hidden rounded-2xl border border-[#EEE1C6] bg-white transition-all duration-300 hover:shadow-lg dark:bg-gray-900">
+            <div className="absolute inset-x-0 top-0 h-1" style={{ backgroundColor: tone }} />
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-[#8B7E74]">{label}</p>
+                  <h3 className="mt-2 text-3xl font-extrabold text-[#800020] dark:text-white">{statsLoading ? '…' : value}</h3>
+                  <p className="mt-1 flex items-center gap-1 text-xs" style={{ color: tone }}>
+                    <TrendingUp className="h-3 w-3" /> {t('dashboardPage.stats.growthThisMonth', { value: growth ?? '+0%' })}
+                  </p>
+                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl ring-1" style={{ backgroundColor: `${tone}14`, borderColor: `${tone}33` }}>
+                  <Icon className="h-7 w-7" style={{ color: tone }} />
+                </div>
               </div>
-              <div className="p-4 bg-orange-500 rounded-xl shadow-lg">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-950 dark:to-pink-900 border-pink-200 dark:border-pink-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-pink-600 dark:text-pink-400">{t('dashboardPage.stats.donations')}</p>
-                <h3 className="text-3xl font-bold text-pink-900 dark:text-pink-100 mt-2">{statsLoading ? '...' : (stats?.activeCampaigns ?? 0)}</h3>
-                <p className="text-xs text-pink-600 dark:text-pink-400 mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> {t('dashboardPage.stats.growthThisMonth', { value: stats?.growth?.donations ?? '+0%' })}
-                </p>
-              </div>
-              <div className="p-4 bg-pink-500 rounded-xl shadow-lg">
-                <Heart className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">{t('dashboardPage.stats.activeUsers')}</p>
-                <h3 className="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{statsLoading ? '...' : (stats?.totalUsers ?? 0).toLocaleString()}</h3>
-                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> {t('dashboardPage.stats.growthThisMonth', { value: stats?.growth?.users ?? '+0%' })}
-                </p>
-              </div>
-              <div className="p-4 bg-blue-500 rounded-xl shadow-lg">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 hover:scale-105">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600 dark:text-green-400">{t('dashboardPage.stats.volunteers')}</p>
-                <h3 className="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">{statsLoading ? '...' : (stats?.totalVolunteers ?? 0).toLocaleString()}</h3>
-                <p className="text-xs text-green-600 dark:text-green-400 mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> {t('dashboardPage.stats.growthThisMonth', { value: stats?.growth?.volunteers ?? '+0%' })}
-                </p>
-              </div>
-              <div className="p-4 bg-green-500 rounded-xl shadow-lg">
-                <HeartHandshake className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Management Sections */}
+      {/* Management modules */}
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('dashboardPage.managementPortal')}</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{t('dashboardPage.modulesAvailable', { count: filteredCards.length })}</p>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-serif text-2xl font-bold text-[#5E0016] dark:text-white">{t('dashboardPage.managementPortal')}</h2>
+          <p className="text-sm text-[#8B7E74]">{t('dashboardPage.modulesAvailable', { count: filteredCards.length })}</p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filteredCards.map((card, index) => (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredCards.map((card) => (
             <Card
               key={card.serviceKey}
-              className="group relative overflow-hidden hover:shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer border-2 hover:border-orange-200 dark:hover:border-orange-800"
-              style={{
-                animationDelay: `${index * 50}ms`,
-                animation: 'fadeInUp 0.5s ease-out forwards'
-              }}
+              className="group relative overflow-hidden rounded-2xl border border-[#EEE1C6] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#D4A017] hover:shadow-[0_18px_40px_-20px_rgba(128,0,32,0.4)] dark:border-gray-800"
             >
-              {/* Gradient Background on Hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
-              
               <CardHeader className="relative">
-                <div className="flex items-start justify-between mb-3">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${card.color} shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500`}>
-                    <card.icon className="h-6 w-6 text-white" />
+                <div className="mb-3 flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#8A0A26] to-[#4A0010] shadow-md transition-transform duration-300 group-hover:scale-105">
+                    <card.icon className="h-6 w-6 text-[#FFD54F]" />
                   </div>
-                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-orange-500 group-hover:translate-x-1 transition-all duration-300" />
+                  <ArrowRight className="h-5 w-5 text-gray-300 transition-all duration-300 group-hover:translate-x-1 group-hover:text-[#800020]" />
                 </div>
-                <CardTitle className="text-lg font-semibold group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                <CardTitle className="text-lg font-bold text-gray-800 transition-colors group-hover:text-[#800020] dark:text-white">
                   {t(`dashboardPage.cards.${card.serviceKey}.title`)}
                 </CardTitle>
               </CardHeader>
-              
               <CardContent className="relative">
-                <CardDescription className="text-sm mb-4 line-clamp-2">
+                <CardDescription className="mb-4 line-clamp-2 text-sm">
                   {t(`dashboardPage.cards.${card.serviceKey}.description`)}
                 </CardDescription>
-                <Button
-                  asChild
-                  size="sm"
-                  className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md hover:shadow-lg transition-all duration-300"
-                >
+                <Button asChild size="sm" className="w-full bg-gradient-to-br from-[#800020] to-[#4A0010] text-white shadow-sm transition hover:brightness-110">
                   <Link href={card.href}>{t(`dashboardPage.cards.${card.serviceKey}.linkText`)}</Link>
                 </Button>
               </CardContent>
@@ -271,19 +208,19 @@ export default function MainDashBoard() {
         </div>
       </div>
 
-      {/* Quick Actions Footer */}
-      <div className="mt-8 p-6 rounded-xl bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-950 dark:to-amber-950 border-2 border-orange-200 dark:border-orange-800">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Footer help card */}
+      <div className="mt-8 rounded-2xl border border-[#EEE1C6] bg-gradient-to-r from-[#FFF8E7] to-[#FBEFD6] p-6 dark:border-gray-800 dark:from-gray-900 dark:to-gray-900">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">{t('dashboardPage.needHelpTitle')}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">{t('dashboardPage.needHelpSubtitle')}</p>
+            <h3 className="font-bold text-[#800020] dark:text-white">{t('dashboardPage.needHelpTitle')}</h3>
+            <p className="text-sm text-[#8B7E74] dark:text-gray-300">{t('dashboardPage.needHelpSubtitle')}</p>
           </div>
           <div className="flex gap-3">
-            <Button asChild variant="outline" className="bg-white dark:bg-gray-900">
+            <Button asChild variant="outline" className="border-[#D4A017] bg-white text-[#800020] hover:bg-[#FFF8E7] dark:bg-gray-900">
               <Link href="/dashboard/services">{t('dashboardPage.viewGuides')}</Link>
             </Button>
-            <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white">
-              <a href="mailto:support@avdheshanandg.org">{t('dashboardPage.contactSupport')}</a>
+            <Button asChild className="bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110">
+              <a href="mailto:office@avdheshanandg.org">{t('dashboardPage.contactSupport')}</a>
             </Button>
           </div>
         </div>

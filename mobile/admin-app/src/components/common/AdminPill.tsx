@@ -30,14 +30,15 @@ const styles = StyleSheet.create({
     borderColor: colors.border.gold as string,
   },
   pillSelected: {
-    backgroundColor: `${colors.primary.saffron}16`,
-    borderColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
+    borderColor: colors.primary.maroon,
   },
   text: {
     ...typography.label,
     color: colors.text.secondary,
   },
   textSelected: {
-    color: colors.primary.saffron,
+    color: colors.text.white,
+    fontWeight: '700',
   },
 });

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SectionHeaderProps {
   title: string;
@@ -18,6 +19,8 @@ export function SectionHeader({
   onActionPress,
   icon,
 }: SectionHeaderProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.row}>
       <View style={styles.copy}>
@@ -36,7 +39,7 @@ export function SectionHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',

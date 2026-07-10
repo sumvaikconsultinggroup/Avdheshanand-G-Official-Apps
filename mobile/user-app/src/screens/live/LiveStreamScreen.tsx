@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { useTranslation } from "react-i18next";
-import { colors } from "../../theme";
+import { type ColorPalette } from "../../theme";
+import { useTheme } from "../../context/ThemeContext";
 import api from "../../services/api";
 
 const { width } = Dimensions.get("window");
@@ -24,6 +25,8 @@ interface Stream {
 }
 
 export default function LiveStreamScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t, i18n } = useTranslation();
   const [activeStream, setActiveStream] = useState<Stream | null>(null);
   const [upcomingStreams, setUpcomingStreams] = useState<Stream[]>([]);
@@ -129,7 +132,7 @@ export default function LiveStreamScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFFDF5" },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { color: "#999" },

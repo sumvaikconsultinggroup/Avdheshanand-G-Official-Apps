@@ -10,16 +10,11 @@ const KNOWN_NON_API_BASE_URLS = new Set([
 const PRODUCTION_API_FALLBACKS = [
   'https://admin.avdheshanandg.org',
 ];
-const LOCAL_DEV_API_FALLBACKS = [
-  'http://10.0.2.2:3001',
-  'http://10.0.2.2:3000',
-  'http://10.0.3.2:3001',
-  'http://10.0.3.2:3000',
-  'http://localhost:3001',
-  'http://localhost:3000',
-  'http://127.0.0.1:3001',
-  'http://127.0.0.1:3000',
-];
+// The backend dev port. 3031 first so a moved port is easy to update here.
+const DEV_PORTS = ['3031', '3001', '3000'];
+const LOCAL_DEV_API_FALLBACKS = ['10.0.2.2', '10.0.3.2', 'localhost', '127.0.0.1'].flatMap((host) =>
+  DEV_PORTS.map((port) => `http://${host}:${port}`)
+);
 
 let cachedWorkingBaseUrl: string | null = null;
 const invalidBaseUrls = new Set<string>();
@@ -70,9 +65,14 @@ function getCandidateBaseUrls(): string[] {
 
   push(cachedWorkingBaseUrl);
 
+  // Metro is served from the laptop running the backend, so the Expo host IP on
+  // the backend dev port is the most reliable target — it survives IP changes
+  // and a stale EXPO_PUBLIC_API_URL. Try it first in dev.
+  if (__DEV__ && expoHost) {
+    DEV_PORTS.forEach((port) => push(`http://${expoHost}:${port}`));
+  }
+
   if (shouldPreferLocalDev) {
-    push(expoHost ? `http://${expoHost}:3001` : null);
-    push(expoHost ? `http://${expoHost}:3000` : null);
     LOCAL_DEV_API_FALLBACKS.forEach(push);
   }
 
@@ -83,8 +83,6 @@ function getCandidateBaseUrls(): string[] {
   PRODUCTION_API_FALLBACKS.forEach(push);
 
   if (!shouldPreferLocalDev && __DEV__) {
-    push(expoHost ? `http://${expoHost}:3001` : null);
-    push(expoHost ? `http://${expoHost}:3000` : null);
     LOCAL_DEV_API_FALLBACKS.forEach(push);
   }
 

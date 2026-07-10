@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { colors, spacing, borderRadius } from '../../theme';
+import { Badge } from '../../components/common';
 import api from '../../services/api';
 import { usePermissions, ROLE_TEMPLATES } from '../../context/PermissionContext';
 import type { RoleName } from '../../context/PermissionContext';
@@ -26,10 +27,10 @@ interface TeamMember {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  superadmin: '#059669',
-  admin: '#D97706',
-  editor: '#2563EB',
-  moderator: '#7C3AED',
+  superadmin: colors.primary.maroon,
+  admin: colors.primary.saffron, // crimson accent
+  editor: colors.gold.dark,
+  moderator: '#6D28D9',
   viewer: '#6B7280',
 };
 
@@ -128,18 +129,18 @@ export function TeamManagementScreen() {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchTeam(); }} tintColor={colors.primary.saffron} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchTeam(); }} tintColor={colors.primary.maroon} colors={[colors.primary.maroon]} />}
     >
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Team Management</Text>
+        <View style={styles.headerText}>
+          <Text style={styles.title} numberOfLines={1}>Team Management</Text>
           <Text style={styles.subtitle}>{team.length} team members</Text>
         </View>
         {canManageTeam && (
-          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
-            <Icon name="account-plus" size={20} color="#fff" />
-            <Text style={styles.addButtonText}>Add Member</Text>
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)} activeOpacity={0.9}>
+            <Icon name="account-plus" size={18} color="#fff" />
+            <Text style={styles.addButtonText}>Add</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -152,12 +153,17 @@ export function TeamManagementScreen() {
               <Text style={styles.avatarText}>{member.name?.charAt(0)?.toUpperCase()}</Text>
             </View>
             <View style={styles.memberInfo}>
-              <Text style={styles.memberName}>{member.name}</Text>
-              <Text style={styles.memberUsername}>@{member.username}</Text>
-              <View style={[styles.roleBadge, { backgroundColor: (ROLE_COLORS[member.role] || '#6B7280') + '20' }]}>
-                <Text style={[styles.roleBadgeText, { color: ROLE_COLORS[member.role] || '#6B7280' }]}>
-                  {ROLE_LABELS[member.role] || member.role}
-                </Text>
+              <Text style={styles.memberName} numberOfLines={1}>{member.name}</Text>
+              <Text style={styles.memberUsername} numberOfLines={1}>@{member.username}</Text>
+              <View style={styles.badgeRow}>
+                <Badge
+                  label={ROLE_LABELS[member.role] || member.role}
+                  tone={ROLE_COLORS[member.role] || '#6B7280'}
+                  variant="soft"
+                />
+                {member.isActive === false && (
+                  <Badge label="Inactive" tone={colors.text.secondary} variant="outline" />
+                )}
               </View>
             </View>
             {canManageTeam && member.role !== 'superadmin' && (
@@ -237,13 +243,15 @@ export function TeamManagementScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background.parchment },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.lg, paddingTop: spacing.xl },
-  title: { fontSize: 24, fontWeight: '700', color: colors.primary.maroon },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.lg, paddingTop: spacing.xl, gap: spacing.md },
+  headerText: { flex: 1 },
+  title: { fontSize: 22, fontWeight: '800', color: colors.primary.maroon },
   subtitle: { fontSize: 13, color: colors.text.secondary, marginTop: 2 },
-  addButton: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primary.saffron, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: borderRadius.md },
-  addButtonText: { color: '#fff', fontWeight: '600', fontSize: 13 },
+  addButton: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.primary.maroon, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 2, borderRadius: borderRadius.full },
+  addButtonText: { color: '#fff', fontWeight: '700', fontSize: 13 },
   memberCard: { marginHorizontal: spacing.lg, marginBottom: spacing.sm, backgroundColor: colors.background.warmWhite, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border.gold as string, padding: spacing.md },
-  inactiveCard: { opacity: 0.5 },
+  inactiveCard: { opacity: 0.68 },
+  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: 6 },
   memberRow: { flexDirection: 'row', alignItems: 'center' },
   avatar: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center' },
   avatarText: { color: '#fff', fontWeight: '700', fontSize: 18 },

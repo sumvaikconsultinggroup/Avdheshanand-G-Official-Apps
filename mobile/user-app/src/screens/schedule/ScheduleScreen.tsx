@@ -16,8 +16,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { colors, spacing, borderRadius, typography } from '../../theme';
-import { EmptyStateCard, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
+import { spacing, borderRadius, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { EmptyStateCard, FloatingInput, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
 
 interface Event {
   _id: string;
@@ -91,6 +92,8 @@ const EMPTY_FORM: RequestForm = {
 export function ScheduleScreen() {
   const { isAuthenticated, user } = useAuth();
   const { t, i18n } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [events, setEvents] = useState<Event[]>([]);
   const [schedules, setSchedules] = useState<GroupedSchedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -371,7 +374,12 @@ export function ScheduleScreen() {
     const firstSlot = activeSlots[0];
     const period = firstSlot?.period;
     const title = pickLocalizedText(item.publicTitle, item.locations);
-    const location = pickLocalizedText(item.publicLocation, item.locations);
+    // Only treat as a distinct location if it isn't just a repeat of the title
+    // (when publicLocation is empty both fall back to `locations`).
+    const rawLocation = pickLocalizedText(item.publicLocation, '');
+    const baseLabel = item.baseLocation || t('schedule.ashram');
+    const hasDistinctLocation = !!rawLocation && rawLocation.trim() !== title.trim();
+    const locationLine = hasDistinctLocation ? `${baseLabel} • ${rawLocation}` : baseLabel;
 
     return (
       <SurfaceCard compact style={styles.scheduleItem}>
@@ -389,10 +397,11 @@ export function ScheduleScreen() {
           ) : null}
         </View>
         <View style={styles.scheduleContent}>
-          <Text style={styles.scheduleTitle}>{title}</Text>
-          <Text style={styles.scheduleLocation}>
-            {item.baseLocation || t('schedule.ashram')} • {location}
-          </Text>
+          <Text style={styles.scheduleTitle} numberOfLines={3}>{title}</Text>
+          <View style={styles.scheduleLocationRow}>
+            <Icon name="map-marker-outline" size={13} color={colors.text.secondary} />
+            <Text style={styles.scheduleLocation} numberOfLines={2}>{locationLine}</Text>
+          </View>
           {item.dateRange ? <Text style={styles.scheduleTime}>{item.dateRange}</Text> : null}
           {item.changeNote ? <Text style={styles.changeNote}>{item.changeNote}</Text> : null}
 
@@ -512,17 +521,17 @@ export function ScheduleScreen() {
                 </View>
               ) : null}
 
-              <Text style={styles.inputLabel}>{t('schedule.fullName')}</Text>
-              <TextInput
-                style={styles.input}
+              <FloatingInput
+                label={t('schedule.fullName')}
+                leftIcon="account"
                 value={requestForm.name}
                 onChangeText={(value) => setRequestForm((prev) => ({ ...prev, name: value }))}
                 placeholder={t('schedule.placeholders.name')}
               />
 
-              <Text style={styles.inputLabel}>{t('schedule.email')}</Text>
-              <TextInput
-                style={styles.input}
+              <FloatingInput
+                label={t('schedule.email')}
+                leftIcon="email"
                 value={requestForm.email}
                 onChangeText={(value) => setRequestForm((prev) => ({ ...prev, email: value }))}
                 placeholder={t('schedule.placeholders.email')}
@@ -530,9 +539,9 @@ export function ScheduleScreen() {
                 autoCapitalize="none"
               />
 
-              <Text style={styles.inputLabel}>{t('schedule.phone')}</Text>
-              <TextInput
-                style={styles.input}
+              <FloatingInput
+                label={t('schedule.phone')}
+                leftIcon="phone"
                 value={requestForm.phone}
                 onChangeText={(value) => setRequestForm((prev) => ({ ...prev, phone: value }))}
                 placeholder={t('schedule.placeholders.phone')}
@@ -587,16 +596,15 @@ export function ScheduleScreen() {
                 ))}
               </View>
 
-              <Text style={styles.inputLabel}>{t('schedule.additionalInfo')}</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
+              <FloatingInput
+                label={t('schedule.additionalInfo')}
+                leftIcon="message-text-outline"
                 value={requestForm.additionalInfo}
                 onChangeText={(value) =>
                   setRequestForm((prev) => ({ ...prev, additionalInfo: value }))
                 }
                 placeholder={t('schedule.placeholders.additionalInfo')}
                 multiline
-                numberOfLines={4}
               />
 
               <TouchableOpacity
@@ -641,15 +649,16 @@ export function ScheduleScreen() {
       />
 
       <View style={styles.tabWrap}>
-        <SurfaceCard compact style={styles.tabContainer}>
+        <View style={styles.tabTrack}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'schedules' && styles.tabActive]}
             onPress={() => setActiveTab('schedules')}
+            activeOpacity={0.85}
           >
             <Icon
               name="calendar-clock"
               size={18}
-              color={activeTab === 'schedules' ? colors.text.white : colors.text.primary}
+              color={activeTab === 'schedules' ? colors.text.white : colors.primary.maroon}
             />
             <Text style={[styles.tabText, activeTab === 'schedules' && styles.tabTextActive]}>
               {t('schedule.title')}
@@ -658,17 +667,18 @@ export function ScheduleScreen() {
           <TouchableOpacity
             style={[styles.tab, activeTab === 'events' && styles.tabActive]}
             onPress={() => setActiveTab('events')}
+            activeOpacity={0.85}
           >
             <Icon
               name="calendar-star"
               size={18}
-              color={activeTab === 'events' ? colors.text.white : colors.text.primary}
+              color={activeTab === 'events' ? colors.text.white : colors.primary.maroon}
             />
             <Text style={[styles.tabText, activeTab === 'events' && styles.tabTextActive]}>
               {t('explore.events')}
             </Text>
           </TouchableOpacity>
-        </SurfaceCard>
+        </View>
       </View>
 
       {activeTab === 'events' ? (
@@ -755,7 +765,7 @@ export function ScheduleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -763,6 +773,7 @@ const styles = StyleSheet.create({
   tabWrap: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   loadingContainer: {
     flex: 1,
@@ -775,28 +786,36 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     ...typography.bodySm,
   },
-  tabContainer: {
+  tabTrack: {
     flexDirection: 'row',
-    padding: 0,
+    backgroundColor: colors.background.sandstone,
+    borderRadius: borderRadius.full,
+    padding: 5,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    marginHorizontal: spacing.xs,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.sandstone,
+    gap: 7,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.full,
   },
   tabActive: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
+    shadowColor: colors.primary.maroon,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   tabText: {
-    ...typography.bodySm,
+    fontSize: 15,
     fontWeight: '700',
-    color: colors.text.primary,
-    marginLeft: spacing.xs,
+    color: colors.primary.maroon,
   },
   tabTextActive: {
     color: colors.text.white,
@@ -841,17 +860,19 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
   },
   sectionHeaderBar: {
+    alignSelf: 'flex-start',
     backgroundColor: colors.primary.maroon,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
     marginBottom: spacing.sm,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.full,
     marginHorizontal: spacing.lg,
   },
   sectionHeaderText: {
-    ...typography.bodySm,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.4,
     color: colors.text.white,
   },
   eventCard: {
@@ -901,7 +922,8 @@ const styles = StyleSheet.create({
   },
   scheduleItem: {
     flexDirection: 'row',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
+    padding: spacing.md,
   },
   scheduleLeft: {
     alignItems: 'center',
@@ -915,9 +937,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
   },
   scheduleDateText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: colors.text.primary,
+    fontSize: 12,
+    fontWeight: '700',
+    color: colors.primary.maroon,
     textAlign: 'center',
   },
   periodBadge: {
@@ -936,7 +958,10 @@ const styles = StyleSheet.create({
   },
   scheduleTitle: {
     ...typography.title,
-    color: colors.text.primary,
+    fontSize: 16,
+    lineHeight: 23,
+    fontWeight: '700',
+    color: colors.primary.maroon,
     marginBottom: spacing.xs,
   },
   scheduleTime: {
@@ -944,9 +969,16 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: spacing.xs,
   },
+  scheduleLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+    marginTop: 2,
+  },
   scheduleLocation: {
     ...typography.bodySm,
     color: colors.text.secondary,
+    flex: 1,
   },
   changeNote: {
     ...typography.caption,

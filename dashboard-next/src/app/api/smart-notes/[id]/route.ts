@@ -27,10 +27,21 @@ export async function PUT(req: NextRequest, context: RouteContext) {
       ...(body.title !== undefined && { title: String(body.title).trim() }),
       ...(body.body !== undefined && { body: String(body.body).trim() }),
       ...(body.tags !== undefined && { tags: Array.isArray(body.tags) ? body.tags : [] }),
+      ...(body.priority !== undefined && { priority: body.priority }),
+      ...(body.city !== undefined && { city: String(body.city || '').trim() }),
       ...(body.assignedToId !== undefined && { assignedToId: body.assignedToId || '' }),
       ...(body.assignedToName !== undefined && { assignedToName: body.assignedToName || '' }),
       ...(body.assignmentStatus !== undefined && { assignmentStatus: body.assignmentStatus }),
     };
+
+    // Reassigning a previously-unassigned note should reflect an assigned state.
+    if (
+      (body.assignedToId || body.assignedToName) &&
+      body.assignmentStatus === undefined &&
+      (currentNote.assignmentStatus === 'unassigned' || !currentNote.assignmentStatus)
+    ) {
+      updateData.assignmentStatus = 'assigned';
+    }
 
     const note = await SmartNoteModel.findOneAndUpdate(
       { _id: id, isDeleted: false },

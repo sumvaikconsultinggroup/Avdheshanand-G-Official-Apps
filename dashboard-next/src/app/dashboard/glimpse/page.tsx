@@ -204,15 +204,22 @@ export default function GlimpsePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-xl border border-[#EEE1C6] bg-[#FFF8E7] p-6 shadow-sm dark:border-[#3a2a1a] dark:bg-[#1c130c]">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Glimpses</h1>
-          <p className="text-muted-foreground">
-            Manage your image gallery - upload and showcase memorable moments
+          <h1 className="text-3xl font-bold tracking-tight text-[#800020] dark:text-[#D4A017]">
+            Glimpses
+          </h1>
+          <p className="text-[#7a5c3e] dark:text-muted-foreground">
+            Manage your Swami Avdheshanand G image gallery - upload and showcase memorable moments
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchGlimpses} disabled={isLoading}>
+          <Button
+            variant="outline"
+            onClick={fetchGlimpses}
+            disabled={isLoading}
+            className="border-[#EEE1C6] text-[#800020] hover:bg-[#800020]/[0.06] hover:text-[#800020] focus-visible:ring-[#800020]/20 dark:border-[#3a2a1a] dark:text-[#D4A017]"
+          >
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -222,14 +229,16 @@ export default function GlimpsePage() {
           </Button>
           <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110 focus-visible:ring-[#800020]/20">
                 <Upload className="mr-2 h-4 w-4" />
                 Upload Image
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md border-[#EEE1C6] dark:border-[#3a2a1a]">
               <DialogHeader>
-                <DialogTitle>Upload Glimpse</DialogTitle>
+                <DialogTitle className="text-[#800020] dark:text-[#D4A017]">
+                  Upload Glimpse
+                </DialogTitle>
                 <DialogDescription>Add a new image to your glimpse gallery</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -237,8 +246,8 @@ export default function GlimpsePage() {
                   className={cn(
                     'border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
                     dragActive
-                      ? 'border-primary bg-primary/5'
-                      : 'border-muted-foreground/25 hover:border-muted-foreground/50'
+                      ? 'border-[#800020] bg-[#800020]/[0.06]'
+                      : 'border-[#EEE1C6] hover:border-[#D4A017] dark:border-[#3a2a1a] dark:hover:border-[#B8860B]'
                   )}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
@@ -265,6 +274,7 @@ export default function GlimpsePage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="border-[#EEE1C6] text-[#800020] hover:bg-[#800020]/[0.06] hover:text-[#800020] focus-visible:ring-[#800020]/20 dark:border-[#3a2a1a] dark:text-[#D4A017]"
                         onClick={e => {
                           e.stopPropagation();
                           setSelectedFile(null);
@@ -279,9 +289,12 @@ export default function GlimpsePage() {
                     </div>
                   ) : (
                     <>
-                      <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                      <ImageIcon className="mx-auto h-12 w-12 text-[#D4A017]" />
                       <p className="mt-2 text-sm text-muted-foreground">
-                        <span className="font-medium">Click to upload</span> or drag and drop
+                        <span className="font-medium text-[#800020] dark:text-[#D4A017]">
+                          Click to upload
+                        </span>{' '}
+                        or drag and drop
                       </p>
                       <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 5MB</p>
                     </>
@@ -296,10 +309,18 @@ export default function GlimpsePage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setUploadDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setUploadDialogOpen(false)}
+                  className="border-[#EEE1C6] text-[#800020] hover:bg-[#800020]/[0.06] hover:text-[#800020] focus-visible:ring-[#800020]/20 dark:border-[#3a2a1a] dark:text-[#D4A017]"
+                >
                   Cancel
                 </Button>
-                <Button onClick={handleUpload} disabled={!selectedFile || isUploading}>
+                <Button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || isUploading}
+                  className="bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110 focus-visible:ring-[#800020]/20"
+                >
                   {isUploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -323,30 +344,33 @@ export default function GlimpsePage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#800020] dark:text-[#D4A017]" />
           <span className="ml-2 text-lg">Loading glimpses...</span>
         </div>
       ) : error ? (
-        <Card>
+        <Card className="border-[#EEE1C6] dark:border-[#3a2a1a]">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <p className="text-destructive">{error}</p>
-            <Button onClick={fetchGlimpses} className="mt-4">
+            <Button
+              onClick={fetchGlimpses}
+              className="mt-4 bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110 focus-visible:ring-[#800020]/20"
+            >
               <RefreshCw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
           </CardContent>
         </Card>
       ) : glimpses.length === 0 ? (
-        <Card>
+        <Card className="border-[#EEE1C6] bg-[#FFF8E7] dark:border-[#3a2a1a] dark:bg-[#1c130c]">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <ImageIcon className="h-16 w-16 text-muted-foreground" />
-            <CardTitle className="mt-4">No glimpses yet</CardTitle>
+            <ImageIcon className="h-16 w-16 text-[#D4A017]" />
+            <CardTitle className="mt-4 text-[#800020] dark:text-[#D4A017]">No glimpses yet</CardTitle>
             <CardDescription className="mt-2 text-center">
               Upload your first image to start your glimpse gallery
             </CardDescription>
             <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="mt-4">
+                <Button className="mt-4 bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110 focus-visible:ring-[#800020]/20">
                   <Upload className="mr-2 h-4 w-4" />
                   Upload First Image
                 </Button>
@@ -357,7 +381,10 @@ export default function GlimpsePage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {glimpses.map(glimpse => (
-            <Card key={glimpse._id} className="group overflow-hidden">
+            <Card
+              key={glimpse._id}
+              className="group overflow-hidden border-[#EEE1C6] transition-shadow hover:shadow-lg hover:shadow-[#800020]/10 dark:border-[#3a2a1a]"
+            >
               <div className="relative aspect-square">
                 <Image
                   src={glimpse.image}
@@ -385,9 +412,9 @@ export default function GlimpsePage() {
                   )}
                 </Button>
               </div>
-              <CardContent className="p-4">
+              <CardContent className="p-4 bg-[#FFF8E7] dark:bg-[#1c130c]">
                 <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="mr-1 h-3 w-3" />
+                  <Clock className="mr-1 h-3 w-3 text-[#D4A017]" />
                   <span>{formatDate(glimpse.createdAt)}</span>
                 </div>
               </CardContent>

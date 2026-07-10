@@ -1,4 +1,14 @@
 {
+  "settings": {
+    "appearance": "App Preferences",
+    "theme": {
+      "title": "Theme",
+      "subtitle": "Choose how the app looks",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
   "tabs": {
     "home": "Home",
     "explore": "Explore",
@@ -214,8 +224,8 @@
       "campaign": "Campaign",
       "reference": "Payment reference",
       "share": "Share this seva",
-      "shareTitle": "I just supported AvdheshanandG Mission",
-      "shareText": "I just offered {{amount}} towards {{campaign}} through AvdheshanandG Mission."
+      "shareTitle": "I just supported Swami Avdheshanand G",
+      "shareText": "I just offered {{amount}} towards {{campaign}} through Swami Avdheshanand G."
     },
     "history": {
       "title": "Donation History",
@@ -247,6 +257,14 @@
   "profile": {
     "title": "Profile",
     "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "updateSuccess": "Profile updated",
+    "updateFailed": "Could not update profile",
+    "emailLocked": "Email address can't be changed",
+    "errors": {
+      "nameRequired": "Name is required",
+      "phoneInvalid": "Enter a valid 10-digit phone number"
+    },
     "myEvents": "My Events",
     "settings": "Settings",
     "language": "Language",
@@ -305,6 +323,7 @@
     "sendResetLink": "Send Reset Link",
     "backToLogin": "Back to Login",
     "googleSignInComingSoon": "Google Sign-In (Coming Soon)",
+    "continueWithGoogle": "Continue with Google",
     "browseWithoutSignIn": "Browse without signing in",
     "registerFlow": {
       "subtitle": "Join our spiritual community",
@@ -317,7 +336,7 @@
       "errors": {
         "fillRequired": "Please fill in all required fields",
         "passwordMismatch": "Passwords do not match",
-        "passwordMin": "Password must be at least 6 characters",
+        "passwordMin": "Password must be at least 8 characters",
         "failedTitle": "Registration Failed",
         "failedMessage": "Could not create account"
       }
@@ -374,7 +393,7 @@
     }
   },
   "onboarding": {
-    "brand": "AvdheshanandG Mission",
+    "brand": "Swami Avdheshanand G",
     "brandTagline": "Towards Divinity",
     "changeLanguage": "Change Language",
     "languageTitle": "Choose your language",
@@ -384,7 +403,7 @@
     "getStarted": "Get Started",
     "existingLogin": "Existing User? Login",
     "continueAsGuest": "Continue as Guest",
-    "footer": "By continuing, you agree to receive a respectful and personalized spiritual experience from AvdheshanandG Mission.",
+    "footer": "By continuing, you agree to receive a respectful and personalized spiritual experience from Swami Avdheshanand G.",
     "slides": {
       "panchangEyebrow": "Daily Guidance",
       "panchangTitle": "Begin each day with Panchang and sacred timing",
@@ -437,7 +456,8 @@
     "tryAgain": "Try Again",
     "ok": "OK",
     "goBack": "Go Back",
-    "unexpectedError": "An unexpected error occurred"
+    "unexpectedError": "An unexpected error occurred",
+    "networkError": "Cannot reach the server. Please check your internet connection and try again."
   },
   "chat": {
     "headerTitle": "Ask Swami Ji",
@@ -534,7 +554,7 @@
       "loading": "Loading article...",
       "loadFailed": "Failed to load article",
       "notFound": "Article not found",
-      "shareMessage": "Read this enlightening article from AvdheshanandG Mission.",
+      "shareMessage": "Read this enlightening article from Swami Avdheshanand G.",
       "minRead": "{{count}} min read",
       "footerBlessing": "Hari Om Tat Sat"
     },
@@ -571,8 +591,8 @@
       "openLinkFailed": "Unable to open the external book link right now.",
       "externalSellerAvailable": "External Seller Link Available",
       "purchaseNoticeTitle": "Purchase Notice",
-      "externalSellerNoticeShort": "AvdheshanandG Mission only displays these books and their external purchase links. Sales and fulfilment are handled solely by the respective seller or marketplace.",
-      "externalSellerNotice": "AvdheshanandG Mission does not sell, fulfill, or distribute these books directly. Any purchase is completed solely with the respective third-party seller, publisher, or marketplace, which remains solely responsible for pricing, availability, shipping, returns, and customer support."
+      "externalSellerNoticeShort": "Swami Avdheshanand G only displays these books and their external purchase links. Sales and fulfilment are handled solely by the respective seller or marketplace.",
+      "externalSellerNotice": "Swami Avdheshanand G does not sell, fulfill, or distribute these books directly. Any purchase is completed solely with the respective third-party seller, publisher, or marketplace, which remains solely responsible for pricing, availability, shipping, returns, and customer support."
     },
     "podcast": {
       "title": "Podcast",
@@ -704,7 +724,7 @@
   },
   "appDrawer": {
     "openMenu": "Open app menu",
-    "eyebrow": "AvdheshanandG Mission",
+    "eyebrow": "Swami Avdheshanand G",
     "title": "Mission Guide",
     "subtitle": "Browse the wider spiritual journey, teachings, legal pages, and service pathways from one place.",
     "sections": {
@@ -830,7 +850,7 @@
     },
     "terms": {
       "title": "Terms of Service",
-      "subtitle": "The operating terms and responsibilities for using AvdheshanandG Mission's digital platforms.",
+      "subtitle": "The operating terms and responsibilities for using Swami Avdheshanand G's digital platforms.",
       "sections": {
         "use": {
           "title": "Use of Platform",

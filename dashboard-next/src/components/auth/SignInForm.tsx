@@ -1,8 +1,5 @@
 'use client';
-import Input from '@/components/form/input/InputField';
-import Label from '@/components/form/Label';
-import { Button } from '@/components/ui/button';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
@@ -14,120 +11,142 @@ export default function SignInForm() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  try {
-    const res = await fetch('/api/auth/signin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const res = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password }),
+      });
 
-    const data = await res.json();
-    
-    if (res.ok) {
-      localStorage.setItem('user', JSON.stringify(data.user));
-      router.push('/dashboard');
-    } else {
-      setError(data.message || 'Invalid credentials');
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        router.push('/dashboard');
+      } else {
+        setError(data.message || 'Invalid credentials');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Failed to sign in. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Login error:', error);
-    setError('Failed to sign in. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+    <div>
+      {/* Monogram / portal identity */}
+      <div className="mb-10 flex items-center gap-3.5">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#8A0A26] to-[#4A0010] text-xl text-[#FFD54F] shadow-sm">
+          &#x950;
+        </div>
+        <div className="leading-tight">
+          <p className="font-serif text-lg font-bold text-[#3A2A22]">Admin Console</p>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-[#9A8A72]">Admin Portal</p>
+        </div>
+      </div>
+
+      {/* Heading */}
+      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A1E23]">
+        Administrator Access
+      </p>
+      <h1 className="mt-2 font-serif text-[2.6rem] font-bold leading-none text-[#2A211C]">
+        Welcome back
+      </h1>
+      <p className="mt-3 text-[15px] leading-relaxed text-[#7A6E60]">
+        Sign in to steward the Swami Avdheshanand G website &amp; records.
+      </p>
+
+      {error && (
+        <div className="mt-6 flex items-start gap-2.5 rounded-lg border border-[#D9A7A0] bg-[#FBEDEA] p-3.5">
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#B23B2E]" />
+          <p className="text-sm text-[#8A1E23]">{error}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleLogin} className="mt-9 space-y-6">
+        {/* Username */}
         <div>
-          <div className="mb-6 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white sm:text-title-md">
-              Welcome Back
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Sign in to continue your service
-            </p>
-            {error && (
-              <div className="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-              </div>
-            )}
-          </div>
-          <div>
-            <form onSubmit={handleLogin}>
-              <div className="space-y-6">
-                <div>
-                  <Label>
-                    Username <span className="text-error-500">*</span>{' '}
-                  </Label>
+          <label htmlFor="username" className="mb-2 block text-sm font-semibold text-[#3A2A22]">
+            Username
+          </label>
+          <input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            autoComplete="username"
+            placeholder="Enter your username"
+            className="w-full rounded-xl border border-[#E1D6C2] bg-[#FCFAF4] px-4 py-3.5 text-[15px] text-[#2A211C] placeholder-[#B4A88E] shadow-inner outline-none transition focus:border-[#8A1E23] focus:bg-white focus:ring-4 focus:ring-[#8A1E23]/10"
+          />
+        </div>
 
-                  <Input
-                    className="w-full p-2 border rounded mt-1"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    required
-                    placeholder="username"
-                    type="text"
-                  />
-                </div>
-                <div>
-                  <Label>
-                    Password <span className="text-error-500">*</span>{' '}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? (
-                        <Eye className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      ) : (
-                        <EyeOff className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white" 
-                    disabled={loading} 
-                    size="lg"
-                  >
-                    {loading ? 'Signing in...' : 'Sign in to Dashboard'}
-                  </Button>
-                </div>
-              </div>
-            </form>
-
-            {/* <div className="mt-5">
-              <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Don&apos;t have an account? {""}
-                <Link
-                  href="/signup"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  Sign Up
-                </Link>
-              </p>
-            </div> */}
+        {/* Password */}
+        <div>
+          <label htmlFor="password" className="mb-2 block text-sm font-semibold text-[#3A2A22]">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              className="w-full rounded-xl border border-[#E1D6C2] bg-[#FCFAF4] px-4 py-3.5 pr-12 text-[15px] text-[#2A211C] placeholder-[#B4A88E] shadow-inner outline-none transition focus:border-[#8A1E23] focus:bg-white focus:ring-4 focus:ring-[#8A1E23]/10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A2947E] transition hover:text-[#8A1E23]"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="group flex w-full items-center justify-center gap-2.5 rounded-xl bg-gradient-to-br from-[#8C221B] to-[#5E0016] py-4 text-[15px] font-bold tracking-wide text-white shadow-[0_16px_34px_-14px_rgba(120,20,20,0.7)] transition hover:brightness-[1.08] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Signing in…
+            </>
+          ) : (
+            <>
+              Enter the Portal
+              <ArrowRight className="h-[18px] w-[18px] transition-transform group-hover:translate-x-1" />
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Ornamental divider */}
+      <div className="mt-10 flex items-center gap-3">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#D4A017]/50" />
+        <span className="text-[#C79A2E]">&#x965;</span>
+        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#D4A017]/50" />
+      </div>
+
+      {/* Footer */}
+      <div className="mt-5 text-center">
+        <p className="text-xs tracking-wide text-[#9A8A72]">Protected area · Authorised personnel only</p>
+        <p className="mt-1 text-[11px] text-[#B4A88E]">© 2026 Swami Avdheshanand G. All rights reserved.</p>
       </div>
     </div>
   );

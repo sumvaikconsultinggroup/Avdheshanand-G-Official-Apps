@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,9 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { FloatingInput } from '../../components/common';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface FormData {
   name: string;
@@ -44,6 +46,8 @@ export function ContactScreen() {
   const navigation = useNavigation();
   const route = useRoute<any>();
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const routeParams = route.params || {};
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -159,38 +163,17 @@ export function ContactScreen() {
       keyboardType?: 'email-address' | 'default';
     }
   ) => {
-    const hasError = errors[field];
-
     return (
-      <View style={styles.inputContainer}>
-        <View style={styles.labelContainer}>
-          <Icon name={icon} size={18} color={colors.gold.dark} />
-          <Text style={styles.inputLabel}>
-            {label}
-            <Text style={styles.requiredStar}>*</Text>
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.inputWrapper,
-            hasError && styles.inputWrapperError,
-            options?.multiline && styles.inputWrapperMultiline,
-          ]}
-        >
-          <TextInput
-            style={[styles.input, options?.multiline && styles.inputMultiline]}
-            placeholder={placeholder}
-            placeholderTextColor={colors.text.secondary}
-            value={formData[field]}
-            onChangeText={(value) => updateField(field, value)}
-            keyboardType={options?.keyboardType || 'default'}
-            multiline={options?.multiline}
-            numberOfLines={options?.multiline ? 5 : 1}
-            textAlignVertical={options?.multiline ? 'top' : 'center'}
-          />
-        </View>
-        {hasError && <Text style={styles.errorText}>{hasError}</Text>}
-      </View>
+      <FloatingInput
+        label={`${label} *`}
+        value={formData[field]}
+        onChangeText={(value) => updateField(field, value)}
+        error={errors[field]}
+        leftIcon={icon}
+        placeholder={placeholder}
+        keyboardType={options?.keyboardType}
+        multiline={options?.multiline}
+      />
     );
   };
 
@@ -332,7 +315,7 @@ export function ContactScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

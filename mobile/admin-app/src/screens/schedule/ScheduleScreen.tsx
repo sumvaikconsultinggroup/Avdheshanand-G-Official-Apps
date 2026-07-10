@@ -14,14 +14,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Card, FAB, ActivityIndicator, Chip, IconButton } from 'react-native-paper';
+import { Card, FAB, ActivityIndicator, IconButton } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   AdminEmptyState,
   AdminHero,
   AdminMetricCard,
   AdminSectionHeader,
+  Badge,
 } from '../../components/common';
-import { colors, spacing, borderRadius, typography } from '../../theme';
+import { colors, spacing, borderRadius, typography, shadows, gradients } from '../../theme';
 import api from '../../services/api';
 import { Schedule, LocalizedText } from '../../types';
 
@@ -126,6 +129,7 @@ export function ScheduleScreen() {
   const [error, setError] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
+  const [detailSchedule, setDetailSchedule] = useState<Schedule | null>(null);
   const [formData, setFormData] = useState<ScheduleFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -249,6 +253,11 @@ export function ScheduleScreen() {
       return;
     }
 
+    // The backend requires endDate to be strictly AFTER startDate; for a
+    // single-day schedule (start === end) we omit endDate (it's optional).
+    const isSingleDay =
+      new Date(formData.endDate).getTime() === new Date(formData.startDate).getTime();
+
     const body = {
       month: formData.month.trim(),
       locations: formData.locations.trim(),
@@ -257,7 +266,7 @@ export function ScheduleScreen() {
         {
           period: formData.period.trim() || undefined,
           startDate: new Date(formData.startDate).toISOString(),
-          endDate: new Date(formData.endDate).toISOString(),
+          ...(isSingleDay ? {} : { endDate: new Date(formData.endDate).toISOString() }),
           slotCapacity,
         },
       ],
@@ -342,16 +351,24 @@ export function ScheduleScreen() {
   const renderScheduleItem = ({ item }: { item: Schedule }) => {
     const firstSlot = item.timeSlots?.[0];
     const period = firstSlot?.period;
-    const slotCapacity = firstSlot?.slotCapacity;
 
     return (
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
           <View style={styles.leftStripe} />
           <View style={styles.detailsSection}>
-            <Text style={styles.locationText} numberOfLines={2}>
-              {getPrimaryLocalizedValue(item.publicTitle, item.locations)}
-            </Text>
+            <TouchableOpacity activeOpacity={0.7} onPress={() => setDetailSchedule(item)}>
+            <View style={styles.titleRow}>
+              <Text style={styles.locationText} numberOfLines={2}>
+                {getPrimaryLocalizedValue(item.publicTitle, item.locations)}
+              </Text>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={22}
+                color={colors.gold.dark}
+                style={styles.titleChevron}
+              />
+            </View>
             <Text style={styles.secondaryText}>
               {item.baseLocation || 'Ashram schedule'}
             </Text>
@@ -360,44 +377,68 @@ export function ScheduleScreen() {
 
             <View style={styles.metaRow}>
               {period ? (
-                <Chip style={styles.periodChip} textStyle={styles.periodChipText} compact>
-                  {period}
-                </Chip>
+                <Badge
+                  label={period}
+                  tone={colors.gold.dark}
+                  variant="soft"
+                  icon="clock-outline"
+                />
               ) : null}
 
               {item.appointment ? (
-                <Chip style={styles.appointmentChip} textStyle={styles.appointmentChipText} compact>
-                  Appointment open
-                </Chip>
+                <Badge
+                  label="Appointment open"
+                  tone={colors.status.success}
+                  variant="soft"
+                  dot
+                />
               ) : null}
 
               {item.isLastMinuteUpdate ? (
-                <Chip style={styles.urgentChip} textStyle={styles.urgentChipText} compact>
-                  Last-minute update
-                </Chip>
+                <Badge
+                  label="Last-minute update"
+                  tone={colors.status.warning}
+                  variant="solid"
+                  icon="alert"
+                />
               ) : null}
             </View>
 
-            <View style={styles.metricsRow}>
-              <Text style={styles.metricText}>
-                Daily capacity: {item.maxPeople ?? 100}
-              </Text>
-              {slotCapacity ? (
-                <Text style={styles.metricText}>Slot cap: {slotCapacity}</Text>
-              ) : null}
-              {item.currentAppointments != null ? (
-                <Text style={styles.metricText}>Booked: {item.currentAppointments}</Text>
-              ) : null}
-              {item.remainingCapacity != null ? (
-                <Text style={styles.metricText}>Open: {item.remainingCapacity}</Text>
-              ) : null}
+            <View style={styles.capacityStrip}>
+              <View style={styles.capItem}>
+                <Text style={styles.capValue}>{item.maxPeople ?? 100}</Text>
+                <Text style={styles.capLabel}>Daily</Text>
+              </View>
+              <View style={styles.capDivider} />
+              <View style={styles.capItem}>
+                <Text style={styles.capValue}>{item.currentAppointments ?? 0}</Text>
+                <Text style={styles.capLabel}>Booked</Text>
+              </View>
+              <View style={styles.capDivider} />
+              <View style={styles.capItem}>
+                <Text style={[styles.capValue, { color: colors.status.success }]}>
+                  {item.remainingCapacity ?? '—'}
+                </Text>
+                <Text style={styles.capLabel}>Open</Text>
+              </View>
             </View>
 
-            {item.changeNote ? <Text style={styles.changeNoteText}>{item.changeNote}</Text> : null}
+            {item.changeNote ? (
+              <View style={styles.changeNoteRow}>
+                <MaterialCommunityIcons
+                  name="information-outline"
+                  size={14}
+                  color={colors.status.warning}
+                  style={styles.changeNoteIcon}
+                />
+                <Text style={styles.changeNoteText}>{item.changeNote}</Text>
+              </View>
+            ) : null}
+            </TouchableOpacity>
 
             <View style={styles.cardActionRow}>
               <TouchableOpacity style={styles.actionButton} onPress={() => openEditModal(item)}>
-                <IconButton icon="pencil" iconColor={colors.accent.peacock} size={18} />
+                <IconButton icon="pencil" iconColor={colors.primary.maroon} size={18} />
                 <Text style={styles.actionButtonText}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionButton} onPress={() => handleDelete(item)}>
@@ -414,12 +455,27 @@ export function ScheduleScreen() {
   };
 
   const renderSectionHeader = ({ section }: { section: ScheduleSection }) => (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{section.title}</Text>
+    <LinearGradient
+      colors={gradients.maroon}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 0 }}
+      style={styles.sectionHeader}
+    >
+      <View style={styles.sectionTitleRow}>
+        <MaterialCommunityIcons
+          name="calendar-month-outline"
+          size={16}
+          color={colors.gold.light}
+          style={styles.sectionTitleIcon}
+        />
+        <Text style={styles.sectionTitle} numberOfLines={1}>
+          {section.title}
+        </Text>
+      </View>
       <View style={styles.sectionBadge}>
         <Text style={styles.sectionCount}>{section.data.length}</Text>
       </View>
-    </View>
+    </LinearGradient>
   );
 
   const renderEmptyState = () => (
@@ -468,7 +524,7 @@ export function ScheduleScreen() {
           label="Open capacity"
           value={scheduleSummary.capacity}
           icon="seat-recline-normal"
-          tone={colors.accent.peacock}
+          tone={colors.gold.dark}
         />
       </View>
       <AdminSectionHeader
@@ -477,6 +533,133 @@ export function ScheduleScreen() {
       />
     </View>
   );
+
+  const renderDetailModal = () => {
+    const item = detailSchedule;
+    if (!item) return null;
+    const firstSlot = item.timeSlots?.[0];
+    const period = firstSlot?.period;
+    const title = getPrimaryLocalizedValue(item.publicTitle, item.locations);
+
+    const Row = ({ label, value, last }: { label: string; value?: string | number | null; last?: boolean }) =>
+      value === undefined || value === null || value === '' ? null : (
+        <View style={[styles.detailRow, last && styles.detailRowLast]}>
+          <Text style={styles.detailLabel}>{label}</Text>
+          <Text style={styles.detailValue}>{String(value)}</Text>
+        </View>
+      );
+
+    return (
+      <Modal
+        visible={!!detailSchedule}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setDetailSchedule(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.detailSheet}>
+            {/* Compact gradient header */}
+            <LinearGradient
+              colors={gradients.maroon}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.detailHeader}
+            >
+              <View style={styles.detailHeaderTop}>
+                <Text style={styles.detailEyebrow}>Schedule details</Text>
+                <TouchableOpacity onPress={() => setDetailSchedule(null)} style={styles.detailClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <MaterialCommunityIcons name="close" size={20} color={colors.text.white} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.detailTitle}>{title}</Text>
+              <View style={styles.detailSubRow}>
+                <MaterialCommunityIcons name="map-marker-outline" size={14} color={colors.gold.light} />
+                <Text style={styles.detailSub}>{item.baseLocation || 'Ashram schedule'}</Text>
+              </View>
+            </LinearGradient>
+
+            <ScrollView style={styles.detailBody} contentContainerStyle={styles.detailBodyContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.detailBadgeRow}>
+                {period ? <Badge label={period} tone={colors.gold.dark} variant="soft" icon="clock-outline" /> : null}
+                <Badge
+                  label={item.appointment ? 'Appointment open' : 'Appointment closed'}
+                  tone={item.appointment ? colors.status.success : colors.text.secondary}
+                  variant="soft"
+                  dot
+                />
+                {item.isLastMinuteUpdate ? (
+                  <Badge label="Last-minute update" tone={colors.status.warning} variant="solid" icon="alert" />
+                ) : null}
+              </View>
+
+              {/* Capacity stat tiles */}
+              <View style={styles.statRow}>
+                <View style={styles.statTile}>
+                  <Text style={styles.statValue}>{item.maxPeople ?? 100}</Text>
+                  <Text style={styles.statLabel}>Daily cap</Text>
+                </View>
+                <View style={styles.statTile}>
+                  <Text style={styles.statValue}>{item.currentAppointments ?? 0}</Text>
+                  <Text style={styles.statLabel}>Booked</Text>
+                </View>
+                <View style={styles.statTile}>
+                  <Text style={[styles.statValue, { color: colors.status.success }]}>
+                    {item.remainingCapacity ?? '—'}
+                  </Text>
+                  <Text style={styles.statLabel}>Open</Text>
+                </View>
+              </View>
+
+              {/* Info list */}
+              <View style={styles.detailList}>
+                <Row label="Dates" value={item.dateRange} />
+                <Row label="Month" value={item.month} />
+                <Row label="Preferred period" value={period} />
+                <Row label="Slot capacity" value={firstSlot?.slotCapacity} last />
+              </View>
+
+              {item.timeSlots && item.timeSlots.length > 0 ? (
+                <View style={styles.detailBlock}>
+                  <Text style={styles.detailSectionLabel}>Time slots</Text>
+                  <View style={styles.detailBadgeRow}>
+                    {item.timeSlots.map((slot, i) => (
+                      <Badge
+                        key={i}
+                        label={`${slot.period || 'Slot'}${slot.slotCapacity ? ` · ${slot.slotCapacity}` : ''}`}
+                        tone={colors.primary.saffron}
+                        variant="soft"
+                      />
+                    ))}
+                  </View>
+                </View>
+              ) : null}
+
+              {item.changeNote ? (
+                <View style={styles.detailBlock}>
+                  <Text style={styles.detailSectionLabel}>Update note</Text>
+                  <View style={styles.noteCard}>
+                    <Text style={styles.noteText}>{item.changeNote}</Text>
+                  </View>
+                </View>
+              ) : null}
+
+              <TouchableOpacity
+                style={styles.detailEditBtn}
+                activeOpacity={0.9}
+                onPress={() => {
+                  setDetailSchedule(null);
+                  openEditModal(item);
+                }}
+              >
+                <MaterialCommunityIcons name="pencil" size={18} color={colors.text.white} />
+                <Text style={styles.detailEditBtnText}>Edit schedule</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   const renderFormModal = () => (
     <Modal
@@ -676,7 +859,7 @@ export function ScheduleScreen() {
             />
 
             <View style={styles.switchRow}>
-              <Text style={styles.inputLabel}>Accept appointment requests</Text>
+              <Text style={styles.switchLabel}>Accept appointment requests</Text>
               <Switch
                 value={formData.appointment}
                 onValueChange={(value) => setFormData((prev) => ({ ...prev, appointment: value }))}
@@ -686,7 +869,7 @@ export function ScheduleScreen() {
             </View>
 
             <View style={styles.switchRow}>
-              <Text style={styles.inputLabel}>Mark as last-minute update</Text>
+              <Text style={styles.switchLabel}>Mark as last-minute update</Text>
               <Switch
                 value={formData.isLastMinuteUpdate}
                 onValueChange={(value) =>
@@ -722,7 +905,7 @@ export function ScheduleScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading schedules...</Text>
       </View>
     );
@@ -753,8 +936,8 @@ export function ScheduleScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -763,6 +946,7 @@ export function ScheduleScreen() {
 
       <FAB icon="plus" style={styles.fab} onPress={openCreateModal} color={colors.text.white} />
 
+      {renderDetailModal()}
       {renderFormModal()}
     </View>
   );
@@ -817,16 +1001,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.primary.maroon,
     marginHorizontal: spacing.md,
     marginTop: spacing.md,
     borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gold.dark,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    ...shadows.soft,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  sectionTitleIcon: {
+    marginRight: spacing.sm,
   },
   sectionTitle: {
     ...typography.titleSm,
     color: colors.gold.light,
+    flexShrink: 1,
   },
   sectionBadge: {
     backgroundColor: colors.gold.main,
@@ -843,26 +1038,194 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginTop: spacing.sm,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.lg,
-    elevation: 2,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    ...shadows.soft,
   },
   cardContent: {
     flexDirection: 'row',
+    paddingVertical: spacing.sm,
   },
   leftStripe: {
     width: 4,
-    backgroundColor: colors.primary.saffron,
-    borderTopLeftRadius: borderRadius.md,
-    borderBottomLeftRadius: borderRadius.md,
-    marginRight: spacing.sm,
+    backgroundColor: colors.primary.maroon,
+    borderRadius: borderRadius.full,
+    marginRight: spacing.md,
   },
   detailsSection: {
     flex: 1,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  titleChevron: {
+    marginTop: -2,
+    marginLeft: spacing.xs,
+  },
   locationText: {
     ...typography.titleSm,
-    color: colors.text.primary,
+    flex: 1,
+    color: colors.primary.maroon,
+    fontWeight: '700',
     marginBottom: spacing.xs,
+  },
+  detailSheet: {
+    backgroundColor: colors.background.warmWhite,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    overflow: 'hidden',
+    maxHeight: '90%',
+  },
+  detailHeader: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  detailHeaderTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  detailEyebrow: {
+    ...typography.micro,
+    color: colors.gold.light,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    fontWeight: '700',
+  },
+  detailClose: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailTitle: {
+    fontSize: 18,
+    lineHeight: 25,
+    fontWeight: '700',
+    color: colors.text.white,
+  },
+  detailSubRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: spacing.sm,
+  },
+  detailSub: {
+    ...typography.bodySm,
+    color: colors.gold.light,
+  },
+  detailBody: {},
+  detailBodyContent: {
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  detailBadgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  statRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  statTile: {
+    flex: 1,
+    backgroundColor: colors.background.parchment,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: colors.primary.maroon,
+  },
+  statLabel: {
+    ...typography.micro,
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginTop: 2,
+  },
+  detailList: {
+    backgroundColor: colors.background.warmWhite,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.gold as string,
+    gap: spacing.md,
+  },
+  detailRowLast: {
+    borderBottomWidth: 0,
+  },
+  detailLabel: {
+    ...typography.label,
+    color: colors.gold.dark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  detailValue: {
+    ...typography.body,
+    flexShrink: 1,
+    textAlign: 'right',
+    color: colors.primary.maroon,
+    fontWeight: '700',
+  },
+  detailBlock: {
+    marginTop: spacing.lg,
+    gap: spacing.sm,
+  },
+  detailSectionLabel: {
+    ...typography.label,
+    color: colors.gold.dark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  noteCard: {
+    backgroundColor: colors.background.parchment,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.status.warning,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+  },
+  noteText: {
+    ...typography.body,
+    color: colors.text.primary,
+    lineHeight: 21,
+  },
+  detailEditBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary.maroon,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.md + 2,
+    marginTop: spacing.xl,
+    ...shadows.maroonGlow,
+  },
+  detailEditBtnText: {
+    ...typography.title,
+    color: colors.text.white,
   },
   secondaryText: {
     ...typography.bodySm,
@@ -879,48 +1242,52 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: spacing.sm,
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
     marginTop: spacing.sm,
   },
-  metricText: {
-    ...typography.label,
-    color: colors.accent.peacock,
+  capacityStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.parchment,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.md,
+  },
+  capItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  capValue: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: colors.primary.maroon,
+  },
+  capLabel: {
+    ...typography.micro,
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginTop: 1,
+  },
+  capDivider: {
+    width: 1,
+    height: 26,
+    backgroundColor: colors.border.gold as string,
+  },
+  changeNoteRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: spacing.sm,
+  },
+  changeNoteIcon: {
+    marginTop: 2,
+    marginRight: spacing.xs,
   },
   changeNoteText: {
     ...typography.bodySm,
     color: colors.status.warning,
-    marginTop: spacing.sm,
-  },
-  periodChip: {
-    backgroundColor: colors.accent.peacock,
-    height: 24,
-  },
-  periodChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  appointmentChip: {
-    backgroundColor: colors.primary.saffron,
-    height: 24,
-  },
-  appointmentChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  urgentChip: {
-    backgroundColor: colors.status.warning,
-    height: 24,
-  },
-  urgentChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
+    flex: 1,
   },
   cardActionRow: {
     flexDirection: 'row',
@@ -936,15 +1303,16 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 13,
-    color: colors.accent.peacock,
-    fontWeight: '500',
+    color: colors.primary.maroon,
+    fontWeight: '600',
     marginLeft: -spacing.sm,
   },
   fab: {
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
+    ...shadows.maroonGlow,
   },
   modalOverlay: {
     flex: 1,
@@ -977,36 +1345,43 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text.primary,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
   translationSectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.primary.maroon,
-    marginTop: spacing.md,
+    fontSize: 13,
+    fontWeight: '800',
+    color: colors.gold.dark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: spacing.xl,
     marginBottom: spacing.sm,
+    paddingLeft: spacing.sm,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.gold.main,
   },
   textInput: {
-    backgroundColor: colors.background.parchment,
+    backgroundColor: colors.background.warmWhite,
     borderWidth: 1,
     borderColor: colors.border.gold,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm + 3,
     fontSize: 15,
     color: colors.text.primary,
+    marginBottom: spacing.sm,
   },
   textArea: {
-    minHeight: 60,
+    minHeight: 64,
     textAlignVertical: 'top',
   },
   choiceRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
   choiceChip: {
     borderWidth: 1,
@@ -1033,37 +1408,52 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    backgroundColor: colors.background.warmWhite,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.md,
+  },
+  switchLabel: {
+    flex: 1,
+    marginRight: spacing.md,
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.text.primary,
   },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: spacing.lg,
+    alignItems: 'center',
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
     gap: spacing.md,
   },
   cancelButton: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.full,
     borderWidth: 1,
-    borderColor: colors.text.secondary,
+    borderColor: colors.border.gold as string,
   },
   cancelButtonText: {
     color: colors.text.secondary,
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 15,
   },
   saveButton: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    minWidth: 100,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.full,
+    minWidth: 120,
     alignItems: 'center',
+    ...shadows.maroonGlow,
   },
   saveButtonText: {
     color: colors.text.white,
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 15,
   },
   disabledButton: {

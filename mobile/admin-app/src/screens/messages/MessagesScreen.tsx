@@ -21,8 +21,10 @@ import {
   AdminPill,
   AdminSectionHeader,
   AdminSurface,
+  Avatar,
+  Badge,
 } from '../../components/common';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, colors, shadows, spacing, typography } from '../../theme';
 
 type MessageFilter = 'all' | 'new' | 'in_review' | 'responded' | 'archived';
 
@@ -37,9 +39,16 @@ const STATUS_LABELS: Record<Exclude<MessageFilter, 'all'>, string> = {
 
 const STATUS_COLORS: Record<Exclude<MessageFilter, 'all'>, string> = {
   new: colors.primary.saffron,
-  in_review: colors.accent.peacock,
+  in_review: colors.gold.dark,
   responded: colors.status.success,
   archived: colors.text.secondary,
+};
+
+const STATUS_ICONS: Record<Exclude<MessageFilter, 'all'>, string> = {
+  new: 'email-open-outline',
+  in_review: 'progress-clock',
+  responded: 'reply-outline',
+  archived: 'archive-outline',
 };
 
 export function MessagesScreen() {
@@ -126,16 +135,22 @@ export function MessagesScreen() {
         sendResponse: Boolean(sendResponse && responseText.trim()),
       });
 
-      const updated = response.data as ContactMessage;
+      const updated = response.data as ContactMessage & { _emailSent?: boolean; _emailError?: string };
       setMessages((current) => current.map((item) => (item._id === updated._id ? updated : item)));
       setSelectedMessage(updated);
 
-      Alert.alert(
-        sendResponse && responseText.trim() ? 'Sent' : 'Saved',
-        sendResponse && responseText.trim()
-          ? 'Prayer response email has been sent.'
-          : 'Prayer request updated successfully.',
-      );
+      const triedToSend = Boolean(sendResponse && responseText.trim());
+      if (!triedToSend) {
+        Alert.alert('Saved', 'Prayer request updated successfully.');
+      } else if (updated._emailSent) {
+        Alert.alert('Reply sent', `The response email has been delivered to ${updated.email}.`);
+      } else {
+        Alert.alert(
+          'Saved — but email not sent',
+          updated._emailError ||
+            'The reply was saved, but the email could not be delivered. Check the Resend configuration.',
+        );
+      }
     } catch (error) {
       console.error('Error updating prayer request:', error);
       Alert.alert('Error', 'Unable to update this prayer request right now.');
@@ -167,7 +182,7 @@ export function MessagesScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading prayer requests...</Text>
       </View>
     );
@@ -182,8 +197,8 @@ export function MessagesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -198,7 +213,7 @@ export function MessagesScreen() {
             <View style={styles.metricGrid}>
               <AdminMetricCard label="All requests" value={counts.all || 0} icon="hands-pray" />
               <AdminMetricCard label="New" value={counts.new || 0} icon="email-open-outline" tone={colors.primary.saffron} />
-              <AdminMetricCard label="In review" value={counts.in_review || 0} icon="progress-clock" tone={colors.accent.peacock} />
+              <AdminMetricCard label="In review" value={counts.in_review || 0} icon="progress-clock" tone={colors.gold.dark} />
               <AdminMetricCard label="Responded" value={counts.responded || 0} icon="reply-outline" tone={colors.status.success} />
             </View>
             <AdminSectionHeader
@@ -230,24 +245,33 @@ export function MessagesScreen() {
             <TouchableOpacity activeOpacity={0.85} onPress={() => setSelectedMessage(item)}>
               <AdminSurface style={styles.card}>
                 <View style={styles.cardTopRow}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{item.fullName?.charAt(0)?.toUpperCase() || '?'}</Text>
-                  </View>
+                  <Avatar name={item.fullName} size={46} />
                   <View style={styles.messageCopy}>
-                    <Text style={styles.name}>{item.fullName}</Text>
+                    <Text style={styles.name} numberOfLines={1}>{item.fullName}</Text>
                     <Text style={styles.metaText} numberOfLines={1}>{item.email}</Text>
-                    {item.subject ? <Text style={styles.subject}>{item.subject}</Text> : null}
+                    {item.subject ? <Text style={styles.subject} numberOfLines={1}>{item.subject}</Text> : null}
                   </View>
-                  <View style={[styles.statusBadge, { backgroundColor: `${STATUS_COLORS[status]}18` }]}>
-                    <Text style={[styles.statusBadgeText, { color: STATUS_COLORS[status] }]}>
-                      {STATUS_LABELS[status]}
-                    </Text>
-                  </View>
+                  <Badge
+                    label={STATUS_LABELS[status]}
+                    tone={STATUS_COLORS[status]}
+                    variant="soft"
+                    icon={STATUS_ICONS[status] as never}
+                  />
                 </View>
                 <Text style={styles.preview} numberOfLines={3}>{item.message}</Text>
                 <View style={styles.footerRow}>
-                  <Text style={styles.metaText}>{formatDate(item.createdAt)}</Text>
-                  {item.assignedToName ? <Text style={styles.assignee}>Assigned: {item.assignedToName}</Text> : null}
+                  <View style={styles.footerMeta}>
+                    <Icon name="clock-outline" size={14} color={colors.text.secondary} />
+                    <Text style={styles.metaText} numberOfLines={1}>{formatDate(item.createdAt)}</Text>
+                  </View>
+                  {item.assignedToName ? (
+                    <Badge
+                      label={item.assignedToName}
+                      tone={colors.primary.maroon}
+                      variant="outline"
+                      icon="account-check-outline"
+                    />
+                  ) : null}
                 </View>
               </AdminSurface>
             </TouchableOpacity>
@@ -360,31 +384,23 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   filterRow: { gap: spacing.sm, paddingBottom: spacing.md, marginBottom: spacing.sm },
-  card: { marginBottom: spacing.md },
-  cardTopRow: { flexDirection: 'row', gap: spacing.sm },
-  avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: colors.accent.peacock,
-    alignItems: 'center',
-    justifyContent: 'center',
+  card: {
+    marginBottom: spacing.md,
+    borderRadius: borderRadius.xl,
+    backgroundColor: colors.background.warmWhite,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    padding: spacing.lg,
+    ...shadows.soft,
   },
-  avatarText: { color: colors.text.white, fontWeight: '700', fontSize: 18 },
+  cardTopRow: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center' },
   messageCopy: { flex: 1 },
   name: { ...typography.titleSm, color: colors.text.primary },
-  metaText: { ...typography.bodySm, color: colors.text.secondary },
+  metaText: { ...typography.bodySm, color: colors.text.secondary, flexShrink: 1 },
   subject: { marginTop: 2, color: colors.primary.maroon, fontWeight: '600' },
-  statusBadge: {
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    alignSelf: 'flex-start',
-  },
-  statusBadgeText: { ...typography.micro },
   preview: { ...typography.body, color: colors.text.primary, marginTop: spacing.md },
-  footerRow: { marginTop: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  assignee: { ...typography.label, color: colors.accent.peacock },
+  footerRow: { marginTop: spacing.md, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
+  footerMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1 },
   modalContainer: {
     backgroundColor: colors.background.warmWhite,
     margin: spacing.md,

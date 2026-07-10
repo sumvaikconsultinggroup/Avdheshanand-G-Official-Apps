@@ -16,13 +16,14 @@ export function AdminMetricCard({
   label,
   value,
   icon,
-  tone = colors.primary.saffron,
+  tone = colors.primary.maroon,
   meta,
   onPress,
 }: AdminMetricCardProps) {
   const content = (
     <View style={styles.card}>
-      <View style={[styles.iconWrap, { backgroundColor: `${tone}18` }]}>
+      <View style={[styles.accentBar, { backgroundColor: tone }]} />
+      <View style={[styles.iconWrap, { backgroundColor: `${tone}14`, borderColor: `${tone}2A` }]}>
         <Icon name={icon} size={20} color={tone} />
       </View>
       <Text style={styles.value}>{value}</Text>
@@ -49,17 +50,28 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     padding: spacing.md,
-    minHeight: 128,
+    paddingTop: spacing.lg,
+    minHeight: 132,
     borderWidth: 1,
     borderColor: colors.border.gold as string,
+    overflow: 'hidden',
     ...shadows.soft,
   },
+  accentBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    opacity: 0.9,
+  },
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,

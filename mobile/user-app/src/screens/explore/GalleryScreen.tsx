@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { GlimpseImage } from '../../types';
 
 const { width, height } = Dimensions.get('window');
@@ -24,6 +25,8 @@ const GAP = spacing.sm;
 const ITEM_WIDTH = (width - spacing.md * 2 - GAP) / COLUMN_COUNT;
 
 export function GalleryScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const navigation = useNavigation();
   const { t } = useTranslation();
   const [images, setImages] = useState<GlimpseImage[]>([]);
@@ -95,7 +98,7 @@ export function GalleryScreen() {
           ]}
         >
           <Image
-            source={{ uri: item.imageUrl }}
+            source={{ uri: item.image || item.imageUrl }}
             style={styles.galleryImage}
             resizeMode="cover"
           />
@@ -199,7 +202,7 @@ export function GalleryScreen() {
           {selectedIndex !== null && images[selectedIndex] && (
             <View style={styles.fullImageContainer}>
               <Image
-                source={{ uri: images[selectedIndex].imageUrl }}
+                source={{ uri: images[selectedIndex].image || images[selectedIndex].imageUrl }}
                 style={styles.fullImage}
                 resizeMode="contain"
               />
@@ -236,7 +239,7 @@ export function GalleryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

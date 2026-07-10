@@ -1,48 +1,33 @@
-import nodemailer from 'nodemailer';
+import { sendResendEmail } from '@/utils/resendMailer';
+
+/**
+ * Backwards-compatible email helper, now backed by Resend (was nodemailer).
+ * Keeps the original sendEmail(to, subject, text, html) signature and the
+ * { success, messageId } return shape so every existing caller works unchanged.
+ * All outgoing email now flows through RESEND_API_KEY (no EMAIL_/SMTP_ vars).
+ */
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 export async function sendEmail(to, subject, text, html) {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      debug: process.env.NODE_ENV === 'development',
-    });
+  const finalHtml =
+    html ||
+    `<pre style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.7;color:#4A0010;white-space:pre-wrap;">${escapeHtml(text)}</pre>`;
 
-    console.log('Email configuration:', {
-      service: process.env.EMAIL_SERVICE,
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      user: process.env.EMAIL_USER ? 'Set' : 'Not set',
-    });
+  const result = await sendResendEmail({
+    to,
+    subject,
+    html: finalHtml,
+    ...(text ? { text } : {}),
+  });
 
-    const mailOptions = {
-      from: {
-        name: process.env.EMAIL_FROM_NAME || 'SwamiG Dashboard',
-        address: process.env.EMAIL_USER || '',
-      },
-      to,
-      subject,
-      text,
-      ...(html && { html }), // Only include html if provided
-    };
-
-    console.log('Sending email to:', to);
-
-    // Send email
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
-
-    return {
-      success: true,
-      messageId: info.messageId,
-    };
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    throw error;
+  if (!result.success) {
+    throw new Error(result.error || 'Email could not be sent (Resend not configured)');
   }
+
+  return { success: true, messageId: result.id };
 }

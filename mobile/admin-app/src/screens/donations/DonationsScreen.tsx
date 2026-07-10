@@ -19,11 +19,12 @@ import {
   FAB,
   ActivityIndicator,
   ProgressBar,
-  Chip,
   IconButton,
   SegmentedButtons,
 } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors, spacing, borderRadius, shadows, gradients } from '../../theme';
+import { Badge, Avatar } from '../../components/common';
 import api from '../../services/api';
 import { DonationAnalytics, DonationCampaign, DonationRecord, LocalizedText } from '../../types';
 
@@ -444,24 +445,20 @@ export function DonationsScreen() {
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.cardHeader}>
+            <Avatar
+              name={getPrimaryLocalizedValue(item.titleTranslations, item.title)}
+              size={44}
+            />
             <Text style={styles.campaignTitle} numberOfLines={2}>
               {getPrimaryLocalizedValue(item.titleTranslations, item.title)}
             </Text>
             <View style={styles.cardActions}>
-              <Chip
-                style={[
-                  styles.statusChip,
-                  {
-                    backgroundColor: item.isActive
-                      ? colors.status.success
-                      : colors.text.secondary,
-                  },
-                ]}
-                textStyle={styles.statusChipText}
-                compact
-              >
-                {item.isActive ? 'Active' : 'Closed'}
-              </Chip>
+              <Badge
+                label={item.isActive ? 'Active' : 'Closed'}
+                tone={item.isActive ? colors.status.success : colors.text.secondary}
+                variant="soft"
+                dot
+              />
             </View>
           </View>
 
@@ -489,7 +486,15 @@ export function DonationsScreen() {
               <Text style={[styles.percentage, { color: getProgressColor(percentage) }]}>
                 {percentage}% Complete
               </Text>
-              <Text style={styles.donorsText}>{item.donors || 0} donors</Text>
+              <View style={styles.donorsRow}>
+                <MaterialCommunityIcons
+                  name="account-heart-outline"
+                  size={14}
+                  color={colors.primary.maroon}
+                  style={styles.donorsIcon}
+                />
+                <Text style={styles.donorsText}>{item.donors || 0} donors</Text>
+              </View>
             </View>
           </View>
 
@@ -498,7 +503,7 @@ export function DonationsScreen() {
               style={styles.actionButton}
               onPress={() => openEditModal(item)}
             >
-              <IconButton icon="pencil" iconColor={colors.accent.peacock} size={20} />
+              <IconButton icon="pencil" iconColor={colors.primary.maroon} size={20} />
               <Text style={styles.actionButtonText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -525,14 +530,38 @@ export function DonationsScreen() {
             {item.currency === 'INR' ? '\u20B9' : item.currency}{' '}
             {item.amount.toLocaleString('en-IN')}
           </Text>
-          <Text style={styles.recordMethod}>{item.method || 'N/A'}</Text>
+          <View style={styles.recordMetaRow}>
+            <MaterialCommunityIcons
+              name="credit-card-outline"
+              size={13}
+              color={colors.primary.maroon}
+              style={styles.recordMetaIcon}
+            />
+            <Text style={styles.recordMethod}>{item.method || 'N/A'}</Text>
+          </View>
           {item.email ? (
-            <Text style={styles.recordContact} numberOfLines={1}>
-              {item.email}
-            </Text>
+            <View style={styles.recordMetaRow}>
+              <MaterialCommunityIcons
+                name="email-outline"
+                size={13}
+                color={colors.text.secondary}
+                style={styles.recordMetaIcon}
+              />
+              <Text style={styles.recordContact} numberOfLines={1}>
+                {item.email}
+              </Text>
+            </View>
           ) : null}
           {item.contact ? (
-            <Text style={styles.recordContact}>{item.contact}</Text>
+            <View style={styles.recordMetaRow}>
+              <MaterialCommunityIcons
+                name="phone-outline"
+                size={13}
+                color={colors.text.secondary}
+                style={styles.recordMetaIcon}
+              />
+              <Text style={styles.recordContact}>{item.contact}</Text>
+            </View>
           ) : null}
           {item.description ? (
             <Text style={styles.recordDesc} numberOfLines={1}>
@@ -540,9 +569,17 @@ export function DonationsScreen() {
             </Text>
           ) : null}
           <View style={styles.receiptMetaBlock}>
-            <Text style={styles.receiptMetaTitle}>
-              {item.receiptNumber || 'Receipt pending'}
-            </Text>
+            <View style={styles.recordMetaRow}>
+              <MaterialCommunityIcons
+                name="receipt"
+                size={13}
+                color={colors.primary.maroon}
+                style={styles.recordMetaIcon}
+              />
+              <Text style={styles.receiptMetaTitle}>
+                {item.receiptNumber || 'Receipt pending'}
+              </Text>
+            </View>
             <Text style={styles.receiptMetaText}>
               Email: {item.receiptEmailSentAt ? new Date(item.receiptEmailSentAt).toLocaleDateString('en-IN') : 'Pending'}
             </Text>
@@ -552,13 +589,13 @@ export function DonationsScreen() {
           </View>
         </View>
         <View style={styles.recordRight}>
-          <Chip
-            style={[styles.recordStatusChip, { backgroundColor: getStatusColor(item.status) }]}
-            textStyle={styles.recordStatusText}
-            compact
-          >
-            {item.status}
-          </Chip>
+          <Badge
+            label={item.status}
+            tone={getStatusColor(item.status)}
+            variant="soft"
+            dot
+            style={styles.recordStatusBadge}
+          />
           <Text style={styles.recordDate}>{formatUnixDate(item.created)}</Text>
           <TouchableOpacity
             style={[
@@ -776,7 +813,7 @@ export function DonationsScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading campaigns...</Text>
       </View>
     );
@@ -809,8 +846,8 @@ export function DonationsScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={[colors.primary.saffron]}
-              tintColor={colors.primary.saffron}
+              colors={[colors.primary.maroon]}
+              tintColor={colors.primary.maroon}
             />
           }
           ListEmptyComponent={renderEmptyCampaigns}
@@ -818,7 +855,7 @@ export function DonationsScreen() {
         />
       ) : recordsLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.primary.saffron} />
+          <ActivityIndicator size="large" color={colors.primary.maroon} />
           <Text style={styles.loadingText}>Loading payment records...</Text>
         </View>
       ) : (
@@ -831,8 +868,8 @@ export function DonationsScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              colors={[colors.primary.saffron]}
-              tintColor={colors.primary.saffron}
+              colors={[colors.primary.maroon]}
+              tintColor={colors.primary.maroon}
             />
           }
           ListEmptyComponent={renderEmptyRecords}
@@ -1031,13 +1068,16 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 3,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    padding: spacing.xs,
+    ...shadows.soft,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: spacing.sm,
   },
   cardActions: {
@@ -1049,15 +1089,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text.primary,
     flex: 1,
-    marginRight: spacing.sm,
-  },
-  statusChip: {
-    height: 24,
-  },
-  statusChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
+    marginHorizontal: spacing.sm,
   },
   description: {
     fontSize: 13,
@@ -1102,9 +1134,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  donorsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  donorsIcon: {
+    marginRight: spacing.xs,
+  },
   donorsText: {
     fontSize: 12,
-    color: colors.accent.peacock,
+    color: colors.primary.maroon,
     fontWeight: '500',
   },
   cardActionRow: {
@@ -1121,17 +1160,28 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 13,
-    color: colors.accent.peacock,
+    color: colors.primary.maroon,
     fontWeight: '500',
     marginLeft: -spacing.sm,
   },
 
   // ── Record card ──
   recordCard: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 2,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    padding: spacing.xs,
+    ...shadows.soft,
+  },
+  recordMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  recordMetaIcon: {
+    marginRight: spacing.xs,
   },
   recordContent: {
     flexDirection: 'row',
@@ -1180,15 +1230,8 @@ const styles = StyleSheet.create({
   recordRight: {
     alignItems: 'flex-end',
   },
-  recordStatusChip: {
-    height: 22,
+  recordStatusBadge: {
     marginBottom: spacing.xs,
-  },
-  recordStatusText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-    textTransform: 'capitalize',
   },
   recordDate: {
     fontSize: 11,
@@ -1218,7 +1261,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
+    ...shadows.maroonGlow,
   },
 
   // ── Modal ──

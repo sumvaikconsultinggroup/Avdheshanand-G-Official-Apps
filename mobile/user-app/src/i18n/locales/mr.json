@@ -1,4 +1,14 @@
 {
+  "settings": {
+    "appearance": "अॅप प्राधान्ये",
+    "theme": {
+      "title": "थीम",
+      "subtitle": "अॅप कसा दिसतो ते निवडा",
+      "light": "लाइट",
+      "dark": "डार्क",
+      "system": "सिस्टम"
+    }
+  },
   "tabs": {
     "home": "मुख्यपृष्ठ",
     "explore": "शोधा",
@@ -8,30 +18,59 @@
   },
   "home": {
     "welcome": "हरी ओम",
-    "heroQuote": "\"The mind is everything. What you think, you become.\"",
-    "dailyQuote": "Daily Inspiration",
+    "heroQuote": "\"मन सर्वकाही आहे. तुम्ही जे विचार करता, ते तुम्ही होता.\"",
+    "dailyQuote": "दैनिक प्रेरणा",
     "upcomingEvents": "आगामी कार्यक्रम",
     "latestArticles": "नवीन लेख",
     "donationSpotlight": "एका हेतूसाठी समर्थन",
     "quickLinks": "झटपट दुवे",
-    "viewAll": "View All",
+    "viewAll": "सर्व पहा",
     "seeAll": "सर्व पहा",
-    "seeAllUpcomingEvents": "See all upcoming events",
-    "seeAllArticles": "See all articles",
-    "noUpcomingEvents": "No upcoming events",
-    "noArticlesAvailable": "No articles available",
+    "seeAllUpcomingEvents": "सर्व आगामी कार्यक्रम पहा",
+    "seeAllArticles": "सर्व लेख पहा",
+    "noUpcomingEvents": "कोणतेही आगामी कार्यक्रम नाहीत",
+    "noArticlesAvailable": "कोणतेही लेख उपलब्ध नाहीत",
     "quickLinksItems": {
-      "panchang": "Panchang",
-      "schedule": "Schedule",
-      "books": "Books",
-      "videos": "Videos",
-      "podcasts": "Podcasts",
-      "gallery": "Gallery",
-      "volunteer": "Volunteer"
+      "panchang": "पंचांग",
+      "schedule": "वेळापत्रक",
+      "books": "पुस्तके",
+      "videos": "व्हिडिओ",
+      "podcasts": "पॉडकास्ट",
+      "gallery": "गॅलरी",
+      "volunteer": "स्वयंसेवक"
     },
     "dailyVicharLabel": "आज का विचार",
     "languageHindi": "हिंदी",
-    "languageEnglish": "अंग्रेज़ी"
+    "languageEnglish": "अंग्रेज़ी",
+    "pathways": {
+      "title": "आध्यात्मिक मार्ग",
+      "subtitle": "टॅब बारच्या पलीकडे जाऊन संपूर्ण मिशन अनुभव घ्या.",
+      "aboutTitle": "स्वामी जी बद्दल",
+      "aboutSubtitle": "जीवन, परंपरा आणि आध्यात्मिक प्रवास",
+      "missionTitle": "मिशन आणि शिकवण",
+      "missionSubtitle": "मुख्य संदेश, सेवा आणि पोहोच",
+      "dikshaTitle": "मंत्र दीक्षा",
+      "dikshaSubtitle": "पवित्र मार्गदर्शन आणि नोंदणी मार्ग",
+      "writeTitle": "स्वामी जींना लिहा",
+      "writeSubtitle": "आश्रम कार्यालयाला एक मनापासून संदेश शेअर करा"
+    },
+    "teachings": {
+      "title": "मुख्य शिकवण",
+      "subtitle": "स्वामी जींच्या आध्यात्मिक भरावर आधारित दैनिक स्मरण.",
+      "oneTitle": "आंतरशिस्त",
+      "oneBody": "स्वयं-नियंत्रण, स्थिरता आणि उद्देशाची शुद्धता साधकाला शाश्वत शांतीसाठी तयार करतात.",
+      "twoTitle": "दैनिक जीवनातील ज्ञान",
+      "twoBody": "शास्त्रीय अंतर्दृष्टी तेव्हाच अर्थपूर्ण होते जेव्हा ती नम्रता, स्पष्टता आणि योग्य कृती आणते.",
+      "threeTitle": "साधने म्हणून सेवा",
+      "threeBody": "जेव्हा सेवा अहंकाराशिवाय दिली जाते, तेव्हा करुणा स्वतःच उपासनेचा एक प्रकार बनते."
+    },
+    "initiativesTitle": "मिशन उपक्रम",
+    "initiativesSubtitle": "विस्तृत मिशनमध्ये सेवा आणि पोहोच क्षेत्रे प्रतिबिंबित करतात.",
+    "initiatives": {
+      "one": "साधकांसाठी आध्यात्मिक शिक्षण, सत्संग आणि शास्त्राधारित मार्गदर्शन.",
+      "two": "सामाजिक उन्नती, काळजी आणि मदत कार्याला समर्थन देणारी मानवतावादी सेवा.",
+      "three": "सनातन मूल्यांवर आधारित सांस्कृतिक, पर्यावरणीय आणि समुदाय उपक्रम."
+    }
   },
   "explore": {
     "title": "शोधा",
@@ -52,13 +91,13 @@
   },
   "schedule": {
     "title": "कार्यक्रम",
-    "upcoming": "Upcoming",
-    "past": "Past",
-    "noEvents": "No scheduled events",
-    "registerNow": "Register Now",
-    "registered": "Registered",
-    "location": "Location",
-    "date": "Date",
+    "upcoming": "आगामी",
+    "past": "भूतकाळ",
+    "noEvents": "कोणतेही नियोजित कार्यक्रम नाहीत",
+    "registerNow": "आता नोंदणी करा",
+    "registered": "नोंदणीकृत",
+    "location": "स्थान",
+    "date": "तारीख",
     "ashram": "आश्रम",
     "capacityOpen": "उपलब्ध {{open}} / {{total}}",
     "updated": "अपडेटेड",
@@ -185,8 +224,8 @@
       "campaign": "अभियान",
       "reference": "भुगतान संदर्भ",
       "share": "इस सेवा को साझा करें",
-      "shareTitle": "मैंने AvdheshanandG Mission का समर्थन किया",
-      "shareText": "मैंने AvdheshanandG Mission के माध्यम से {{campaign}} हेतु {{amount}} अर्पित किए।"
+      "shareTitle": "मैंने Swami Avdheshanand G का समर्थन किया",
+      "shareText": "मैंने Swami Avdheshanand G के माध्यम से {{campaign}} हेतु {{amount}} अर्पित किए।"
     },
     "history": {
       "title": "दान इतिहास",
@@ -217,71 +256,75 @@
   },
   "profile": {
     "title": "प्रोफाइल",
-    "editProfile": "Edit Profile",
-    "myEvents": "My Events",
-    "settings": "Settings",
+    "editProfile": "प्रोफाइल संपादित करा",
+    "saveChanges": "बदल जतन करा",
+    "updateSuccess": "प्रोफाइल अद्यतनित",
+    "updateFailed": "प्रोफाइल अद्यतन करू शकत नाही",
+    "emailLocked": "ईमेल पत्ता बदलता येणार नाही",
+    "errors": {
+      "nameRequired": "नाव आवश्यक आहे",
+      "phoneInvalid": "वैध 10-अंकी फोन नंबर प्रविष्ट करा"
+    },
+    "myEvents": "माझी कार्यक्रम",
+    "settings": "सेटिंग्ज",
     "language": "भाषा",
-    "notifications": "Notifications",
-    "about": "About",
+    "notifications": "सूचना",
+    "about": "विषयी",
     "logout": "लॉग आउट",
-    "logoutConfirm": "Are you sure you want to logout?",
-    "loginPrompt": "Sign in to access your profile",
+    "logoutConfirm": "आपण खात्रीने लॉगआउट करू इच्छिता?",
+    "loginPrompt": "आपल्या प्रोफाइलमध्ये प्रवेश करण्यासाठी साइन इन करा",
     "login": "लॉगिन",
-    "register": "Register",
-    "devoteeFallback": "Devotee",
-    "featureComingSoon": "{{item}} will be available soon.",
-    "appTagline": "Hari Om",
+    "register": "नोंदणी",
+    "devoteeFallback": "भक्त",
+    "featureComingSoon": "{{item}} लवकरच उपलब्ध होईल.",
+    "appTagline": "हरी ओम",
     "stats": {
-      "registrations": "Registrations",
-      "donations": "Donations",
-      "bookings": "Bookings"
+      "registrations": "नोंदणी",
+      "donations": "दान",
+      "bookings": "बुकिंग"
     },
     "menu": {
       "registrations": {
-        "title": "My Registrations",
-        "subtitle": "Events and schedules you registered for"
+        "title": "माझी नोंदणी",
+        "subtitle": "आपण नोंदणी केलेले कार्यक्रम आणि वेळापत्रक"
       },
       "donations": {
-        "title": "Donation History",
-        "subtitle": "View your past donations"
+        "title": "दान इतिहास",
+        "subtitle": "आपले मागील दान पहा"
       },
       "bookings": {
-        "title": "My Bookings",
-        "subtitle": "Room and accommodation bookings"
+        "title": "माझी बुकिंग",
+        "subtitle": "खोली आणि निवास बुकिंग"
       },
       "settings": {
-        "subtitle": "App preferences and notifications"
+        "subtitle": "अॅप प्राधान्ये आणि सूचना"
       }
     }
   },
   "auth": {
-    "welcomeBack": "Welcome Back",
-    "spiritualGreeting": "Hari Om Tat Sat",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot Password?",
-    "signIn": "Sign In",
-    "noAccount": "Don't have an account?",
-    "register": "Register",
-    "createAccount": "Create Account",
-    "fullName": "Full Name",
-    "confirmPassword": "Confirm Password",
-    "alreadyHaveAccount": "Already have an account?",
-    "login": "Login",
-    "otpTitle": "Verify Your Email",
-    "otpSubtitle": "Enter the OTP sent to your email",
-    "verifyOtp": "Verify OTP",
-    "resendOtp": "Resend OTP",
-    "resetPassword": "Reset Password",
-    "sendResetLink": "Send Reset Link",
-    "backToLogin": "Back to Login",
-    "googleSignInComingSoon": "Google Sign-In (Coming Soon)",
-    "browseWithoutSignIn": "Browse without signing in",
-    "errors": {
-      "fillAllFields": "Please fill in all fields",
-      "loginFailedTitle": "Login Failed",
-      "invalidCredentials": "Invalid credentials"
-    },
+    "welcomeBack": "पुन्हा स्वागत आहे",
+    "spiritualGreeting": "हरी ओम तत सत",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "forgotPassword": "पासवर्ड विसरलात?",
+    "signIn": "साइन इन",
+    "noAccount": "खाते नाही?",
+    "register": "नोंदणी",
+    "createAccount": "खाते तयार करा",
+    "fullName": "पूर्ण नाव",
+    "confirmPassword": "पासवर्डची पुष्टी करा",
+    "alreadyHaveAccount": "आधीच खाते आहे?",
+    "login": "लॉगिन",
+    "otpTitle": "आपला ईमेल सत्यापित करा",
+    "otpSubtitle": "आपल्या ईमेलवर पाठवलेला ओटीपी प्रविष्ट करा",
+    "verifyOtp": "ओटीपी सत्यापित करा",
+    "resendOtp": "ओटीपी पुन्हा पाठवा",
+    "resetPassword": "पासवर्ड रीसेट करा",
+    "sendResetLink": "रीसेट लिंक पाठवा",
+    "backToLogin": "लॉगिनवर परत जा",
+    "googleSignInComingSoon": "Google साइन-इन (लवकरच येत आहे)",
+    "continueWithGoogle": "Google सह सुरू ठेवा",
+    "browseWithoutSignIn": "साइन इन न करता ब्राउझ करा",
     "registerFlow": {
       "subtitle": "हमारे आध्यात्मिक समुदाय से जुड़ें",
       "fullNameRequired": "पूरा नाम *",
@@ -342,37 +385,79 @@
       "errors": {
         "passwordMin": "पासवर्ड कम से कम 8 अक्षरों का होना चाहिए"
       }
+    },
+    "errors": {
+      "fillAllFields": "कृपया सर्व फील्ड भरा",
+      "loginFailedTitle": "लॉगिन अयशस्वी",
+      "invalidCredentials": "अवैध क्रेडेन्शियल्स"
     }
+  },
+  "onboarding": {
+    "brand": "Swami Avdheshanand G",
+    "brandTagline": "दिव्यतेच्या दिशेने",
+    "changeLanguage": "भाषा बदला",
+    "languageTitle": "तुमची भाषा निवडा",
+    "languageSubtitle": "तुम्ही हे नंतर कधीही अॅपमधून बदलू शकता.",
+    "welcomeTitle": "स्पष्टतेसह तुमची आध्यात्मिक यात्रा सुरू करा",
+    "welcomeSubtitle": "दैनिक पंचांग, स्वामीजींचे वेळापत्रक, ज्ञानविषयक सामग्री, सेवा संधी, आणि आश्रम अद्यतने एका शांत ठिकाणी.",
+    "getStarted": "सुरू करा",
+    "existingLogin": "आधीच वापरकर्ता? लॉगिन करा",
+    "continueAsGuest": "पाहुणा म्हणून सुरू ठेवा",
+    "footer": "सुरू ठेवल्याने, तुम्ही Swami Avdheshanand G कडून आदरणीय आणि वैयक्तिकृत आध्यात्मिक अनुभव प्राप्त करण्यास सहमत आहात.",
+    "slides": {
+      "panchangEyebrow": "दैनिक मार्गदर्शन",
+      "panchangTitle": "प्रत्येक दिवसाची सुरुवात पंचांग आणि पवित्र वेळेसह करा",
+      "panchangDescription": "तिथी, नक्षत्र, मुहूर्त, आणि शहर-विशिष्ट आध्यात्मिक वेळेसह संरेखित रहा.",
+      "scheduleEyebrow": "जोडलेले रहा",
+      "scheduleTitle": "स्वामीजींचे नवीनतम वेळापत्रक आणि दर्शन अद्यतने अनुसरा",
+      "scheduleDescription": "आश्रम भेटी, सार्वजनिक कार्यक्रम, आणि मंजूर अपॉइंटमेंट विंडोज एका ठिकाणी पहा.",
+      "wisdomEyebrow": "ऐका आणि शिका",
+      "wisdomTitle": "स्वामीजींच्या शिकवणीसह वाचा, पहा, आणि चिंतन करा",
+      "wisdomDescription": "तुमच्या दैनिक साधनेसाठी लेख, पुस्तके, पॉडकास्ट, आणि व्हिडिओ मालिका प्रवेश करा.",
+      "sevaEyebrow": "सेवा अर्पण करा",
+      "sevaTitle": "सेवा समर्थन करा, स्वयंसेवा करा, आणि मिशनचा भाग रहा",
+      "sevaDescription": "सुरक्षितपणे दान करा, आश्रम उपक्रम शोधा, आणि महत्त्वाच्या कार्याच्या जवळ रहा."
+    },
+    "permissionsEyebrow": "माहितीपूर्ण रहा",
+    "notificationsTitle": "पवित्र स्मरणपत्रे आणि वेळेवर अद्यतने प्राप्त करा",
+    "notificationsSubtitle": "दैनिक पंचांग, महत्त्वाच्या दर्शन अद्यतनांबद्दल, आणि विशेष सत्संग क्षणांबद्दल आम्ही तुम्हाला सौम्यपणे स्मरण करून देऊ.",
+    "notificationsBenefits": {
+      "panchang": "दैनिक पंचांग आणि ब्रह्म मुहूर्त स्मरणपत्रे",
+      "schedule": "स्वामीजींच्या वेळापत्रकातील बदल आणि दर्शन अलर्ट",
+      "satsang": "विशेष सत्संग, कार्यक्रम, आणि आश्रम अद्यतन सूचना"
+    },
+    "enableNotifications": "होय, मला अद्यतनित ठेवा",
+    "maybeLater": "कदाचित नंतर",
+    "locationEyebrow": "पंचांग वैयक्तिक करा",
+    "locationTitle": "अधिक अचूक पंचांग मार्गदर्शनासाठी तुमचे स्थान वापरा",
+    "locationSubtitle": "तुमचे शहर आम्हाला सूर्योदय, मुहूर्त, आणि सणाच्या वेळेसह अधिक अचूकता दर्शविण्यास मदत करते.",
+    "locationBenefits": {
+      "panchang": "तुमच्या वर्तमान शहरासाठी अधिक अचूक पंचांग",
+      "city": "शहर-आधारित वेळापत्रक आणि आश्रम मार्गदर्शन जलद"
+    },
+    "useMyLocation": "माझे स्थान वापरा",
+    "chooseLater": "शहर नंतर निवडा",
+    "locationErrorTitle": "स्थान शोधण्यात अक्षम",
+    "locationErrorMessage": "आम्ही सध्या तुमचे स्थान प्रवेश करू शकत नाही. तुम्ही नंतर पंचांगमधून तुमचे शहर निवडू शकता."
   },
   "common": {
     "loading": "लोड होत आहे...",
-    "error": "Error",
+    "error": "त्रुटी",
+    "comingSoon": "जल्द आ रहा है",
     "retry": "पुन्हा प्रयत्न करा",
     "cancel": "रद्द करा",
-    "or": "or",
+    "or": "किंवा",
     "changeLanguageTo": "{{language}} भाषेत बदला",
     "save": "जतन करा",
-    "readMore": "Read More",
-    "viewAll": "View All",
-    "buyOnAmazon": "Buy on Amazon",
+    "readMore": "अधिक वाचा",
+    "viewAll": "सर्व पहा",
+    "buyOnAmazon": "अमेझॉनवर खरेदी करा",
     "somethingWentWrong": "काहीतरी चुकले",
     "tryAgain": "पुन्हा प्रयत्न करा",
-    "comingSoon": "जल्द आ रहा है",
     "ok": "ठीक है",
     "goBack": "वापस जाएँ",
-    "unexpectedError": "एक अनपेक्षित त्रुटि हुई है"
-  },
-  "profileLogin": {
-    "title": "स्वागत आहे, साधका",
-    "subtitle": "तुमच्या आध्यात्मिक प्रवासासाठी आणि समुदायाशी जोडण्यासाठी साइन इन करा.",
-    "benefits": {
-      "savedTeachings": "Save your favorite teachings",
-      "registerEvents": "Register for upcoming events",
-      "trackContributions": "Track your seva contributions",
-      "personalizedNotifications": "Get personalized notifications"
-    },
-    "quote": "\"हजार मैलांचा प्रवास एका पावलाने सुरू होतो\"",
-    "quoteAuthor": "— लाओ त्सू"
+    "unexpectedError": "एक अनपेक्षित त्रुटि हुई है",
+    "networkError": "सर्व्हरशी संपर्क साधता येत नाही. कृपया तुमचे इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा."
   },
   "chat": {
     "headerTitle": "स्वामी जी से पूछें",
@@ -394,6 +479,18 @@
     "noStreamSubtitle": "निर्धारित सत्संग समय में फिर देखें",
     "upcomingStreams": "आगामी स्ट्रीम"
   },
+  "profileLogin": {
+    "title": "स्वागत आहे, साधका",
+    "subtitle": "तुमच्या आध्यात्मिक प्रवासासाठी आणि समुदायाशी जोडण्यासाठी साइन इन करा.",
+    "benefits": {
+      "savedTeachings": "तुमच्या आवडत्या शिकवणी जतन करा",
+      "registerEvents": "आगामी कार्यक्रमांसाठी नोंदणी करा",
+      "trackContributions": "तुमच्या सेवा योगदानाचा मागोवा घ्या",
+      "personalizedNotifications": "वैयक्तिकृत सूचना मिळवा"
+    },
+    "quote": "\"हजार मैलांचा प्रवास एका पावलाने सुरू होतो\"",
+    "quoteAuthor": "— लाओ त्सू"
+  },
   "contact": {
     "title": "संपर्क करें",
     "introTitle": "संपर्क में रहें",
@@ -413,7 +510,9 @@
     "placeholders": {
       "name": "अपना नाम दर्ज करें",
       "email": "your@email.com",
-      "message": "अपना संदेश यहाँ लिखें..."
+      "message": "अपना संदेश यहाँ लिखें...",
+      "subject": "तुम्हाला कोणत्या विषयावर लिहायचे आहे?",
+      "writeToSwami": "स्वामी जी किंवा आश्रम कार्यालयासाठी तुमचा संदेश लिहा..."
     },
     "errors": {
       "nameRequired": "नाम आवश्यक है",
@@ -421,8 +520,12 @@
       "emailValid": "कृपया मान्य ईमेल दर्ज करें",
       "messageRequired": "संदेश आवश्यक है",
       "messageMin": "संदेश कम से कम 10 अक्षरों का होना चाहिए",
-      "submitFailed": "संदेश भेजा नहीं जा सका"
-    }
+      "submitFailed": "संदेश भेजा नहीं जा सका",
+      "subjectRequired": "कृपया एक विषय प्रविष्ट करा"
+    },
+    "subject": "विषय",
+    "writeToSwamiTitle": "स्वामी जींना लिहा",
+    "writeToSwamiSubtitle": "तुमचा संदेश, आशीर्वाद विनंती किंवा आध्यात्मिक नोट आश्रम कार्यालयासह शेअर करा जेणेकरून ते काळजीपूर्वक प्राप्त होईल."
   },
   "panchangNotifications": {
     "headerTitle": "सूचना सेटिंग्स",
@@ -483,10 +586,13 @@
       "genre": "श्रेणी",
       "aboutThisBook": "इस पुस्तक के बारे में",
       "quote": "पुस्तकें सभ्यता की वाहक हैं। पुस्तकों के बिना इतिहास मौन हो जाता है।",
-      "purchaseBook": "पुस्तक खरीदें",
-      "currentlyUnavailable": "वर्तमान में उपलब्ध नहीं",
-      "purchaseRequestTitle": "क्रय अनुरोध",
-      "purchaseRequestMessage": "\"{{title}}\" में आपकी रुचि के लिए धन्यवाद।\n\nहमारी टीम आपकी खरीद पूर्ण कराने के लिए शीघ्र संपर्क करेगी। यह पावन ज्ञान आपके मार्ग को आलोकित करे।"
+      "buyNow": "आता खरेदी करा",
+      "linkUnavailable": "खरेदी लिंक उपलब्ध नाही",
+      "openLinkFailed": "सध्या बाह्य पुस्तक लिंक उघडता येत नाही.",
+      "externalSellerAvailable": "बाह्य विक्रेता लिंक उपलब्ध",
+      "purchaseNoticeTitle": "खरेदी सूचना",
+      "externalSellerNoticeShort": "Swami Avdheshanand G फक्त या पुस्तकांचे आणि त्यांच्या बाह्य खरेदी लिंक प्रदर्शित करते. विक्री आणि पूर्तता संबंधित विक्रेता किंवा बाजारपेठेनेच हाताळली जाते.",
+      "externalSellerNotice": "Swami Avdheshanand G ही पुस्तके थेट विकत नाही, पूर्ण करत नाही किंवा वितरित करत नाही. कोणतीही खरेदी संबंधित तृतीय-पक्ष विक्रेता, प्रकाशक किंवा बाजारपेठेसह पूर्ण केली जाते, जी किंमत, उपलब्धता, शिपिंग, परतावा आणि ग्राहक समर्थनासाठी पूर्णपणे जबाबदार राहते."
     },
     "podcast": {
       "title": "पॉडकास्ट",
@@ -615,5 +721,176 @@
         "monthLoadFailed": "मासिक लाइव पंचांग डेटा लोड नहीं हो सका। कृपया बैकएंड कनेक्शन जांचें।"
       }
     }
+  },
+  "appDrawer": {
+    "openMenu": "अॅप मेनू उघडा",
+    "eyebrow": "Swami Avdheshanand G",
+    "title": "मिशन मार्गदर्शक",
+    "subtitle": "एकाच ठिकाणी व्यापक आध्यात्मिक प्रवास, शिकवणी, कायदेशीर पृष्ठे आणि सेवा मार्ग ब्राउझ करा.",
+    "sections": {
+      "browse": "ब्राउझ करा",
+      "mission": "मिशन",
+      "policies": "धोरणे"
+    },
+    "items": {
+      "aboutSwami": "स्वामी जी बद्दल",
+      "missionTeachings": "मिशन आणि शिकवणी",
+      "mantraDiksha": "मंत्र दीक्षा",
+      "writeToSwami": "स्वामी जींना लिहा",
+      "privacy": "गोपनीयता धोरण",
+      "terms": "सेवेच्या अटी"
+    },
+    "footerTitle": "शांततेने अन्वेषण करण्याचा मार्ग",
+    "footerText": "मोबाइल अॅप आता वेबसाइटच्या विश्वास आणि संदर्भ स्तराचे अधिक प्रतिबिंबित करतो जेणेकरून भक्त मिशन समजू शकतील, फक्त सामग्रीचा उपभोग घेऊ शकतील."
+  },
+  "aboutSwami": {
+    "eyebrow": "आध्यात्मिक वारसा",
+    "title": "स्वामी जी बद्दल",
+    "subtitle": "तपस्या, परंपरा, सेवा आणि करुणामय आध्यात्मिक नेतृत्वात रुजलेले जीवन.",
+    "heroTitle": "प्राचीन परंपरेत रुजलेला आधुनिक आध्यात्मिक मार्गदर्शक",
+    "heroText": "स्वामी अवधेशानंद गिरी जी महाराज वेदांतिक ज्ञान, शिस्तबद्ध साधना आणि निःस्वार्थ सेवेमध्ये सततता दर्शवतात. त्यांचा प्रवास संन्यास, शास्त्रीय खोली आणि समाजासाठी सक्रिय काळजी एकत्र करतो.",
+    "biographyTitle": "जीवन प्रवास",
+    "biographySubtitle": "जगासाठी त्यांच्या आध्यात्मिक मार्ग आणि जबाबदारीला आकार देणारे प्रमुख क्षण.",
+    "milestones": {
+      "early": {
+        "title": "लवकरची आध्यात्मिक प्रवृत्ती",
+        "description": "लहानपणापासून स्वामी जींनी असामान्य अंतर्मुखता, शिस्त आणि आध्यात्मिक जीवनाकडे आकर्षण दाखवले."
+      },
+      "himalaya": {
+        "title": "हिमालयाची यात्रा",
+        "description": "त्यांनी तपस्या, चिंतन आणि शास्त्रांचा अभ्यास स्वीकारला, जगाच्या आरामाच्या पलीकडे सत्य शोधण्यासाठी."
+      },
+      "lineage": {
+        "title": "संन्यास आणि परंपरा",
+        "description": "त्यांनी पवित्र जुना आखाडा परंपरेत संन्यास दीक्षा घेतली आणि एक आदरणीय आध्यात्मिक नेता म्हणून उदयास आले."
+      },
+      "global": {
+        "title": "वैश्विक आध्यात्मिक नेतृत्व",
+        "description": "आज ते भारतात आणि परदेशात साधकांना ज्ञान, करुणा आणि स्थिर कृतीद्वारे मार्गदर्शन करतात."
+      }
+    },
+    "recognitionsTitle": "मान्यता आणि प्रभाव",
+    "recognitionsSubtitle": "स्वामी जींनी आध्यात्मिक आणि सार्वजनिक जीवनात मिळवलेल्या व्यापक सन्मानाचे काही चिन्हे.",
+    "recognitions": {
+      "one": "स्पष्टता आणि करुणेसह सनातन धर्माच्या प्रगतीसाठी जागतिक स्तरावर मान्यता प्राप्त.",
+      "two": "आध्यात्मिक साहित्य, प्रवचन आणि सार्वजनिक विचारांसाठी सन्मानित.",
+      "three": "आखाडे, संस्था आणि समुदायांमध्ये सिध्दांतशील नेतृत्वासाठी आदर प्राप्त.",
+      "four": "शास्त्रीय ज्ञानाचे सेवा, शिक्षण आणि सामाजिक उन्नतीसह एकत्रीकरणासाठी प्रसिद्ध."
+    },
+    "thoughtsTitle": "मार्गदर्शक विचार",
+    "thoughtsSubtitle": "स्वामी जींच्या संदेशात साधकांसाठी वारंवार येणारे विषय.",
+    "thoughts": {
+      "one": "आपण दिव्य महासागरात विलीन होण्यासाठी आतुर लाटा आहोत.",
+      "two": "शिस्त, संयम आणि नम्रता खऱ्या शांततेचा मार्ग उघडतात.",
+      "three": "सेवा, स्मरण आणि योग्य जीवनद्वारे, दिव्यता सर्वत्र प्रकट होते."
+    },
+    "cta": "स्वामी जींना लिहा"
+  },
+  "missionScreen": {
+    "eyebrow": "मिशन",
+    "title": "मिशन आणि शिकवण",
+    "subtitle": "मिशनच्या दृष्टीकोन, मूल्ये आणि सेवा-केंद्रित अभिव्यक्तीचा व्यापक दृष्टिकोन.",
+    "teachingsTitle": "शिक्षणाची दिशा",
+    "teachingsSubtitle": "मिशन कसे ज्ञानाचे जीवनात मार्गदर्शनात रूपांतर करते.",
+    "teachings": {
+      "one": {
+        "title": "वेदांतिक अंतर्दृष्टी",
+        "description": "शिक्षण एकत्व, आत्म-जागरूकता, शिस्तबद्ध जीवन आणि प्रत्यक्ष अनुभवावर आधारित भक्तीवर परत येतात."
+      },
+      "two": {
+        "title": "ध्यान साधना",
+        "description": "मौन, मंत्र, प्रार्थना आणि चिंतनशील शिस्त अंतर्गत जीवन अधिक खोल करण्याचे व्यावहारिक मार्ग म्हणून दिले जातात."
+      },
+      "three": {
+        "title": "सेवा आणि जबाबदारी",
+        "description": "मिशन निःस्वार्थ सेवा आध्यात्मिक परिपक्वता आणि करुणेची नैसर्गिक अभिव्यक्ती मानते."
+      }
+    },
+    "initiativesTitle": "उपक्रम",
+    "initiativesSubtitle": "समाजात मिशन नेणारे कार्य.",
+    "initiatives": {
+      "one": "आध्यात्मिक प्रवचन, सत्संग आणि सर्व वयोगटातील साधकांसाठी मार्गदर्शन.",
+      "two": "शैक्षणिक, मानवतावादी आणि समुदायाभिमुख पोहोचद्वारे सामाजिक उन्नती.",
+      "three": "पुस्तके, माध्यमे आणि आध्यात्मिक कार्यक्रमांद्वारे मूल्य-आधारित जीवनासाठी समर्थन.",
+      "four": "पर्यावरणीय जागरूकता, धार्मिक संस्कृती आणि करुणामय सेवेला प्रोत्साहन."
+    },
+    "presenceTitle": "वैश्विक उपस्थिती",
+    "presenceSubtitle": "मिशनची उपस्थिती प्रवास, कार्यक्रम आणि डिजिटल प्लॅटफॉर्मद्वारे भक्तांपर्यंत पोहोचत राहते.",
+    "presence": {
+      "one": "हरिद्वार आणि संबंधित आध्यात्मिक ठिकाणी केंद्रित प्रमुख आश्रम क्रियाकलाप.",
+      "two": "कार्यक्रम, प्रवचन आणि माध्यमांद्वारे नियमित पोहोच, जे भारतभर भक्तांपर्यंत पोहोचते.",
+      "three": "लेख, पुस्तके, व्हिडिओ, थेट सत्रे आणि मिशन अद्यतनांद्वारे वाढती डिजिटल उपस्थिती."
+    }
+  },
+  "legal": {
+    "policyEyebrow": "धोरण",
+    "lastUpdated": "शेवटचे अद्यतन: ४ एप्रिल, २०२६",
+    "effectiveDate": "प्रभावी तारीख: ४ एप्रिल, २०२६",
+    "privacy": {
+      "title": "गोपनीयता धोरण",
+      "subtitle": "मिशनच्या डिजिटल उत्पादनांमध्ये माहिती कशी गोळा, संरक्षित आणि वापरली जाते.",
+      "sections": {
+        "collect": {
+          "title": "आम्ही गोळा करतो ती माहिती",
+          "body": "आम्ही तुम्ही थेट दिलेली माहिती गोळा करतो, ज्यामध्ये संपर्क तपशील, नोंदणी, स्वयंसेवक सबमिशन आणि तुमच्या विनंत्या सुरक्षितपणे प्रक्रिया करण्यासाठी आवश्यक देणगी तपशील समाविष्ट आहेत."
+        },
+        "use": {
+          "title": "माहितीचा वापर कसा करतो",
+          "body": "आम्ही तुमची माहिती सेवा व्यवस्थापित करण्यासाठी, अद्यतने संवाद साधण्यासाठी, वापरकर्ता अनुभव सुधारण्यासाठी, मिशन ऑपरेशन्सला समर्थन देण्यासाठी आणि सुरक्षा आणि फसवणूक प्रतिबंध नियंत्रण राखण्यासाठी वापरतो."
+        },
+        "share": {
+          "title": "डेटा शेअरिंग",
+          "body": "आम्ही वैयक्तिक माहिती विकत नाही. सुरक्षित होस्टिंग, संवाद, पेमेंट किंवा विश्लेषणासाठी विश्वसनीय प्रदात्यांसोबत मर्यादित माहिती योग्य संरक्षणाखाली शेअर केली जाऊ शकते."
+        },
+        "choices": {
+          "title": "तुमचे पर्याय",
+          "body": "कायदेशीर परवानगी असल्यास तुम्ही वैयक्तिक डेटाची दुरुस्ती किंवा हटविण्याची विनंती करू शकता. अशा विनंत्यांसाठी, कृपया प्लॅटफॉर्मद्वारे मिशनशी संपर्क साधा."
+        }
+      }
+    },
+    "terms": {
+      "title": "सेवेच्या अटी",
+      "subtitle": "AvdheshanandG मिशनच्या डिजिटल प्लॅटफॉर्म्सचा वापर करण्याच्या अटी आणि जबाबदाऱ्या.",
+      "sections": {
+        "use": {
+          "title": "प्लॅटफॉर्मचा वापर",
+          "body": "प्लॅटफॉर्मचा वापर करून, तुम्ही कायदेशीर, आदरपूर्वक आणि गैरवापर, हानिकारक व्यत्यय किंवा अनधिकृत प्रवेश न करण्याचे मान्य करता."
+        },
+        "content": {
+          "title": "सामग्री आणि उपलब्धता",
+          "body": "आम्ही माहिती अचूक ठेवण्यासाठी आणि सेवा उपलब्ध ठेवण्यासाठी काम करतो, जरी वैशिष्ट्ये विकसित, थांबवली किंवा देखभाल किंवा ऑपरेशनल अद्यतनांदरम्यान बदलली जाऊ शकतात."
+        },
+        "donations": {
+          "title": "देणग्या आणि नोंदणी",
+          "body": "देणगी प्रक्रिया, नोंदणी आणि काही संबंधित सेवा तृतीय-पक्ष प्रदात्यांचा समावेश करू शकतात. वापरकर्त्यांनी अचूक माहिती सबमिट करण्याची आणि पूर्ण करण्यापूर्वी तपशील पुनरावलोकन करण्याची जबाबदारी आहे."
+        },
+        "liability": {
+          "title": "जबाबदारीची मर्यादा",
+          "body": "कायद्याने परवानगी दिलेल्या मर्यादेपर्यंत, प्लॅटफॉर्म 'जैसे आहे' आधारावर प्रदान केला जातो, अखंड उपलब्धतेची हमी नाही आणि अप्रत्यक्ष किंवा परिणामी नुकसानीसाठी जबाबदारी मर्यादित आहे."
+        }
+      }
+    }
+  },
+  "mantraDikshaScreen": {
+    "eyebrow": "पवित्र मार्ग",
+    "title": "मंत्र दीक्षा नोंदणी",
+    "subtitle": "प्रक्रियेचे महत्त्व समजून घ्या आणि आश्रम कार्यालयाच्या मार्गदर्शनाखाली तुमची नोंदणी सुरू करा.",
+    "introTitle": "एक पवित्र बांधिलकी, साधा फॉर्म नाही",
+    "introText": "मंत्र दीक्षा आदर, तयारी आणि अंतर्गत प्रामाणिकतेने घेतली जाते. हा स्क्रीन तुमच्या नोंदणी प्रवासाची सुरुवात आहे जेणेकरून आश्रम टीम तुम्हाला योग्य मार्गदर्शन करू शकेल.",
+    "readinessTitle": "सुरू करण्यापूर्वी",
+    "readinessSubtitle": "भक्तांनी पुढे जाण्यापूर्वी मनात ठेवाव्या अशा काही अपेक्षा.",
+    "readiness": {
+      "one": "विश्वास, नम्रता आणि हेतूच्या गांभीर्याने प्रक्रियेचा सामना करा.",
+      "two": "आवश्यकतेनुसार ओळख तपशील आणि समर्थन कागदपत्रे सामायिक करण्यास तयार रहा.",
+      "three": "अंतिम प्रक्रिया शेड्युलिंग, पुनरावलोकन आणि आश्रमाच्या बाजूने मार्गदर्शन समाविष्ट करू शकते.",
+      "four": "हा मार्ग शिस्त आणि सरावासाठी तयार असलेल्या प्रामाणिक साधकांसाठी आहे."
+    },
+    "registrationTitle": "नोंदणी मार्गदर्शन",
+    "registrationSubtitle": "मोबाइल प्रवास सध्या कसा कार्य करतो.",
+    "registrationText": "आश्रम कार्यालय पूर्ण नोंदणी प्रक्रिया, कागदपत्र आवश्यकता आणि पुढील पायऱ्यांचे मार्गदर्शन करेल. संभाषण सुरू करण्यासाठी आणि औपचारिक अर्जासाठी दिशा मिळवण्यासाठी खालील बटण वापरा.",
+    "cta": "नोंदणी मार्गदर्शन सुरू करा",
+    "contactTitle": "मंत्र दीक्षा नोंदणी",
+    "contactSubtitle": "मंत्र दीक्षा नोंदणी प्रक्रिया सुरू करण्याचा तुमचा हेतू सामायिक करा. आवश्यक पायऱ्या आणि कागदपत्रांसाठी आश्रम कार्यालय मार्गदर्शन करेल.",
+    "contactPlaceholder": "कृपया मंत्र दीक्षा नोंदणीसाठी तुमचा हेतू, पार्श्वभूमी आणि कोणतेही संबंधित तपशील सामायिक करा..."
   }
 }

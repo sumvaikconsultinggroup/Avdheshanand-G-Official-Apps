@@ -1,8 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useMemo } from 'react';
 import { LANGUAGE_OPTIONS, LanguageCode, translations } from './translations';
-
-const STORAGE_KEY = 'admin_app_language';
 
 interface I18nContextValue {
   language: LanguageCode;
@@ -33,47 +30,23 @@ function interpolate(template: string, params?: Record<string, string | number>)
   });
 }
 
+// The admin app is English-only — language switching has been removed.
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>('en');
-
-  useEffect(() => {
-    const loadLanguage = async () => {
-      const saved = await AsyncStorage.getItem(STORAGE_KEY);
-      if (saved && saved in translations) {
-        setLanguageState(saved as LanguageCode);
-        return;
-      }
-
-      const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-      const code = locale.split('-')[0] as LanguageCode;
-      if (code in translations) {
-        setLanguageState(code);
-      }
-    };
-    loadLanguage().catch(() => {});
-  }, []);
-
-  const setLanguage = async (nextLanguage: LanguageCode) => {
-    setLanguageState(nextLanguage);
-    await AsyncStorage.setItem(STORAGE_KEY, nextLanguage);
-  };
-
   const value = useMemo<I18nContextValue>(() => {
+    const language: LanguageCode = 'en';
     const t = (key: string, params?: Record<string, string | number>) => {
-      const template =
-        resolveKey(translations[language], key) ||
-        resolveKey(translations.en, key) ||
-        key;
+      const template = resolveKey(translations.en, key) || key;
       return interpolate(template, params);
     };
 
     return {
       language,
-      setLanguage,
+      // no-op kept for interface compatibility; the app stays in English.
+      setLanguage: async () => {},
       t,
       languageOptions: LANGUAGE_OPTIONS,
     };
-  }, [language]);
+  }, []);
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }

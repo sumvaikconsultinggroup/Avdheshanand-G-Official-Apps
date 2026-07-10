@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Volunteer, { IVolunteer } from '@/models/Volunteer';
 import { connectDB } from '@/lib/mongodb';
-import { sendEmail } from '@/utils/sendEmail';
+import { sendResendEmail, buildVolunteerConfirmationEmail } from '@/utils/resendMailer';
 import { v2 as cloudinary } from 'cloudinary';
 
 type ApiResponse = {
@@ -120,77 +120,104 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
   try {
     await connectDB();
 
-    const formData = await req.formData();
-
-    console.log('Form Data:', formData);
-    // Extract file if present
-    const profileFile = formData.get('profile') as File | null;
+    const contentType = req.headers.get('content-type') || '';
     let profileUrl: string | undefined;
+    const toArray = (value: unknown): string[] =>
+      Array.isArray(value) ? value.map(String) : value ? [String(value)] : [];
 
-    // Upload profile to Cloudinary if provided
-    if (profileFile && profileFile.size > 0) {
-      // Validate file size (e.g., max 5MB)
-      if (profileFile.size > 5 * 1024 * 1024) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'Profile file size must be less than 5MB',
-          },
-          { status: 400 }
-        );
-      }
-
-      // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-      if (!allowedTypes.includes(profileFile.type)) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'Profile must be an image (JPG, PNG, WEBP) or PDF file',
-          },
-          { status: 400 }
-        );
-      }
-
-      try {
-        profileUrl = await uploadToCloudinary(profileFile);
-      } catch (uploadError) {
-        console.error('Cloudinary upload error:', uploadError);
-        return NextResponse.json(
-          {
-            success: false,
-            message: 'Failed to upload profile file',
-          },
-          { status: 500 }
-        );
-      }
-    }
-
-    // Extract other form data
-    const data = {
-      fullName: formData.get('fullName') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      age: formData.get('age') as string,
-      occupationType: formData.get('occupationType') as string,
-      occupation: formData.get('occupation') as string,
-      availability: JSON.parse(formData.get('availability') as string || '[]'),
-      availableFrom: formData.get('availableFrom') as string,
-      availableUntil: formData.get('availableUntil') as string,
-      skills: JSON.parse(formData.get('skills') as string || '[]'),
-      motivation: formData.get('motivation') as string,
-      experience: formData.get('experience') as string,
-      consent: formData.get('consent') === 'true',
-      profile: profileUrl,
-      city: formData.get('city') as string,
-      state: formData.get('state') as string,
-      country: formData.get('country') as string,
-      zip: formData.get('zip') as string,
-      maritalStatus: formData.get('maritalStatus') as string,
-      gender: formData.get('gender') as string,
-      highestEducation: formData.get('highestEducation') as string,
-      hoursAvailable: formData.get('hoursAvailable') as string | null,
+    let data: {
+      fullName: string; email: string; phone: string; age: string;
+      occupationType: string; occupation: string; availability: string[];
+      availableFrom: string; availableUntil: string; skills: string[];
+      motivation: string; experience: string; consent: boolean;
+      profile?: string; city: string; state: string; country: string; zip: string;
+      maritalStatus: string; gender: string; highestEducation: string;
+      hoursAvailable: string | null;
     };
+
+    if (contentType.includes('application/json')) {
+      // Mobile app submits JSON (no profile upload). Map the app's fields and
+      // accept arrays directly. `name`/`message` are accepted as aliases.
+      const body = await req.json();
+      data = {
+        fullName: String(body.fullName || body.name || ''),
+        email: String(body.email || ''),
+        phone: String(body.phone || ''),
+        age: String(body.age ?? ''),
+        occupationType: String(body.occupationType || ''),
+        occupation: String(body.occupation || ''),
+        availability: toArray(body.availability),
+        availableFrom: String(body.availableFrom || ''),
+        availableUntil: String(body.availableUntil || ''),
+        skills: toArray(body.skills),
+        motivation: String(body.motivation || body.message || ''),
+        experience: String(body.experience || ''),
+        consent: body.consent === true || body.consent === 'true',
+        city: String(body.city || ''),
+        state: String(body.state || ''),
+        country: String(body.country || ''),
+        zip: String(body.zip || ''),
+        maritalStatus: String(body.maritalStatus || ''),
+        gender: String(body.gender || ''),
+        highestEducation: String(body.highestEducation || ''),
+        hoursAvailable: body.hoursAvailable ? JSON.stringify(body.hoursAvailable) : null,
+      };
+    } else {
+      const formData = await req.formData();
+      // Extract file if present
+      const profileFile = formData.get('profile') as File | null;
+
+      // Upload profile to Cloudinary if provided
+      if (profileFile && profileFile.size > 0) {
+        if (profileFile.size > 5 * 1024 * 1024) {
+          return NextResponse.json(
+            { success: false, message: 'Profile file size must be less than 5MB' },
+            { status: 400 }
+          );
+        }
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+        if (!allowedTypes.includes(profileFile.type)) {
+          return NextResponse.json(
+            { success: false, message: 'Profile must be an image (JPG, PNG, WEBP) or PDF file' },
+            { status: 400 }
+          );
+        }
+        try {
+          profileUrl = await uploadToCloudinary(profileFile);
+        } catch (uploadError) {
+          console.error('Cloudinary upload error:', uploadError);
+          return NextResponse.json(
+            { success: false, message: 'Failed to upload profile file' },
+            { status: 500 }
+          );
+        }
+      }
+
+      data = {
+        fullName: formData.get('fullName') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
+        age: formData.get('age') as string,
+        occupationType: formData.get('occupationType') as string,
+        occupation: formData.get('occupation') as string,
+        availability: JSON.parse((formData.get('availability') as string) || '[]'),
+        availableFrom: formData.get('availableFrom') as string,
+        availableUntil: formData.get('availableUntil') as string,
+        skills: JSON.parse((formData.get('skills') as string) || '[]'),
+        motivation: formData.get('motivation') as string,
+        experience: formData.get('experience') as string,
+        consent: formData.get('consent') === 'true',
+        profile: profileUrl,
+        city: formData.get('city') as string,
+        state: formData.get('state') as string,
+        country: formData.get('country') as string,
+        zip: formData.get('zip') as string,
+        maritalStatus: formData.get('maritalStatus') as string,
+        gender: formData.get('gender') as string,
+        highestEducation: formData.get('highestEducation') as string,
+        hoursAvailable: formData.get('hoursAvailable') as string | null,
+      };
+    }
 
     // Required fields validation
     const requiredFields = [
@@ -205,7 +232,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       'consent',
     ];
 
-    const missingFields = requiredFields.filter(field => !data[field]);
+    const missingFields = requiredFields.filter(
+      (field) => !(data as Record<string, unknown>)[field]
+    );
 
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -383,69 +412,25 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     // Save to database
     await volunteer.save();
 
-    // Send confirmation email
+    // Send a branded confirmation email via Resend. Non-blocking and guarded:
+    // a failure here must never fail the registration, and the helper no-ops
+    // when RESEND_API_KEY is not configured.
     try {
-      const confirmationEmailSubject = "Thank you for your volunteer application";
-      const locationParts = [volunteer.city, volunteer.state, volunteer.country].filter(Boolean);
-      const fullLocation = locationParts.join(', ');
-      
-      const confirmationEmailText = `
-        Dear ${volunteer.fullName},
-        
-        Thank you for submitting your volunteer application. We appreciate your interest in joining our team.
-        
-        Your application has been received and is under review. We will contact you shortly to discuss next steps.
-        
-        Details of your application:
-        - Name: ${volunteer.fullName}
-        - Email: ${volunteer.email}
-        - Phone: ${volunteer.phone}
-        - Location: ${fullLocation}
-        - Skills: ${volunteer.skills.join(', ')}
-        
-        If you have any questions, please don't hesitate to contact us.
-        
-        Best regards,
-        The Volunteer Coordination Team
-      `;
-
-      const confirmationEmailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #4f6df5;">Thank You for Your Application</h1>
-          </div>
-          
-          <p>Dear <strong>${volunteer.fullName}</strong>,</p>
-          
-          <p>Thank you for submitting your volunteer application. We appreciate your interest in joining our team.</p>
-          
-          <p>Your application has been received and is under review. We will contact you shortly to discuss next steps.</p>
-          
-          <div style="background-color: #f7f9fc; border-left: 4px solid #4f6df5; padding: 15px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Application Details:</h3>
-            <p><strong>Name:</strong> ${volunteer.fullName}</p>
-            <p><strong>Email:</strong> ${volunteer.email}</p>
-            <p><strong>Phone:</strong> ${volunteer.phone}</p>
-            <p><strong>Location:</strong> ${fullLocation}</p>
-            <p><strong>Skills:</strong> ${volunteer.skills.join(', ')}</p>
-          </div>
-          
-          <p>If you have any questions, please don't hesitate to contact us.</p>
-          
-          <p>Best regards,<br />The Volunteer Coordination Team</p>
-          
-          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777;">
-            <p>This is an automated message. Please do not reply directly to this email.</p>
-          </div>
-        </div>
-      `;
-      
-      await sendEmail(
-        volunteer.email,
-        confirmationEmailSubject,
-        confirmationEmailText,
-        confirmationEmailHtml
-      );
+      const fullLocation = [volunteer.city, volunteer.state, volunteer.country]
+        .filter(Boolean)
+        .join(', ');
+      const confirmation = buildVolunteerConfirmationEmail({
+        fullName: volunteer.fullName,
+        skills: volunteer.skills,
+        location: fullLocation,
+      });
+      await sendResendEmail({
+        to: volunteer.email,
+        subject: confirmation.subject,
+        html: confirmation.html,
+        text: confirmation.text,
+        replyTo: process.env.CONTACT_NOTIFY_EMAIL || 'office@avdheshanandg.org',
+      });
     } catch (emailError) {
       console.error('Error sending confirmation email:', emailError);
     }

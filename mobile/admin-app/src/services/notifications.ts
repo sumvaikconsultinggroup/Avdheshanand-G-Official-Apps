@@ -6,6 +6,13 @@ import api from './api';
 
 const ADMIN_PUSH_TOKEN_KEY = '@admin_push_notification_token';
 
+// EAS project id — required by getExpoPushTokenAsync() in real builds. Injected
+// into expo config by `eas init`. Without it the token call throws
+// "No projectId found" and admin push registration silently fails.
+const EAS_PROJECT_ID =
+  Constants.expoConfig?.extra?.eas?.projectId ??
+  (Constants as any)?.easConfig?.projectId;
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -50,7 +57,11 @@ export async function registerAdminPushNotifications() {
     return null;
   }
 
-  const token = (await Notifications.getExpoPushTokenAsync()).data;
+  const token = (
+    await Notifications.getExpoPushTokenAsync(
+      EAS_PROJECT_ID ? { projectId: EAS_PROJECT_ID } : undefined
+    )
+  ).data;
   const deviceId =
     Constants.sessionId ||
     Constants.installationId ||

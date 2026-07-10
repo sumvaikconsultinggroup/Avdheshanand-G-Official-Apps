@@ -109,6 +109,8 @@ export interface Volunteer {
 export interface GlimpseImage {
   _id: string;
   title?: string;
-  imageUrl: string;
+  // Backend stores the URL in `image`; `imageUrl` kept optional for safety.
+  image: string;
+  imageUrl?: string;
   description?: string;
 }

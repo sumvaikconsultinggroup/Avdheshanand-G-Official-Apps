@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '@/utils/sendEmail';
 import { cookies } from 'next/headers';
 import { verifyJwtToken } from '../../../utils/verifyJwtToken';
 
@@ -57,34 +57,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create transporter with config from environment variables
-    const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE,
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // App Password here
-      },
-      debug: process.env.NODE_ENV === 'development',
-      logger: process.env.NODE_ENV === 'development',
-    });
-
-    const mailOptions = {
-      from: {
-        name: process.env.EMAIL_FROM_NAME || 'SwamiG Dashboard',
-        address: process.env.EMAIL_USER || '',
-      },
-      to,
-      subject,
-      text,
-      ...(html && { html }), // Only include html if provided
-    };
-
-    // Send email
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
+    // Send via Resend (see utils/sendEmail — backed by RESEND_API_KEY)
+    const info = await sendEmail(to, subject, text, html);
 
     // Return success response
     return NextResponse.json({

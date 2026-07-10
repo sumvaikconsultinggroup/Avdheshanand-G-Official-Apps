@@ -1,17 +1,26 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { ActivityIndicator, Button, Card, Chip, Modal, Portal } from 'react-native-paper';
+import { ActivityIndicator, Button, Modal, Portal } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import api from '../../services/api';
 import { MantraDikshaRegistration } from '../../types';
-import { borderRadius, colors, spacing } from '../../theme';
+import { borderRadius, colors, shadows, spacing } from '../../theme';
+import { Avatar, Badge } from '../../components/common';
 
 type ReviewFilter = 'all' | 'pending' | 'under_review' | 'approved' | 'rejected';
 
 const STATUS_COLORS: Record<Exclude<ReviewFilter, 'all'>, string> = {
   pending: colors.primary.saffron,
-  under_review: colors.status.info,
+  under_review: colors.gold.dark,
   approved: colors.status.success,
   rejected: colors.status.error,
+};
+
+const STATUS_ICONS: Record<Exclude<ReviewFilter, 'all'>, React.ComponentProps<typeof MaterialCommunityIcons>['name']> = {
+  pending: 'clock-outline',
+  under_review: 'eye-outline',
+  approved: 'check-decagram',
+  rejected: 'close-circle-outline',
 };
 
 export function MantraDikshaScreen() {
@@ -82,22 +91,30 @@ export function MantraDikshaScreen() {
   const renderItem = ({ item }: { item: MantraDikshaRegistration }) => {
     const status = (item.status || 'pending') as Exclude<ReviewFilter, 'all'>;
     return (
-      <TouchableOpacity activeOpacity={0.8} onPress={() => setSelected(item)}>
-        <Card style={styles.card}>
-          <Card.Content>
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.name}>{item.fullName}</Text>
-                <Text style={styles.meta}>{item.mobileNumber}</Text>
-                <Text style={styles.meta}>{item.nationality}</Text>
+      <TouchableOpacity activeOpacity={0.85} onPress={() => setSelected(item)}>
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <Avatar name={item.fullName} size={48} />
+            <View style={styles.identity}>
+              <Text style={styles.name} numberOfLines={1}>{item.fullName}</Text>
+              <View style={styles.metaRow}>
+                <MaterialCommunityIcons name="phone-outline" size={13} color={colors.text.secondary} />
+                <Text style={styles.meta} numberOfLines={1}>{item.mobileNumber}</Text>
               </View>
-              <Chip style={[styles.statusChip, { backgroundColor: `${STATUS_COLORS[status]}20` }]} textStyle={{ color: STATUS_COLORS[status], fontWeight: '700' }}>
-                {status.replace('_', ' ')}
-              </Chip>
+              <View style={styles.metaRow}>
+                <MaterialCommunityIcons name="earth" size={13} color={colors.text.secondary} />
+                <Text style={styles.meta} numberOfLines={1}>{item.nationality}</Text>
+              </View>
             </View>
-            <Text style={styles.intent} numberOfLines={2}>{item.spiritualIntent || 'Awaiting review notes from the team.'}</Text>
-          </Card.Content>
-        </Card>
+            <Badge
+              label={status.replace('_', ' ')}
+              tone={STATUS_COLORS[status]}
+              variant="soft"
+              icon={STATUS_ICONS[status]}
+            />
+          </View>
+          <Text style={styles.intent} numberOfLines={2}>{item.spiritualIntent || 'Awaiting review notes from the team.'}</Text>
+        </View>
       </TouchableOpacity>
     );
   };
@@ -105,7 +122,7 @@ export function MantraDikshaScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
       </View>
     );
   }
@@ -115,18 +132,26 @@ export function MantraDikshaScreen() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item._id}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchRegistrations(); }} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchRegistrations(); }} tintColor={colors.primary.maroon} colors={[colors.primary.maroon]} />}
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.title}>Mantra Diksha</Text>
             <Text style={styles.subtitle}>Review, assign, and approve registrations from mobile.</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-              {(['all', 'pending', 'under_review', 'approved', 'rejected'] as ReviewFilter[]).map((item) => (
-                <Chip key={item} selected={filter === item} onPress={() => setFilter(item)} style={styles.filterChip}>
-                  {item === 'all' ? 'All' : item.replace('_', ' ')}
-                </Chip>
-              ))}
+              {(['all', 'pending', 'under_review', 'approved', 'rejected'] as ReviewFilter[]).map((item) => {
+                const active = filter === item;
+                const tone = item === 'all' ? colors.primary.maroon : STATUS_COLORS[item];
+                return (
+                  <TouchableOpacity key={item} activeOpacity={0.85} onPress={() => setFilter(item)}>
+                    <Badge
+                      label={item === 'all' ? 'All' : item.replace('_', ' ')}
+                      tone={tone}
+                      variant={active ? 'solid' : 'outline'}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
             </ScrollView>
           </View>
         }
@@ -137,10 +162,30 @@ export function MantraDikshaScreen() {
         <Modal visible={!!selected} onDismiss={() => setSelected(null)} contentContainerStyle={styles.modalContainer}>
           {selected && (
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={styles.modalTitle}>{selected.fullName}</Text>
-              <Text style={styles.meta}>{selected.email || 'No email provided'}</Text>
-              <Text style={styles.meta}>{selected.mobileNumber}</Text>
-              <Text style={styles.meta}>{selected.nationality}</Text>
+              <View style={styles.modalHeader}>
+                <Avatar name={selected.fullName} size={56} />
+                <View style={styles.modalHeaderText}>
+                  <Text style={styles.modalTitle} numberOfLines={2}>{selected.fullName}</Text>
+                  <Badge
+                    label={((selected.status || 'pending') as Exclude<ReviewFilter, 'all'>).replace('_', ' ')}
+                    tone={STATUS_COLORS[(selected.status || 'pending') as Exclude<ReviewFilter, 'all'>]}
+                    variant="soft"
+                    icon={STATUS_ICONS[(selected.status || 'pending') as Exclude<ReviewFilter, 'all'>]}
+                  />
+                </View>
+              </View>
+              <View style={styles.metaRow}>
+                <MaterialCommunityIcons name="email-outline" size={14} color={colors.text.secondary} />
+                <Text style={styles.meta} numberOfLines={1}>{selected.email || 'No email provided'}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <MaterialCommunityIcons name="phone-outline" size={14} color={colors.text.secondary} />
+                <Text style={styles.meta} numberOfLines={1}>{selected.mobileNumber}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <MaterialCommunityIcons name="earth" size={14} color={colors.text.secondary} />
+                <Text style={styles.meta} numberOfLines={1}>{selected.nationality}</Text>
+              </View>
 
               <View style={styles.section}>
                 <Text style={styles.label}>Spiritual Intent</Text>
@@ -179,15 +224,25 @@ const styles = StyleSheet.create({
   header: { marginBottom: spacing.md },
   title: { fontSize: 24, fontWeight: '700', color: colors.primary.maroon },
   subtitle: { color: colors.text.secondary, marginTop: spacing.xs },
-  filterRow: { gap: spacing.sm, paddingTop: spacing.md },
-  filterChip: { backgroundColor: colors.background.warmWhite },
-  card: { marginBottom: spacing.md, backgroundColor: colors.background.warmWhite, borderRadius: borderRadius.lg },
+  filterRow: { gap: spacing.sm, paddingTop: spacing.md, alignItems: 'center' },
+  card: {
+    marginBottom: spacing.md,
+    backgroundColor: colors.background.warmWhite,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    padding: spacing.md,
+    ...shadows.soft,
+  },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  identity: { flex: 1 },
   name: { fontSize: 16, fontWeight: '700', color: colors.text.primary },
-  meta: { color: colors.text.secondary, marginTop: 2 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 3 },
+  meta: { flex: 1, color: colors.text.secondary },
   intent: { marginTop: spacing.sm, color: colors.text.primary, lineHeight: 22 },
-  statusChip: { alignSelf: 'flex-start' },
-  modalContainer: { backgroundColor: colors.background.warmWhite, margin: spacing.md, padding: spacing.lg, borderRadius: borderRadius.xl, maxHeight: '88%' },
+  modalContainer: { backgroundColor: colors.background.warmWhite, margin: spacing.md, padding: spacing.lg, borderRadius: borderRadius.xl, borderWidth: 1, borderColor: colors.border.gold as string, maxHeight: '88%', ...shadows.raised },
+  modalHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
+  modalHeaderText: { flex: 1, gap: spacing.xs },
   modalTitle: { fontSize: 22, fontWeight: '700', color: colors.primary.maroon },
   section: { marginTop: spacing.lg },
   label: { fontSize: 12, color: colors.text.secondary, textTransform: 'uppercase', marginBottom: spacing.xs },
