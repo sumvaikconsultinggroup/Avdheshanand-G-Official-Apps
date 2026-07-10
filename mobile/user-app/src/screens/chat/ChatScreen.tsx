@@ -1,5 +1,5 @@
 // mobile/user-app/src/screens/chat/ChatScreen.tsx
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, borderRadius } from '../../theme';
+import { spacing, borderRadius, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import api from '../../services/api';
 
 interface ChatMessage {
@@ -26,6 +27,8 @@ interface ChatMessage {
 
 export function ChatScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: '1',
@@ -217,7 +220,7 @@ export function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.warmWhite,

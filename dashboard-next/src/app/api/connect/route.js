@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Connect from '@/models/Connect';
-import { sendEmail } from '@/utils/sendEmail';
+import {
+  sendResendEmail,
+  buildContactConfirmationEmail,
+  buildContactNotificationEmail,
+} from '@/utils/resendMailer';
 
 // GET all contact submissions
 export async function GET() {
@@ -104,64 +108,46 @@ export async function POST(request) {
       lastActionAt: new Date(),
     });
 
+    // Send a branded confirmation to the submitter and notify the office.
+    // Email delivery must never block or fail the submission, so each send is
+    // guarded and the helper no-ops when RESEND_API_KEY is not configured.
     try {
-      // Send confirmation email to the person who submitted the form
-      const confirmationEmailSubject = "We've Received Your Message";
-
-      // Plain text version
-      const confirmationEmailText = `
-        Dear ${values.fullName},
-        
-        Thank you for reaching out to us. We have received your message and will get back to you shortly.
-        
-        Here's a summary of your submission:
-        
-        Subject: ${values.subject}
-        Message: ${values.message}
-        
-        We appreciate your interest and will respond to your inquiry as soon as possible.
-        
-        Warm regards,
-        The Team
-      `;
-
-      // HTML version
-      const confirmationEmailHtml = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #4f6df5;">Message Received</h1>
-          </div>
-          
-          <p>Dear <strong>${values.fullName}</strong>,</p>
-          
-          <p>Thank you for reaching out to us. We have received your message and will get back to you shortly.</p>
-          
-          <div style="background-color: #f7f9fc; border-left: 4px solid #4f6df5; padding: 15px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Your Message Summary:</h3>
-            <p><strong>Subject:</strong> ${values.subject}</p>
-            <p><strong>Message:</strong></p>
-            <p style="font-style: italic;">"${values.message}"</p>
-          </div>
-          
-          <p>We appreciate your interest and will respond to your inquiry as soon as possible.</p>
-          
-          <p>Warm regards,<br />The Team</p>
-          
-          <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #777;">
-            <p>This is an automated confirmation of your message submission.</p>
-          </div>
-        </div>
-      `;
-
-      // Send confirmation email
-      await sendEmail(
-        values.email,
-        confirmationEmailSubject,
-        confirmationEmailText,
-        confirmationEmailHtml
-      );
+      const confirmation = buildContactConfirmationEmail({
+        fullName: values.fullName,
+        subject: values.subject,
+        message: values.message,
+      });
+      await sendResendEmail({
+        to: values.email,
+        subject: confirmation.subject,
+        html: confirmation.html,
+        text: confirmation.text,
+        replyTo: process.env.CONTACT_NOTIFY_EMAIL || 'office@avdheshanandg.org',
+      });
     } catch (emailError) {
       console.error('Error sending confirmation email:', emailError);
+    }
+
+    const officeInbox = process.env.CONTACT_NOTIFY_EMAIL;
+    if (officeInbox) {
+      try {
+        const notification = buildContactNotificationEmail({
+          fullName: values.fullName,
+          email: values.email,
+          phone: values.phone,
+          subject: values.subject,
+          message: values.message,
+        });
+        await sendResendEmail({
+          to: officeInbox,
+          subject: notification.subject,
+          html: notification.html,
+          text: notification.text,
+          replyTo: values.email,
+        });
+      } catch (notifyError) {
+        console.error('Error sending office notification email:', notifyError);
+      }
     }
 
     return NextResponse.json(

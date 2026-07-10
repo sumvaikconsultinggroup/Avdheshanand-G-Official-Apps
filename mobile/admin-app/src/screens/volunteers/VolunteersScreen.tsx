@@ -10,14 +10,14 @@ import {
   ScrollView,
 } from 'react-native';
 import {
-  Card,
   ActivityIndicator,
-  Chip,
   Portal,
   Modal,
   Button,
 } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, spacing, borderRadius, gradients, shadows, typography } from '../../theme';
 import api from '../../services/api';
 import { Volunteer } from '../../types';
 
@@ -124,96 +124,102 @@ export function VolunteersScreen() {
     );
   };
 
+  const StatusBadge = ({ approved }: { approved: boolean }) => {
+    const tone = approved ? colors.status.success : colors.status.warning;
+    return (
+      <View style={[styles.statusBadge, { backgroundColor: `${tone}1A`, borderColor: `${tone}55` }]}>
+        <View style={[styles.statusDot, { backgroundColor: tone }]} />
+        <Text style={[styles.statusBadgeText, { color: tone }]}>
+          {approved ? 'Approved' : 'Pending'}
+        </Text>
+      </View>
+    );
+  };
+
+  const SkillPill = ({ label }: { label: string }) => (
+    <View style={styles.skillPill}>
+      <Text style={styles.skillPillText}>{label}</Text>
+    </View>
+  );
+
   const renderVolunteerCard = ({ item }: { item: Volunteer }) => {
     const isApproved = item.isApproved === true;
-    const statusLabel = isApproved ? 'Approved' : 'Pending';
-    const statusColor = isApproved ? colors.status.success : colors.status.warning;
 
     return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => setDetailVolunteer(item)}
-      >
-        <Card style={styles.card}>
-          <Card.Content>
-            <View style={styles.cardHeader}>
-              <View style={styles.avatarContainer}>
-                <Text style={styles.avatarText}>
-                  {item.fullName?.charAt(0)?.toUpperCase() || '?'}
-                </Text>
-              </View>
-              <View style={styles.volunteerInfo}>
-                <Text style={styles.volunteerName}>{item.fullName}</Text>
-                {item.location ? (
-                  <Text style={styles.volunteerLocation}>📍 {item.location}</Text>
-                ) : null}
-                <Text style={styles.volunteerEmail}>{item.email}</Text>
-              </View>
-              <Chip
-                style={[styles.statusChip, { backgroundColor: statusColor }]}
-                textStyle={styles.statusChipText}
-                compact
-              >
-                {statusLabel}
-              </Chip>
-            </View>
+      <TouchableOpacity activeOpacity={0.8} onPress={() => setDetailVolunteer(item)} style={styles.card}>
+        {/* Header: avatar + identity + status */}
+        <View style={styles.cardHeader}>
+          <LinearGradient
+            colors={gradients.hero as unknown as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.avatar}
+          >
+            <Text style={styles.avatarText}>{item.fullName?.charAt(0)?.toUpperCase() || '?'}</Text>
+          </LinearGradient>
 
-            {item.skills && item.skills.length > 0 && (
-              <View style={styles.skillsSection}>
-                <View style={styles.skillsContainer}>
-                  {item.skills.slice(0, 4).map((skill, index) => (
-                    <Chip
-                      key={index}
-                      style={styles.skillChip}
-                      textStyle={styles.skillChipText}
-                      compact
-                    >
-                      {skill}
-                    </Chip>
-                  ))}
-                  {item.skills.length > 4 && (
-                    <Text style={styles.moreSkills}>
-                      +{item.skills.length - 4} more
-                    </Text>
-                  )}
-                </View>
+          <View style={styles.volunteerInfo}>
+            <Text style={styles.volunteerName} numberOfLines={1}>{item.fullName}</Text>
+            {item.location ? (
+              <View style={styles.metaRow}>
+                <Icon name="map-marker" size={13} color={colors.primary.saffron} />
+                <Text style={styles.metaText} numberOfLines={1}>{item.location}</Text>
               </View>
+            ) : null}
+            <View style={styles.metaRow}>
+              <Icon name="email-outline" size={13} color={colors.gold.dark} />
+              <Text style={styles.metaText} numberOfLines={1}>{item.email}</Text>
+            </View>
+          </View>
+
+          <StatusBadge approved={isApproved} />
+        </View>
+
+        {/* Skills */}
+        {item.skills && item.skills.length > 0 && (
+          <View style={styles.skillsSection}>
+            <Text style={styles.sectionEyebrow}>Skills</Text>
+            <View style={styles.skillsContainer}>
+              {item.skills.slice(0, 4).map((skill, index) => (
+                <SkillPill key={index} label={skill} />
+              ))}
+              {item.skills.length > 4 && (
+                <Text style={styles.moreSkills}>+{item.skills.length - 4} more</Text>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Footer: applied date + actions */}
+        <View style={styles.cardActions}>
+          <View style={styles.metaRow}>
+            <Icon name="calendar-check-outline" size={14} color={colors.text.secondary} />
+            <Text style={styles.dateText}>{formatDate(item.createdAt)}</Text>
+          </View>
+          <View style={styles.actionButtons}>
+            {!isApproved && (
+              <TouchableOpacity style={styles.approveBtn} onPress={() => handleApprove(item)}>
+                <Icon name="check" size={15} color={colors.text.white} />
+                <Text style={styles.approveBtnText}>Approve</Text>
+              </TouchableOpacity>
             )}
-
-            <View style={styles.cardActions}>
-              <Text style={styles.dateText}>
-                Applied: {formatDate(item.createdAt)}
-              </Text>
-              <View style={styles.actionButtons}>
-                {!isApproved && (
-                  <TouchableOpacity
-                    style={styles.approveBtn}
-                    onPress={() => handleApprove(item)}
-                  >
-                    <Text style={styles.approveBtnText}>Approve</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  style={styles.deleteBtnSmall}
-                  onPress={() => handleDelete(item)}
-                >
-                  <Text style={styles.deleteBtnSmallText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Card.Content>
-        </Card>
+            <TouchableOpacity style={styles.deleteBtnSmall} onPress={() => handleDelete(item)}>
+              <Icon name="trash-can-outline" size={15} color={colors.status.error} />
+              <Text style={styles.deleteBtnSmallText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </TouchableOpacity>
     );
   };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>🙋</Text>
-      <Text style={styles.emptyStateText}>No volunteers</Text>
-      <Text style={styles.emptyStateSubtext}>
-        Volunteer applications will appear here
-      </Text>
+      <View style={styles.emptyIconWrap}>
+        <Icon name="hand-heart-outline" size={30} color={colors.primary.saffron} />
+      </View>
+      <Text style={styles.emptyStateText}>No volunteers yet</Text>
+      <Text style={styles.emptyStateSubtext}>Volunteer applications will appear here</Text>
     </View>
   );
 
@@ -223,7 +229,12 @@ export function VolunteersScreen() {
     const pending = volunteers.filter((v) => !v.isApproved).length;
 
     return (
-      <View style={styles.summaryCard}>
+      <LinearGradient
+        colors={gradients.hero as unknown as readonly [string, string, ...string[]]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.summaryCard}
+      >
         <Text style={styles.summaryTitle}>Volunteer Overview</Text>
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
@@ -232,20 +243,16 @@ export function VolunteersScreen() {
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: colors.status.success }]}>
-              {approved}
-            </Text>
+            <Text style={[styles.summaryValue, { color: '#7BE5A0' }]}>{approved}</Text>
             <Text style={styles.summaryLabel}>Approved</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: colors.status.warning }]}>
-              {pending}
-            </Text>
+            <Text style={[styles.summaryValue, { color: colors.gold.light }]}>{pending}</Text>
             <Text style={styles.summaryLabel}>Pending</Text>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     );
   };
 
@@ -274,19 +281,16 @@ export function VolunteersScreen() {
         >
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.modalHeader}>
-              <View style={[styles.avatarContainerLarge, { backgroundColor: isApproved ? colors.status.success : colors.status.warning }]}>
-                <Text style={styles.avatarTextLarge}>
-                  {v.fullName?.charAt(0)?.toUpperCase() || '?'}
-                </Text>
-              </View>
-              <Text style={styles.modalName}>{v.fullName}</Text>
-              <Chip
-                style={[styles.statusChip, { backgroundColor: isApproved ? colors.status.success : colors.status.warning }]}
-                textStyle={styles.statusChipText}
-                compact
+              <LinearGradient
+                colors={gradients.hero as unknown as readonly [string, string, ...string[]]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.avatarLarge}
               >
-                {isApproved ? 'Approved' : 'Pending'}
-              </Chip>
+                <Text style={styles.avatarTextLarge}>{v.fullName?.charAt(0)?.toUpperCase() || '?'}</Text>
+              </LinearGradient>
+              <Text style={styles.modalName}>{v.fullName}</Text>
+              <StatusBadge approved={isApproved} />
             </View>
 
             {renderDetailField('Email', v.email)}
@@ -306,7 +310,7 @@ export function VolunteersScreen() {
                 <Text style={styles.detailFieldLabel}>Availability</Text>
                 <View style={styles.tagRow}>
                   {v.availability.map((a, i) => (
-                    <Chip key={i} style={styles.skillChip} textStyle={styles.skillChipText} compact>{a}</Chip>
+                    <SkillPill key={i} label={a} />
                   ))}
                 </View>
               </View>
@@ -317,7 +321,7 @@ export function VolunteersScreen() {
                 <Text style={styles.detailFieldLabel}>Skills</Text>
                 <View style={styles.tagRow}>
                   {v.skills.map((s, i) => (
-                    <Chip key={i} style={styles.skillChip} textStyle={styles.skillChipText} compact>{s}</Chip>
+                    <SkillPill key={i} label={s} />
                   ))}
                 </View>
               </View>
@@ -368,7 +372,7 @@ export function VolunteersScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading volunteers...</Text>
       </View>
     );
@@ -397,8 +401,8 @@ export function VolunteersScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -432,7 +436,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   retryButton: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
@@ -443,18 +447,23 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
+    paddingBottom: spacing.xxl,
   },
+
+  // Summary
   summaryCard: {
-    backgroundColor: colors.primary.saffron,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     padding: spacing.lg,
     marginBottom: spacing.lg,
+    ...shadows.maroonGlow,
   },
   summaryTitle: {
-    color: colors.text.white,
-    fontSize: 14,
-    fontWeight: '600',
+    color: colors.gold.light,
+    fontSize: 12,
+    fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
     marginBottom: spacing.md,
   },
   summaryRow: {
@@ -468,156 +477,207 @@ const styles = StyleSheet.create({
   },
   summaryValue: {
     color: colors.text.white,
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 30,
+    fontWeight: '800',
   },
   summaryLabel: {
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.82)',
     fontSize: 12,
     marginTop: spacing.xs,
+    fontWeight: '600',
   },
   summaryDivider: {
     width: 1,
     height: 40,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
+
+  // Card
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 2,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    padding: spacing.md,
+    ...shadows.soft,
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
-  avatarContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.accent.peacock,
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
+    borderWidth: 1.5,
+    borderColor: colors.gold.main,
   },
   avatarText: {
     color: colors.text.white,
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  avatarContainerLarge: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  avatarTextLarge: {
-    color: colors.text.white,
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 21,
+    fontWeight: '800',
   },
   volunteerInfo: {
     flex: 1,
+    paddingRight: spacing.sm,
   },
   volunteerName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
+    ...typography.title,
+    color: colors.primary.maroon,
   },
-  volunteerLocation: {
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 3,
+  },
+  metaText: {
     fontSize: 13,
     color: colors.text.secondary,
-    marginTop: 2,
+    flexShrink: 1,
   },
-  volunteerEmail: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    marginTop: 2,
+
+  // Status badge (custom — no clipping)
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
   },
-  statusChip: {
-    height: 26,
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
-  statusChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
+  statusBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
+
+  // Skills
   skillsSection: {
     marginTop: spacing.md,
     paddingTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border.gold as string,
   },
+  sectionEyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: colors.gold.dark,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: spacing.sm,
+  },
   skillsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: spacing.sm,
     alignItems: 'center',
   },
-  skillChip: {
-    backgroundColor: colors.background.sandstone,
-    height: 24,
+  skillPill: {
+    backgroundColor: colors.background.cream,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
   },
-  skillChipText: {
-    color: colors.text.primary,
-    fontSize: 11,
+  skillPillText: {
+    color: colors.primary.maroon,
+    fontSize: 12,
+    fontWeight: '600',
   },
   moreSkills: {
     fontSize: 12,
     color: colors.text.secondary,
     fontStyle: 'italic',
   },
+
+  // Footer actions
   cardActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing.md,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border.gold as string,
   },
   dateText: {
     fontSize: 12,
     color: colors.text.secondary,
+    fontWeight: '600',
   },
   actionButtons: {
     flexDirection: 'row',
     gap: spacing.sm,
   },
   approveBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
+    paddingVertical: 8,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.status.success,
   },
   approveBtnText: {
     color: colors.text.white,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   deleteBtnSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.status.error,
+    paddingVertical: 8,
+    borderRadius: borderRadius.full,
+    backgroundColor: `${colors.status.error}14`,
+    borderWidth: 1,
+    borderColor: `${colors.status.error}44`,
   },
   deleteBtnSmallText: {
-    color: colors.text.white,
+    color: colors.status.error,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
   },
+
+  // Modal
   modalContainer: {
     backgroundColor: colors.background.warmWhite,
     margin: spacing.md,
     padding: spacing.lg,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     maxHeight: '85%',
   },
   modalHeader: {
     alignItems: 'center',
     marginBottom: spacing.lg,
+  },
+  avatarLarge: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    borderWidth: 2,
+    borderColor: colors.gold.main,
+  },
+  avatarTextLarge: {
+    color: colors.text.white,
+    fontSize: 28,
+    fontWeight: '800',
   },
   modalName: {
     fontSize: 20,
@@ -630,8 +690,8 @@ const styles = StyleSheet.create({
   },
   detailFieldLabel: {
     fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '600',
+    color: colors.gold.dark,
+    fontWeight: '700',
     marginBottom: spacing.xs,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -644,7 +704,7 @@ const styles = StyleSheet.create({
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   modalActions: {
     flexDirection: 'row',
@@ -658,18 +718,25 @@ const styles = StyleSheet.create({
   modalActionBtn: {
     flex: 1,
   },
+
+  // Empty
   emptyState: {
     padding: spacing.xxl,
     alignItems: 'center',
   },
-  emptyStateIcon: {
-    fontSize: 48,
+  emptyIconWrap: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: `${colors.primary.saffron}18`,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: spacing.md,
   },
   emptyStateText: {
-    color: colors.text.secondary,
+    color: colors.primary.maroon,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   emptyStateSubtext: {
     color: colors.text.secondary,

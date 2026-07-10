@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Button, Card, SegmentedButtons } from 'react-native-paper';
+import { SegmentedButtons } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import api from '../../services/api';
-import { borderRadius, colors, spacing } from '../../theme';
+import { borderRadius, colors, gradients, shadows, spacing } from '../../theme';
 
 type PushAudience = 'all_followers' | 'city_followers';
 
@@ -100,11 +101,13 @@ export function NotificationBroadcasterScreen() {
       <Text style={styles.title}>Broadcast Center</Text>
       <Text style={styles.subtitle}>Send a public push notification or rally volunteers city-wise from the same mobile screen.</Text>
 
-      <Card style={styles.card}>
-        <Card.Content>
+      <View style={styles.card}>
+        <View style={styles.cardBody}>
           <View style={styles.cardHeader}>
-            <Icon name="bell-ring-outline" size={24} color={colors.primary.saffron} />
-            <Text style={styles.cardTitle}>Push To Followers</Text>
+            <View style={styles.cardIconWrap}>
+              <Icon name="bell-ring-outline" size={22} color={colors.primary.maroon} />
+            </View>
+            <Text style={styles.cardTitle} numberOfLines={2}>Push To Followers</Text>
           </View>
           <SegmentedButtons
             value={pushAudience}
@@ -139,17 +142,38 @@ export function NotificationBroadcasterScreen() {
             multiline
             placeholderTextColor={colors.text.secondary}
           />
-          <Button mode="contained" onPress={sendPushBroadcast} loading={pushSending}>
-            Send Push Notification
-          </Button>
-        </Card.Content>
-      </Card>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={sendPushBroadcast}
+            disabled={pushSending}
+            style={styles.primaryButton}
+          >
+            <LinearGradient
+              colors={gradients.maroon}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.primaryButtonInner}
+            >
+              <Icon
+                name={pushSending ? 'progress-clock' : 'send'}
+                size={18}
+                color={colors.text.white}
+              />
+              <Text style={styles.primaryButtonText}>
+                {pushSending ? 'Sending…' : 'Send Push Notification'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </View>
 
-      <Card style={styles.card}>
-        <Card.Content>
+      <View style={styles.card}>
+        <View style={styles.cardBody}>
           <View style={styles.cardHeader}>
-            <Icon name="whatsapp" size={24} color={colors.status.success} />
-            <Text style={styles.cardTitle}>Volunteer WhatsApp By City</Text>
+            <View style={styles.cardIconWrap}>
+              <Icon name="whatsapp" size={22} color={colors.status.success} />
+            </View>
+            <Text style={styles.cardTitle} numberOfLines={2}>Volunteer WhatsApp By City</Text>
           </View>
           <TextInput
             value={volunteerCity}
@@ -188,14 +212,29 @@ export function NotificationBroadcasterScreen() {
             placeholderTextColor={colors.text.secondary}
           />
           <View style={styles.previewBox}>
-            <Text style={styles.previewLabel}>Preview</Text>
+            <View style={styles.previewHeader}>
+              <Icon name="eye-outline" size={14} color={colors.status.success} />
+              <Text style={styles.previewLabel}>Preview</Text>
+            </View>
             <Text style={styles.previewText}>{previewMessage}</Text>
           </View>
-          <Button mode="contained" buttonColor={colors.status.success} onPress={sendVolunteerWhatsApp} loading={whatsAppSending}>
-            Send WhatsApp
-          </Button>
-        </Card.Content>
-      </Card>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={sendVolunteerWhatsApp}
+            disabled={whatsAppSending}
+            style={[styles.primaryButton, styles.whatsAppButton, whatsAppSending && styles.buttonDisabled]}
+          >
+            <Icon
+              name={whatsAppSending ? 'progress-clock' : 'whatsapp'}
+              size={18}
+              color={colors.text.white}
+            />
+            <Text style={styles.primaryButtonText}>
+              {whatsAppSending ? 'Sending…' : 'Send WhatsApp'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -203,11 +242,28 @@ export function NotificationBroadcasterScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background.parchment },
   content: { padding: spacing.lg, gap: spacing.lg },
-  title: { fontSize: 24, fontWeight: '700', color: colors.primary.maroon },
+  title: { fontSize: 26, fontWeight: '700', color: colors.primary.maroon, letterSpacing: 0.2 },
   subtitle: { color: colors.text.secondary, lineHeight: 22 },
-  card: { backgroundColor: colors.background.warmWhite, borderRadius: borderRadius.xl },
+  card: {
+    backgroundColor: colors.background.warmWhite,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    ...shadows.soft,
+  },
+  cardBody: { padding: spacing.lg },
   cardHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
-  cardTitle: { fontSize: 18, fontWeight: '700', color: colors.text.primary },
+  cardIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background.parchment,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+  },
+  cardTitle: { flex: 1, fontSize: 18, fontWeight: '700', color: colors.text.primary },
   input: {
     backgroundColor: colors.background.parchment,
     borderWidth: 1,
@@ -224,9 +280,51 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     backgroundColor: '#F3FAF4',
     borderWidth: 1,
-    borderColor: 'rgba(76,175,80,0.2)',
+    borderColor: 'rgba(46,158,91,0.2)',
     marginBottom: spacing.md,
   },
-  previewLabel: { fontSize: 12, textTransform: 'uppercase', color: colors.text.secondary, marginBottom: spacing.xs },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  previewLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    color: colors.status.success,
+  },
   previewText: { color: colors.text.primary, lineHeight: 22 },
+  primaryButton: {
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    ...shadows.maroonGlow,
+  },
+  primaryButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  primaryButtonText: {
+    color: colors.text.white,
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  whatsAppButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.status.success,
+    shadowColor: colors.status.success,
+  },
+  buttonDisabled: { opacity: 0.7 },
 });

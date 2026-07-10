@@ -4,6 +4,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -12,11 +13,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { borderRadius, colors, shadows, spacing, typography } from '../../theme';
+import { FloatingInput } from '../../components/common';
+import { borderRadius, shadows, spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 type Gender = 'Male' | 'Female' | 'Other';
 type UploadField = 'aadhaarDocument' | 'passportDocument' | 'recentPhoto';
@@ -47,6 +51,7 @@ interface FormErrors {
   dateOfBirth?: string;
   nationality?: string;
   mobileNumber?: string;
+  whatsappNumber?: string;
   email?: string;
   aadhaarNumber?: string;
   passportNumber?: string;
@@ -73,7 +78,20 @@ const INITIAL_FORM: FormDataState = {
 
 const GENDER_OPTIONS: Gender[] = ['Male', 'Female', 'Other'];
 
+// Aadhaar format check: exactly 12 digits and never starts with 0 or 1
+// (UIDAI format rule). We intentionally do NOT enforce the Verhoeff checksum —
+// it falsely rejects valid real-world numbers, so format validation is the
+// reliable choice for accepting genuine Aadhaar entries.
+function isValidAadhaar(value: string): boolean {
+  return /^[2-9]\d{11}$/.test(value.replace(/\D/g, ''));
+}
+
+// Indian mobile numbers are exactly 10 digits and start with 6-9.
+const isValidMobile = (value: string): boolean => /^[6-9]\d{9}$/.test(value.replace(/\D/g, ''));
+
 export function MantraDikshaScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { i18n } = useTranslation();
   const isHindi = (i18n.resolvedLanguage || i18n.language || 'en').startsWith('hi');
 
@@ -82,7 +100,7 @@ export function MantraDikshaScreen({ navigation }: any) {
       isHindi
         ? {
             title: 'मंत्र दीक्षा',
-            subtitle: 'मोबाइल से सीधे पंजीकरण करें। आपका आवेदन वेब और मोबाइल एडमिन पैनल दोनों में दिखेगा।',
+            subtitle: 'अपने फ़ोन से सीधे पंजीकरण करें। आश्रम कार्यालय आपके आवेदन की समीक्षा करेगा और अगले चरणों के लिए आपसे संपर्क करेगा।',
             inPersonOnly: 'दीक्षा केवल व्यक्तिगत उपस्थिति में दी जाती है। पंजीकरण अनुमोदन की गारंटी नहीं है।',
             personalDetails: 'व्यक्तिगत विवरण',
             spiritualDetails: 'आध्यात्मिक विवरण',
@@ -112,7 +130,7 @@ export function MantraDikshaScreen({ navigation }: any) {
             submit: 'पंजीकरण भेजें',
             submitting: 'भेजा जा रहा है...',
             successTitle: 'पंजीकरण सफल',
-            successMessage: 'आपका मंत्र दीक्षा आवेदन सफलतापूर्वक भेज दिया गया है। अब यह वेब और मोबाइल एडमिन पैनल दोनों में समीक्षा के लिए उपलब्ध है।',
+            successMessage: 'आपका मंत्र दीक्षा आवेदन सफलतापूर्वक भेज दिया गया है। आश्रम कार्यालय शीघ्र ही आपके आवेदन की समीक्षा करेगा और अगले चरणों के लिए आपसे संपर्क करेगा। हरि ॐ 🙏',
             validationRequired: 'यह फ़ील्ड आवश्यक है',
             validationEmail: 'कृपया सही ईमेल दर्ज करें',
             validationPhone: 'कृपया सही मोबाइल नंबर दर्ज करें',
@@ -128,7 +146,7 @@ export function MantraDikshaScreen({ navigation }: any) {
           }
         : {
             title: 'Mantra Diksha',
-            subtitle: 'Register directly from mobile. Your application will sync with both the web and mobile admin panels.',
+            subtitle: 'Register directly from your phone. The Ashram office will review your application and reach out to you with the next steps.',
             inPersonOnly: 'Diksha is offered only in person. Registration does not guarantee approval.',
             personalDetails: 'Personal Details',
             spiritualDetails: 'Spiritual Details',
@@ -158,7 +176,7 @@ export function MantraDikshaScreen({ navigation }: any) {
             submit: 'Submit Registration',
             submitting: 'Submitting...',
             successTitle: 'Registration Submitted',
-            successMessage: 'Your Mantra Diksha application has been submitted successfully and is now visible in both the web and mobile admin panels for review.',
+            successMessage: 'Your Mantra Diksha application has been submitted successfully. The Ashram office will review it shortly and reach out to you with the next steps. Hari Om 🙏',
             validationRequired: 'This field is required',
             validationEmail: 'Please enter a valid email address',
             validationPhone: 'Please enter a valid mobile number',
@@ -185,6 +203,53 @@ export function MantraDikshaScreen({ navigation }: any) {
   });
 
   const isIndian = formData.nationality.trim().toLowerCase().includes('india');
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Bounds for the date-of-birth calendar: never in the future, never older
+  // than 120 years. Computed once so the picker can't drift between renders.
+  const maxDob = useMemo(() => new Date(), []);
+  const minDob = useMemo(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 120);
+    return d;
+  }, []);
+
+  const formatDob = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  // Value shown in the picker: the entered DOB if valid, otherwise a sensible
+  // starting point (~25 years ago) so the user isn't scrolling from today.
+  const pickerValue = useMemo(() => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(formData.dateOfBirth)) {
+      const parsed = new Date(`${formData.dateOfBirth}T00:00:00`);
+      if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+    const fallback = new Date();
+    fallback.setFullYear(fallback.getFullYear() - 25);
+    return fallback;
+  }, [formData.dateOfBirth]);
+
+  const displayDob = useMemo(() => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.dateOfBirth)) return '';
+    return pickerValue.toLocaleDateString(isHindi ? 'hi-IN' : 'en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [formData.dateOfBirth, pickerValue, isHindi]);
+
+  const handleDateChange = (event: DateTimePickerEvent, selected?: Date) => {
+    // Android shows a one-shot dialog; close it on any result.
+    if (Platform.OS === 'android') setShowDatePicker(false);
+    if (event.type === 'set' && selected) {
+      updateField('dateOfBirth', formatDob(selected));
+    }
+  };
 
   const updateField = (field: keyof FormDataState, value: string) => {
     setFormData((current) => ({ ...current, [field]: value }));
@@ -278,8 +343,13 @@ export function MantraDikshaScreen({ navigation }: any) {
 
     if (!formData.mobileNumber.trim()) {
       nextErrors.mobileNumber = copy.validationRequired;
-    } else if (!/^\+?[\d\s\-()]{10,}$/.test(formData.mobileNumber.trim())) {
+    } else if (!isValidMobile(formData.mobileNumber)) {
       nextErrors.mobileNumber = copy.validationPhone;
+    }
+
+    // WhatsApp is optional, but if provided it must be a valid 10-digit number.
+    if (formData.whatsappNumber.trim() && !isValidMobile(formData.whatsappNumber)) {
+      nextErrors.whatsappNumber = copy.validationPhone;
     }
 
     if (!formData.email.trim()) {
@@ -295,7 +365,7 @@ export function MantraDikshaScreen({ navigation }: any) {
     }
 
     if (isIndian) {
-      if (!/^\d{12}$/.test(formData.aadhaarNumber.replace(/\D/g, ''))) {
+      if (!isValidAadhaar(formData.aadhaarNumber)) {
         nextErrors.aadhaarNumber = copy.validationAadhaar;
       }
       if (!files.aadhaarDocument) {
@@ -385,24 +455,26 @@ export function MantraDikshaScreen({ navigation }: any) {
       multiline?: boolean;
       keyboardType?: 'default' | 'email-address' | 'phone-pad';
       autoCapitalize?: 'none' | 'words' | 'sentences' | 'characters';
+      maxLength?: number;
+      digitsOnly?: boolean;
     }
   ) => (
-    <View style={styles.fieldBlock}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <TextInput
-        style={[styles.input, options?.multiline && styles.multilineInput]}
-        placeholder={options?.placeholder}
-        placeholderTextColor={colors.text.secondary}
-        keyboardType={options?.keyboardType || 'default'}
-        autoCapitalize={options?.autoCapitalize || 'sentences'}
-        multiline={options?.multiline}
-        numberOfLines={options?.multiline ? 5 : 1}
-        textAlignVertical={options?.multiline ? 'top' : 'center'}
-        value={formData[field]}
-        onChangeText={(value) => updateField(field, value)}
-      />
-      {errors[field as keyof FormErrors] ? <Text style={styles.errorText}>{errors[field as keyof FormErrors]}</Text> : null}
-    </View>
+    <FloatingInput
+      label={label}
+      value={formData[field]}
+      error={errors[field as keyof FormErrors]}
+      placeholder={options?.placeholder}
+      keyboardType={options?.keyboardType}
+      autoCapitalize={options?.autoCapitalize}
+      multiline={options?.multiline}
+      maxLength={options?.maxLength}
+      onChangeText={(value) => {
+        let next = value;
+        if (options?.digitsOnly) next = next.replace(/\D/g, '');
+        if (options?.maxLength) next = next.slice(0, options.maxLength);
+        updateField(field, next);
+      }}
+    />
   );
 
   const renderUploadCard = (field: UploadField, label: string, required: boolean) => {
@@ -472,7 +544,63 @@ export function MantraDikshaScreen({ navigation }: any) {
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>{copy.personalDetails}</Text>
             {renderInput('fullName', copy.fullName, { placeholder: copy.fullName, autoCapitalize: 'words' })}
-            {renderInput('dateOfBirth', copy.dob, { placeholder: copy.dobPlaceholder, autoCapitalize: 'none' })}
+
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel}>{copy.dob}</Text>
+              <TouchableOpacity
+                style={[styles.input, styles.dateField, errors.dateOfBirth ? styles.inputError : null]}
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={copy.dob}
+              >
+                <Text style={[styles.dateText, !displayDob && styles.datePlaceholder]}>
+                  {displayDob || copy.dobPlaceholder}
+                </Text>
+                <Icon name="calendar-month-outline" size={20} color={colors.gold.dark} />
+              </TouchableOpacity>
+              {errors.dateOfBirth ? <Text style={styles.errorText}>{errors.dateOfBirth}</Text> : null}
+            </View>
+
+            {showDatePicker &&
+              (Platform.OS === 'ios' ? (
+                <Modal transparent animationType="fade" visible={showDatePicker}>
+                  <TouchableOpacity
+                    style={styles.modalBackdrop}
+                    activeOpacity={1}
+                    onPress={() => setShowDatePicker(false)}
+                  >
+                    <View style={styles.modalCard}>
+                      <DateTimePicker
+                        value={pickerValue}
+                        mode="date"
+                        display="spinner"
+                        maximumDate={maxDob}
+                        minimumDate={minDob}
+                        onChange={(_event, selected) => {
+                          if (selected) updateField('dateOfBirth', formatDob(selected));
+                        }}
+                      />
+                      <TouchableOpacity
+                        style={styles.modalDone}
+                        onPress={() => setShowDatePicker(false)}
+                        activeOpacity={0.85}
+                      >
+                        <Text style={styles.modalDoneText}>OK</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
+              ) : (
+                <DateTimePicker
+                  value={pickerValue}
+                  mode="date"
+                  display="calendar"
+                  maximumDate={maxDob}
+                  minimumDate={minDob}
+                  onChange={handleDateChange}
+                />
+              ))}
 
             <View style={styles.fieldBlock}>
               <Text style={styles.fieldLabel}>{copy.gender}</Text>
@@ -520,9 +648,11 @@ export function MantraDikshaScreen({ navigation }: any) {
             </View>
 
             {renderInput('mobileNumber', copy.mobile, {
-              placeholder: '+91 XXXXX XXXXX',
+              placeholder: '10-digit mobile number',
               keyboardType: 'phone-pad',
               autoCapitalize: 'none',
+              digitsOnly: true,
+              maxLength: 10,
             })}
             {renderInput('email', copy.email, {
               placeholder: 'name@example.com',
@@ -530,20 +660,25 @@ export function MantraDikshaScreen({ navigation }: any) {
               autoCapitalize: 'none',
             })}
             {renderInput('whatsappNumber', copy.whatsapp, {
-              placeholder: '+91 XXXXX XXXXX',
+              placeholder: '10-digit WhatsApp number',
               keyboardType: 'phone-pad',
               autoCapitalize: 'none',
+              digitsOnly: true,
+              maxLength: 10,
             })}
 
             {isIndian
               ? renderInput('aadhaarNumber', copy.aadhaar, {
-                  placeholder: '123412341234',
+                  placeholder: '12-digit Aadhaar number',
                   keyboardType: 'phone-pad',
                   autoCapitalize: 'none',
+                  digitsOnly: true,
+                  maxLength: 12,
                 })
               : renderInput('passportNumber', copy.passport, {
                   placeholder: 'Passport Number',
                   autoCapitalize: 'characters',
+                  maxLength: 20,
                 })}
           </View>
 
@@ -596,7 +731,7 @@ export function MantraDikshaScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -720,6 +855,45 @@ const styles = StyleSheet.create({
   multilineInput: {
     minHeight: 110,
     paddingTop: spacing.md,
+  },
+  inputError: {
+    borderColor: colors.primary.vermillion,
+  },
+  dateField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateText: {
+    ...typography.body,
+    color: colors.text.primary,
+  },
+  datePlaceholder: {
+    color: colors.text.secondary,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalCard: {
+    backgroundColor: colors.background.warmWhite,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.md,
+  },
+  modalDone: {
+    alignSelf: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary.maroon,
+    marginTop: spacing.sm,
+  },
+  modalDoneText: {
+    ...typography.button,
+    color: colors.text.white,
   },
   errorText: {
     ...typography.bodySm,

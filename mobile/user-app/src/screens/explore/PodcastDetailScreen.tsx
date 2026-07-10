@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,8 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { Podcast } from '../../types';
 
 interface RouteParams {
@@ -27,6 +28,8 @@ export function PodcastDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { podcastId } = route.params as RouteParams;
 
   const [podcast, setPodcast] = useState<Podcast | null>(null);
@@ -264,7 +267,7 @@ export function PodcastDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

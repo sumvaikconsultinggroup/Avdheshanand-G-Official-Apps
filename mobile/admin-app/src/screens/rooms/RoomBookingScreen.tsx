@@ -14,7 +14,6 @@ import {
 import {
   Card,
   ActivityIndicator,
-  Chip,
   FAB,
   Portal,
   Modal,
@@ -23,7 +22,10 @@ import {
   Button,
   IconButton,
 } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, spacing, borderRadius, shadows, gradients } from '../../theme';
+import { Badge } from '../../components/common';
 import api from '../../services/api';
 import { RoomBooking } from '../../types';
 
@@ -180,31 +182,38 @@ export function RoomBookingScreen() {
         <Card.Content>
           <View style={styles.cardHeader}>
             <View style={styles.roomIcon}>
-              <Text style={styles.iconText}>🏠</Text>
+              <MaterialCommunityIcons
+                name="bed-king-outline"
+                size={26}
+                color={colors.primary.maroon}
+              />
             </View>
             <View style={styles.roomInfo}>
               <Text style={styles.roomName} numberOfLines={1}>
                 {item.name}
               </Text>
               {item.place ? (
-                <Text style={styles.placeText}>📍 {item.place}</Text>
+                <View style={styles.placeRow}>
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={13}
+                    color={colors.text.secondary}
+                  />
+                  <Text style={styles.placeText} numberOfLines={1}>
+                    {item.place}
+                  </Text>
+                </View>
               ) : null}
             </View>
             <View style={styles.chipAndActions}>
-              <Chip
-                style={[
-                  styles.availabilityChip,
-                  {
-                    backgroundColor: isAvailable
-                      ? colors.status.success
-                      : colors.status.error,
-                  },
-                ]}
-                textStyle={styles.availabilityChipText}
-                compact
-              >
-                {item.isBooked ? 'Booked' : item.available ? 'Available' : 'Unavailable'}
-              </Chip>
+              <Badge
+                label={
+                  item.isBooked ? 'Booked' : item.available ? 'Available' : 'Unavailable'
+                }
+                tone={isAvailable ? colors.status.success : colors.status.error}
+                variant="soft"
+                dot
+              />
             </View>
           </View>
 
@@ -226,14 +235,12 @@ export function RoomBookingScreen() {
             <View style={styles.amenitiesSection}>
               <View style={styles.amenitiesContainer}>
                 {item.amenities.slice(0, 5).map((amenity, index) => (
-                  <Chip
+                  <Badge
                     key={index}
-                    style={styles.amenityChip}
-                    textStyle={styles.amenityChipText}
-                    compact
-                  >
-                    {amenity}
-                  </Chip>
+                    label={amenity}
+                    tone={colors.gold.dark}
+                    variant="soft"
+                  />
                 ))}
                 {item.amenities.length > 5 && (
                   <Text style={styles.moreAmenities}>
@@ -265,7 +272,12 @@ export function RoomBookingScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>🏨</Text>
+      <MaterialCommunityIcons
+        name="office-building-outline"
+        size={56}
+        color={colors.gold.dark}
+        style={styles.emptyStateIcon}
+      />
       <Text style={styles.emptyStateText}>No rooms available</Text>
       <Text style={styles.emptyStateSubtext}>
         Tap + to add a new room listing
@@ -279,7 +291,12 @@ export function RoomBookingScreen() {
     const bookedRooms = rooms.filter((r) => r.isBooked).length;
 
     return (
-      <View style={styles.summaryCard}>
+      <LinearGradient
+        colors={gradients.maroon}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.summaryCard}
+      >
         <Text style={styles.summaryTitle}>Room Overview</Text>
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
@@ -288,20 +305,20 @@ export function RoomBookingScreen() {
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: colors.status.success }]}>
+            <Text style={[styles.summaryValue, { color: colors.gold.light }]}>
               {availableRooms}
             </Text>
             <Text style={styles.summaryLabel}>Available</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: colors.primary.vermillion }]}>
+            <Text style={[styles.summaryValue, { color: colors.background.parchment }]}>
               {bookedRooms}
             </Text>
             <Text style={styles.summaryLabel}>Booked</Text>
           </View>
         </View>
-      </View>
+      </LinearGradient>
     );
   };
 
@@ -413,7 +430,7 @@ export function RoomBookingScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading rooms...</Text>
       </View>
     );
@@ -442,8 +459,8 @@ export function RoomBookingScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -484,10 +501,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   retryButton: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
+    ...shadows.maroonGlow,
   },
   retryButtonText: {
     color: colors.text.white,
@@ -498,10 +516,12 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   summaryCard: {
-    backgroundColor: colors.accent.peacock,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     padding: spacing.lg,
     marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    ...shadows.maroonGlow,
   },
   summaryTitle: {
     color: colors.text.white,
@@ -537,8 +557,10 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 3,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    ...shadows.soft,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -550,36 +572,34 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: borderRadius.md,
     backgroundColor: colors.background.sandstone,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
   },
-  iconText: {
-    fontSize: 24,
-  },
   roomInfo: {
     flex: 1,
+    marginRight: spacing.sm,
   },
   roomName: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text.primary,
   },
+  placeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+    gap: 2,
+  },
   placeText: {
+    flex: 1,
     fontSize: 13,
     color: colors.text.secondary,
-    marginTop: 2,
   },
   chipAndActions: {
     alignItems: 'flex-end',
-  },
-  availabilityChip: {
-    height: 26,
-  },
-  availabilityChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
   },
   detailsRow: {
     flexDirection: 'row',
@@ -620,14 +640,6 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     alignItems: 'center',
   },
-  amenityChip: {
-    backgroundColor: colors.background.sandstone,
-    height: 24,
-  },
-  amenityChipText: {
-    color: colors.text.primary,
-    fontSize: 11,
-  },
   moreAmenities: {
     fontSize: 12,
     color: colors.text.secondary,
@@ -646,7 +658,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.accent.peacock,
+    backgroundColor: colors.primary.maroon,
   },
   editButtonText: {
     color: colors.text.white,
@@ -668,8 +680,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.md,
     bottom: spacing.md,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     borderRadius: borderRadius.full,
+    ...shadows.maroonGlow,
   },
   modalContainer: {
     backgroundColor: colors.background.warmWhite,
@@ -723,7 +736,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyStateIcon: {
-    fontSize: 48,
     marginBottom: spacing.md,
   },
   emptyStateText: {

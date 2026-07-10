@@ -1,4 +1,14 @@
 {
+  "settings": {
+    "appearance": "ਐਪ ਪ੍ਰਾਥਮਿਕਤਾਵਾਂ",
+    "theme": {
+      "title": "ਥੀਮ",
+      "subtitle": "ਐਪ ਦੇ ਦਿਖਣ ਦਾ ਢੰਗ ਚੁਣੋ",
+      "light": "ਹਲਕਾ",
+      "dark": "ਗੂੜ੍ਹਾ",
+      "system": "ਸਿਸਟਮ"
+    }
+  },
   "tabs": {
     "home": "ਹੋਮ",
     "explore": "ਖੋਜ",
@@ -8,30 +18,59 @@
   },
   "home": {
     "welcome": "ਹਰੀ ਓਮ",
-    "heroQuote": "\"The mind is everything. What you think, you become.\"",
-    "dailyQuote": "Daily Inspiration",
+    "heroQuote": "\"ਮਨ ਹੀ ਸਭ ਕੁਝ ਹੈ। ਤੁਸੀਂ ਜੋ ਸੋਚਦੇ ਹੋ, ਉਹੀ ਬਣ ਜਾਂਦੇ ਹੋ।\"",
+    "dailyQuote": "ਰੋਜ਼ਾਨਾ ਪ੍ਰੇਰਣਾ",
     "upcomingEvents": "ਆਉਣ ਵਾਲੇ ਪ੍ਰੋਗਰਾਮ",
     "latestArticles": "ਨਵੇਂ ਲੇਖ",
     "donationSpotlight": "ਇੱਕ ਮੁਹਿੰਮ ਨੂੰ ਸਹਿਯੋਗ ਦਿਓ",
     "quickLinks": "ਤੁਰੰਤ ਲਿੰਕ",
-    "viewAll": "View All",
+    "viewAll": "ਸਭ ਦੇਖੋ",
     "seeAll": "ਸਭ ਦੇਖੋ",
-    "seeAllUpcomingEvents": "See all upcoming events",
-    "seeAllArticles": "See all articles",
-    "noUpcomingEvents": "No upcoming events",
-    "noArticlesAvailable": "No articles available",
+    "seeAllUpcomingEvents": "ਸਾਰੇ ਆਉਣ ਵਾਲੇ ਸਮਾਗਮ ਦੇਖੋ",
+    "seeAllArticles": "ਸਾਰੇ ਲੇਖ ਦੇਖੋ",
+    "noUpcomingEvents": "ਕੋਈ ਆਉਣ ਵਾਲੇ ਸਮਾਗਮ ਨਹੀਂ",
+    "noArticlesAvailable": "ਕੋਈ ਲੇਖ ਉਪਲਬਧ ਨਹੀਂ",
     "quickLinksItems": {
-      "panchang": "Panchang",
-      "schedule": "Schedule",
-      "books": "Books",
-      "videos": "Videos",
-      "podcasts": "Podcasts",
-      "gallery": "Gallery",
-      "volunteer": "Volunteer"
+      "panchang": "ਪੰਚਾਂਗ",
+      "schedule": "ਸਮਾਂ-ਸੂਚੀ",
+      "books": "ਕਿਤਾਬਾਂ",
+      "videos": "ਵੀਡੀਓਜ਼",
+      "podcasts": "ਪੌਡਕਾਸਟਸ",
+      "gallery": "ਗੈਲਰੀ",
+      "volunteer": "ਸੇਵਾ"
     },
     "dailyVicharLabel": "आज का विचार",
     "languageHindi": "हिंदी",
-    "languageEnglish": "अंग्रेज़ी"
+    "languageEnglish": "अंग्रेज़ी",
+    "pathways": {
+      "title": "ਆਧਿਆਤਮਿਕ ਮਾਰਗ",
+      "subtitle": "ਟੈਬ ਬਾਰ ਤੋਂ ਅੱਗੇ ਪੂਰੀ ਮਿਸ਼ਨ ਅਨੁਭਵ ਵੱਲ ਵਧੋ।",
+      "aboutTitle": "ਸਵਾਮੀ ਜੀ ਬਾਰੇ",
+      "aboutSubtitle": "ਜੀਵਨ, ਵੰਸ਼ਾਵਲੀ, ਅਤੇ ਆਧਿਆਤਮਿਕ ਯਾਤਰਾ",
+      "missionTitle": "ਮਿਸ਼ਨ ਅਤੇ ਉਪਦੇਸ਼",
+      "missionSubtitle": "ਮੁੱਖ ਸੁਨੇਹਾ, ਸੇਵਾ, ਅਤੇ ਪਹੁੰਚ",
+      "dikshaTitle": "ਮੰਤਰ ਦীক্ষਾ",
+      "dikshaSubtitle": "ਪਵਿੱਤਰ ਮਾਰਗਦਰਸ਼ਨ ਅਤੇ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਾਰਗ",
+      "writeTitle": "ਸਵਾਮੀ ਜੀ ਨੂੰ ਲਿਖੋ",
+      "writeSubtitle": "ਆਸ਼ਰਮ ਦਫ਼ਤਰ ਨਾਲ ਦਿਲੋਂ ਸੁਨੇਹਾ ਸਾਂਝਾ ਕਰੋ"
+    },
+    "teachings": {
+      "title": "ਮੁੱਖ ਉਪਦੇਸ਼",
+      "subtitle": "ਸਵਾਮੀ ਜੀ ਦੇ ਆਧਿਆਤਮਿਕ ਜ਼ੋਰ ਤੋਂ ਰੋਜ਼ਾਨਾ ਯਾਦ ਦਿਵਾਉਣ ਵਾਲੇ।",
+      "oneTitle": "ਅੰਦਰੂਨੀ ਅਨੁਸ਼ਾਸਨ",
+      "oneBody": "ਆਤਮ-ਸੰਯਮ, ਸਥਿਰਤਾ, ਅਤੇ ਇਰਾਦੇ ਦੀ ਪਵਿੱਤਰਤਾ ਖੋਜੀ ਨੂੰ ਸਦੀਵੀ ਸ਼ਾਂਤੀ ਲਈ ਤਿਆਰ ਕਰਦੇ ਹਨ।",
+      "twoTitle": "ਰੋਜ਼ਾਨਾ ਜੀਵਨ ਵਿੱਚ ਗਿਆਨ",
+      "twoBody": "ਧਾਰਮਿਕ ਅਨੁਭਵ ਸਿਰਫ਼ ਤਦ ਹੀ ਮਾਇਨੇ ਰੱਖਦਾ ਹੈ ਜਦੋਂ ਇਹ ਨਿਮਰਤਾ, ਸਪਸ਼ਟਤਾ, ਅਤੇ ਸਹੀ ਕਾਰਵਾਈ ਲਿਆਉਂਦਾ ਹੈ।",
+      "threeTitle": "ਸਾਧਨਾ ਵਜੋਂ ਸੇਵਾ",
+      "threeBody": "ਜਦੋਂ ਸੇਵਾ ਅਹੰਕਾਰ ਤੋਂ ਬਿਨਾਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਤਦੋਂ ਦਇਆ ਖੁਦ ਹੀ ਇੱਕ ਪੂਜਾ ਦਾ ਰੂਪ ਬਣ ਜਾਂਦੀ ਹੈ।"
+    },
+    "initiativesTitle": "ਮਿਸ਼ਨ ਪਹਲਾਂ",
+    "initiativesSubtitle": "ਵਿਆਪਕ ਮਿਸ਼ਨ ਵਿੱਚ ਦਰਸਾਏ ਗਏ ਸੇਵਾ ਅਤੇ ਪਹੁੰਚ ਦੇ ਖੇਤਰ।",
+    "initiatives": {
+      "one": "ਖੋਜੀਆਂ ਲਈ ਆਧਿਆਤਮਿਕ ਸਿੱਖਿਆ, ਸਤਸੰਗ, ਅਤੇ ਧਾਰਮਿਕ ਮਾਰਗਦਰਸ਼ਨ।",
+      "two": "ਸਮਾਜਿਕ ਉਤਥਾਨ, ਦੇਖਭਾਲ, ਅਤੇ ਰਾਹਤ ਕੰਮ ਲਈ ਮਨੁੱਖੀ ਸੇਵਾ।",
+      "three": "ਸੰਸਕ੍ਰਿਤਿਕ, ਪਰੀਵਰਣੀ, ਅਤੇ ਕਮਿਊਨਿਟੀ ਪਹਲਾਂ ਜੋ ਸਨਾਤਨ ਮੁੱਲਾਂ ਵਿੱਚ ਜੜੀਆਂ ਹਨ।"
+    }
   },
   "explore": {
     "title": "ਖੋਜ",
@@ -52,13 +91,13 @@
   },
   "schedule": {
     "title": "ਸੂਚੀ",
-    "upcoming": "Upcoming",
-    "past": "Past",
-    "noEvents": "No scheduled events",
-    "registerNow": "Register Now",
-    "registered": "Registered",
-    "location": "Location",
-    "date": "Date",
+    "upcoming": "ਆਉਣ ਵਾਲੇ",
+    "past": "ਪਿਛਲੇ",
+    "noEvents": "ਕੋਈ ਨਿਰਧਾਰਿਤ ਸਮਾਗਮ ਨਹੀਂ",
+    "registerNow": "ਹੁਣੇ ਰਜਿਸਟਰ ਕਰੋ",
+    "registered": "ਰਜਿਸਟਰਡ",
+    "location": "ਸਥਾਨ",
+    "date": "ਤਾਰੀਖ",
     "ashram": "आश्रम",
     "capacityOpen": "उपलब्ध {{open}} / {{total}}",
     "updated": "अपडेटेड",
@@ -80,7 +119,7 @@
     "emptySchedulesSubtitle": "अद्यतन के लिए बाद में देखें",
     "placeholders": {
       "name": "आपका नाम",
-      "email": "you@example.com",
+      "email": "ਤੁਸੀਂ@example.com",
       "phone": "+91",
       "additionalInfo": "सेवा दल को बताएं कि आप स्वामी जी से क्यों मिलना चाहते हैं"
     },
@@ -185,8 +224,8 @@
       "campaign": "अभियान",
       "reference": "भुगतान संदर्भ",
       "share": "इस सेवा को साझा करें",
-      "shareTitle": "मैंने AvdheshanandG Mission का समर्थन किया",
-      "shareText": "मैंने AvdheshanandG Mission के माध्यम से {{campaign}} हेतु {{amount}} अर्पित किए।"
+      "shareTitle": "मैंने Swami Avdheshanand G का समर्थन किया",
+      "shareText": "मैंने Swami Avdheshanand G के माध्यम से {{campaign}} हेतु {{amount}} अर्पित किए।"
     },
     "history": {
       "title": "दान इतिहास",
@@ -217,71 +256,75 @@
   },
   "profile": {
     "title": "ਪ੍ਰੋਫਾਈਲ",
-    "editProfile": "Edit Profile",
-    "myEvents": "My Events",
-    "settings": "Settings",
+    "editProfile": "ਪ੍ਰੋਫ਼ਾਈਲ ਸੋਧੋ",
+    "saveChanges": "ਬਦਲਾਅ ਸੰਭਾਲੋ",
+    "updateSuccess": "ਪਰੋਫ਼ਾਈਲ ਅਪਡੇਟ ਹੋਈ",
+    "updateFailed": "ਪਰੋਫ਼ਾਈਲ ਅਪਡੇਟ ਨਹੀਂ ਹੋ ਸਕੀ",
+    "emailLocked": "ਈਮੇਲ ਪਤਾ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ",
+    "errors": {
+      "nameRequired": "ਨਾਮ ਲਾਜ਼ਮੀ ਹੈ",
+      "phoneInvalid": "ਕਿਰਪਾ ਕਰਕੇ ਸਹੀ 10-ਅੰਕਾਂ ਵਾਲਾ ਫੋਨ ਨੰਬਰ ਦਾਖਲ ਕਰੋ"
+    },
+    "myEvents": "ਮੇਰੇ ਇਵੈਂਟਸ",
+    "settings": "ਸੈਟਿੰਗਜ਼",
     "language": "ਭਾਸ਼ਾ",
-    "notifications": "Notifications",
-    "about": "About",
+    "notifications": "ਸੂਚਨਾਵਾਂ",
+    "about": "ਬਾਰੇ",
     "logout": "ਲਾਗ ਆਉਟ",
-    "logoutConfirm": "Are you sure you want to logout?",
-    "loginPrompt": "Sign in to access your profile",
+    "logoutConfirm": "ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਲੌਗਆਉਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?",
+    "loginPrompt": "ਆਪਣੀ ਪ੍ਰੋਫ਼ਾਈਲ ਤੱਕ ਪਹੁੰਚਣ ਲਈ ਸਾਈਨ ਇਨ ਕਰੋ",
     "login": "ਲਾਗ ਇਨ",
-    "register": "Register",
-    "devoteeFallback": "Devotee",
-    "featureComingSoon": "{{item}} will be available soon.",
-    "appTagline": "Hari Om",
+    "register": "ਰਜਿਸਟਰ",
+    "devoteeFallback": "ਭਗਤ",
+    "featureComingSoon": "{{item}} ਜਲਦੀ ਉਪਲਬਧ ਹੋਵੇਗਾ।",
+    "appTagline": "ਹਰੀ ਓਮ",
     "stats": {
-      "registrations": "Registrations",
-      "donations": "Donations",
-      "bookings": "Bookings"
+      "registrations": "ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+      "donations": "ਦਾਨ",
+      "bookings": "ਬੁਕਿੰਗਜ਼"
     },
     "menu": {
       "registrations": {
-        "title": "My Registrations",
-        "subtitle": "Events and schedules you registered for"
+        "title": "ਮੇਰੀਆਂ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+        "subtitle": "ਇਵੈਂਟਸ ਅਤੇ ਸਮਾਰੋਹ ਜਿਨ੍ਹਾਂ ਲਈ ਤੁਸੀਂ ਰਜਿਸਟਰ ਕੀਤਾ"
       },
       "donations": {
-        "title": "Donation History",
-        "subtitle": "View your past donations"
+        "title": "ਦਾਨ ਇਤਿਹਾਸ",
+        "subtitle": "ਆਪਣੇ ਪਿਛਲੇ ਦਾਨ ਵੇਖੋ"
       },
       "bookings": {
-        "title": "My Bookings",
-        "subtitle": "Room and accommodation bookings"
+        "title": "ਮੇਰੀਆਂ ਬੁਕਿੰਗਜ਼",
+        "subtitle": "ਕਮਰੇ ਅਤੇ ਰਿਹਾਇਸ਼ ਬੁਕਿੰਗਜ਼"
       },
       "settings": {
-        "subtitle": "App preferences and notifications"
+        "subtitle": "ਐਪ ਪਸੰਦਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ"
       }
     }
   },
   "auth": {
-    "welcomeBack": "Welcome Back",
-    "spiritualGreeting": "Hari Om Tat Sat",
-    "email": "Email",
-    "password": "Password",
-    "forgotPassword": "Forgot Password?",
-    "signIn": "Sign In",
-    "noAccount": "Don't have an account?",
-    "register": "Register",
-    "createAccount": "Create Account",
-    "fullName": "Full Name",
-    "confirmPassword": "Confirm Password",
-    "alreadyHaveAccount": "Already have an account?",
-    "login": "Login",
-    "otpTitle": "Verify Your Email",
-    "otpSubtitle": "Enter the OTP sent to your email",
-    "verifyOtp": "Verify OTP",
-    "resendOtp": "Resend OTP",
-    "resetPassword": "Reset Password",
-    "sendResetLink": "Send Reset Link",
-    "backToLogin": "Back to Login",
-    "googleSignInComingSoon": "Google Sign-In (Coming Soon)",
-    "browseWithoutSignIn": "Browse without signing in",
-    "errors": {
-      "fillAllFields": "Please fill in all fields",
-      "loginFailedTitle": "Login Failed",
-      "invalidCredentials": "Invalid credentials"
-    },
+    "welcomeBack": "ਵਾਪਸੀ 'ਤੇ ਸਵਾਗਤ ਹੈ",
+    "spiritualGreeting": "ਹਰੀ ਓਮ ਤਤ ਸਤ",
+    "email": "ਈਮੇਲ",
+    "password": "ਪਾਸਵਰਡ",
+    "forgotPassword": "ਪਾਸਵਰਡ ਭੁੱਲ ਗਏ?",
+    "signIn": "ਸਾਈਨ ਇਨ",
+    "noAccount": "ਕੀ ਤੁਹਾਡੇ ਕੋਲ ਖਾਤਾ ਨਹੀਂ ਹੈ?",
+    "register": "ਰਜਿਸਟਰ",
+    "createAccount": "ਖਾਤਾ ਬਣਾਓ",
+    "fullName": "ਪੂਰਾ ਨਾਮ",
+    "confirmPassword": "ਪਾਸਵਰਡ ਪੁਸ਼ਟੀ ਕਰੋ",
+    "alreadyHaveAccount": "ਕੀ ਤੁਹਾਡੇ ਕੋਲ ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ?",
+    "login": "ਲੌਗਇਨ",
+    "otpTitle": "ਆਪਣੀ ਈਮੇਲ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ",
+    "otpSubtitle": "ਆਪਣੀ ਈਮੇਲ 'ਤੇ ਭੇਜੇ ਗਏ ਓਟੀਪੀ ਨੂੰ ਦਰਜ ਕਰੋ",
+    "verifyOtp": "ਓਟੀਪੀ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ",
+    "resendOtp": "ਓਟੀਪੀ ਮੁੜ ਭੇਜੋ",
+    "resetPassword": "ਪਾਸਵਰਡ ਰੀਸੈਟ ਕਰੋ",
+    "sendResetLink": "ਰੀਸੈਟ ਲਿੰਕ ਭੇਜੋ",
+    "backToLogin": "ਲੌਗਇਨ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+    "googleSignInComingSoon": "ਗੂਗਲ ਸਾਈਨ-ਇਨ (ਜਲਦੀ ਆ ਰਿਹਾ ਹੈ)",
+    "continueWithGoogle": "ਗੂਗਲ ਨਾਲ ਜਾਰੀ ਰੱਖੋ",
+    "browseWithoutSignIn": "ਬਿਨਾਂ ਸਾਈਨ ਇਨ ਕੀਤੇ ਬ੍ਰਾਊਜ਼ ਕਰੋ",
     "registerFlow": {
       "subtitle": "हमारे आध्यात्मिक समुदाय से जुड़ें",
       "fullNameRequired": "पूरा नाम *",
@@ -342,37 +385,79 @@
       "errors": {
         "passwordMin": "पासवर्ड कम से कम 8 अक्षरों का होना चाहिए"
       }
+    },
+    "errors": {
+      "fillAllFields": "ਕਿਰਪਾ ਕਰਕੇ ਸਾਰੇ ਖੇਤਰ ਭਰੋ",
+      "loginFailedTitle": "ਲਾਗਿਨ ਅਸਫਲ",
+      "invalidCredentials": "ਗਲਤ ਪ੍ਰਮਾਣ ਪੱਤਰ"
     }
+  },
+  "onboarding": {
+    "brand": "Swami Avdheshanand G",
+    "brandTagline": "ਦਿਵ्यता ਵੱਲ",
+    "changeLanguage": "ਭਾਸ਼ਾ ਬਦਲੋ",
+    "languageTitle": "ਆਪਣੀ ਭਾਸ਼ਾ ਚੁਣੋ",
+    "languageSubtitle": "ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਐਪ ਤੋਂ ਬਾਅਦ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
+    "welcomeTitle": "ਸਪਸ਼ਟਤਾ ਨਾਲ ਆਪਣੀ ਆਧਿਆਤਮਿਕ ਯਾਤਰਾ ਸ਼ੁਰੂ ਕਰੋ",
+    "welcomeSubtitle": "ਰੋਜ਼ਾਨਾ ਪੰਚਾਂਗ, ਸਵਾਮੀ ਜੀ ਦਾ ਸ਼ਡਿਊਲ, ਗਿਆਨ ਸਮੱਗਰੀ, ਸੇਵਾ ਦੇ ਮੌਕੇ, ਅਤੇ ਆਸ਼ਰਮ ਅਪਡੇਟ ਇੱਕ ਸ਼ਾਂਤ ਸਥਾਨ ਵਿੱਚ।",
+    "getStarted": "ਸ਼ੁਰੂ ਕਰੋ",
+    "existingLogin": "ਮੌਜੂਦਾ ਯੂਜ਼ਰ? ਲਾਗਿਨ ਕਰੋ",
+    "continueAsGuest": "ਮਹਿਮਾਨ ਵਜੋਂ ਜਾਰੀ ਰੱਖੋ",
+    "footer": "ਜਾਰੀ ਰੱਖਣ ਨਾਲ, ਤੁਸੀਂ Swami Avdheshanand G ਤੋਂ ਇੱਕ ਸਤਿਕਾਰਪੂਰਵਕ ਅਤੇ ਨਿੱਜੀ ਆਧਿਆਤਮਿਕ ਅਨੁਭਵ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਸਹਿਮਤ ਹੋ।",
+    "slides": {
+      "panchangEyebrow": "ਰੋਜ਼ਾਨਾ ਮਾਰਗਦਰਸ਼ਨ",
+      "panchangTitle": "ਪੰਚਾਂਗ ਅਤੇ ਪਵਿੱਤਰ ਸਮੇਂ ਨਾਲ ਹਰ ਦਿਨ ਦੀ ਸ਼ੁਰੂਆਤ ਕਰੋ",
+      "panchangDescription": "ਤਿਥੀ, ਨਕਸ਼ਤ੍ਰ, ਮੁਹੂਰਤ, ਅਤੇ ਸ਼ਹਿਰ-ਵਿਸ਼ੇਸ਼ ਆਧਿਆਤਮਿਕ ਸਮੇਂ ਨਾਲ ਸੁਰ ਵਿੱਚ ਰਹੋ।",
+      "scheduleEyebrow": "ਜੁੜੇ ਰਹੋ",
+      "scheduleTitle": "ਸਵਾਮੀ ਜੀ ਦੇ ਨਵੇਂ ਸ਼ਡਿਊਲ ਅਤੇ ਦਰਸ਼ਨ ਅਪਡੇਟ ਦਾ ਪਾਲਣ ਕਰੋ",
+      "scheduleDescription": "ਆਸ਼ਰਮ ਦੌਰੇ, ਜਨਤਕ ਪ੍ਰੋਗਰਾਮ, ਅਤੇ ਮਨਜ਼ੂਰ ਸ਼ੁਦਾ ਮੁਲਾਕਾਤ ਵਿੰਡੋ ਇੱਕ ਸਥਾਨ ਵਿੱਚ ਵੇਖੋ।",
+      "wisdomEyebrow": "ਸੁਣੋ ਅਤੇ ਸਿੱਖੋ",
+      "wisdomTitle": "ਸਵਾਮੀ ਜੀ ਦੀਆਂ ਸਿੱਖਿਆਵਾਂ ਨਾਲ ਪੜ੍ਹੋ, ਵੇਖੋ, ਅਤੇ ਵਿਚਾਰ ਕਰੋ",
+      "wisdomDescription": "ਆਪਣੀ ਰੋਜ਼ਾਨਾ ਸਾਧਨਾ ਲਈ ਲੇਖ, ਕਿਤਾਬਾਂ, ਪੋਡਕਾਸਟ, ਅਤੇ ਵੀਡੀਓ ਸੀਰੀਜ਼ ਤੱਕ ਪਹੁੰਚ ਕਰੋ।",
+      "sevaEyebrow": "ਸੇਵਾ ਅਰਪਣ ਕਰੋ",
+      "sevaTitle": "ਸੇਵਾ ਦਾ ਸਮਰਥਨ ਕਰੋ, ਸੇਵਾ ਕਰੋ, ਅਤੇ ਮਿਸ਼ਨ ਦਾ ਹਿੱਸਾ ਬਣੇ ਰਹੋ",
+      "sevaDescription": "ਸੁਰੱਖਿਅਤ ਦਾਨ ਕਰੋ, ਆਸ਼ਰਮ ਪਹਲਾਂ ਦੀ ਪੜਚੋਲ ਕਰੋ, ਅਤੇ ਮਹੱਤਵਪੂਰਨ ਕੰਮ ਦੇ ਨੇੜੇ ਰਹੋ।"
+    },
+    "permissionsEyebrow": "ਜਾਣਕਾਰੀ ਵਿੱਚ ਰਹੋ",
+    "notificationsTitle": "ਪਵਿੱਤਰ ਯਾਦ ਦਿਹਾਣੀਆਂ ਅਤੇ ਸਮੇਂ-ਸਮੇਂ ਦੀਆਂ ਅਪਡੇਟ ਪ੍ਰਾਪਤ ਕਰੋ",
+    "notificationsSubtitle": "ਸਾਨੂੰ ਤੁਹਾਨੂੰ ਰੋਜ਼ਾਨਾ ਪੰਚਾਂਗ, ਮਹੱਤਵਪੂਰਨ ਦਰਸ਼ਨ ਅਪਡੇਟ, ਅਤੇ ਵਿਸ਼ੇਸ਼ ਸਤਸੰਗ ਪਲਾਂ ਬਾਰੇ ਹੌਲੀ ਹੌਲੀ ਯਾਦ ਦਿਵਾਉਣ ਦਿਓ।",
+    "notificationsBenefits": {
+      "panchang": "ਰੋਜ਼ਾਨਾ ਪੰਚਾਂਗ ਅਤੇ ਬ੍ਰਹਮਾ ਮੁਹੂਰਤ ਯਾਦ ਦਿਹਾਣੀਆਂ",
+      "schedule": "ਸਵਾਮੀ ਜੀ ਦੇ ਸ਼ਡਿਊਲ ਬਦਲਾਅ ਅਤੇ ਦਰਸ਼ਨ ਅਲਰਟ",
+      "satsang": "ਵਿਸ਼ੇਸ਼ ਸਤਸੰਗ, ਇਵੈਂਟ, ਅਤੇ ਆਸ਼ਰਮ ਅਪਡੇਟ ਨੋਟੀਫਿਕੇਸ਼ਨ"
+    },
+    "enableNotifications": "ਹਾਂ, ਮੈਨੂੰ ਅਪਡੇਟ ਰੱਖੋ",
+    "maybeLater": "ਸ਼ਾਇਦ ਬਾਅਦ ਵਿੱਚ",
+    "locationEyebrow": "ਪੰਚਾਂਗ ਨੂੰ ਨਿੱਜੀ ਬਣਾਓ",
+    "locationTitle": "ਹੋਰ ਸਹੀ ਪੰਚਾਂਗ ਮਾਰਗਦਰਸ਼ਨ ਲਈ ਆਪਣਾ ਸਥਾਨ ਵਰਤੋ",
+    "locationSubtitle": "ਤੁਹਾਡਾ ਸ਼ਹਿਰ ਸਾਨੂੰ ਸੂਰਜੋਦੇ, ਮੁਹੂਰਤ, ਅਤੇ ਤਿਉਹਾਰ ਦੇ ਸਮੇਂ ਨੂੰ ਵਧੀਆ ਸਹੀਤਾ ਨਾਲ ਦਿਖਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ।",
+    "locationBenefits": {
+      "panchang": "ਤੁਹਾਡੇ ਮੌਜੂਦਾ ਸ਼ਹਿਰ ਲਈ ਹੋਰ ਸਹੀ ਪੰਚਾਂਗ",
+      "city": "ਸ਼ਹਿਰ-ਅਧਾਰਿਤ ਸ਼ਡਿਊਲ ਅਤੇ ਆਸ਼ਰਮ ਮਾਰਗਦਰਸ਼ਨ ਤੇਜ਼ੀ ਨਾਲ"
+    },
+    "useMyLocation": "ਮੇਰਾ ਸਥਾਨ ਵਰਤੋ",
+    "chooseLater": "ਸ਼ਹਿਰ ਬਾਅਦ ਵਿੱਚ ਚੁਣੋ",
+    "locationErrorTitle": "ਸਥਾਨ ਪਤਾ ਕਰਨ ਵਿੱਚ ਅਸਮਰਥ",
+    "locationErrorMessage": "ਅਸੀਂ ਇਸ ਵੇਲੇ ਤੁਹਾਡਾ ਸਥਾਨ ਪ੍ਰਾਪਤ ਨਹੀਂ ਕਰ ਸਕੇ। ਤੁਸੀਂ ਬਾਅਦ ਵਿੱਚ ਪੰਚਾਂਗ ਤੋਂ ਆਪਣਾ ਸ਼ਹਿਰ ਚੁਣ ਸਕਦੇ ਹੋ।"
   },
   "common": {
     "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...",
-    "error": "Error",
+    "error": "ਗਲਤੀ",
+    "comingSoon": "जल्द आ रहा है",
     "retry": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
     "cancel": "ਰੱਦ ਕਰੋ",
-    "or": "or",
+    "or": "ਜਾਂ",
     "changeLanguageTo": "{{language}} ਵਿੱਚ ਭਾਸ਼ਾ ਬਦਲੋ",
     "save": "ਸੇਵ ਕਰੋ",
-    "readMore": "Read More",
-    "viewAll": "View All",
-    "buyOnAmazon": "Buy on Amazon",
+    "readMore": "ਹੋਰ ਪੜ੍ਹੋ",
+    "viewAll": "ਸਭ ਦੇਖੋ",
+    "buyOnAmazon": "ਅਮੇਜ਼ਾਨ 'ਤੇ ਖਰੀਦੋ",
     "somethingWentWrong": "ਕੁਝ ਗਲਤ ਹੋਇਆ",
     "tryAgain": "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
-    "comingSoon": "जल्द आ रहा है",
     "ok": "ठीक है",
     "goBack": "वापस जाएँ",
-    "unexpectedError": "एक अनपेक्षित त्रुटि हुई है"
-  },
-  "profileLogin": {
-    "title": "ਸਵਾਗਤ ਹੈ, ਸਾਧਕ",
-    "subtitle": "ਆਪਣੀ ਆਧਿਆਤਮਿਕ ਯਾਤਰਾ ਅਤੇ ਕਮਿਊਨਿਟੀ ਲਈ ਸਾਇਨ ਇਨ ਕਰੋ.",
-    "benefits": {
-      "savedTeachings": "Save your favorite teachings",
-      "registerEvents": "Register for upcoming events",
-      "trackContributions": "Track your seva contributions",
-      "personalizedNotifications": "Get personalized notifications"
-    },
-    "quote": "\"ਹਜ਼ਾਰ ਮੀਲ ਦੀ ਯਾਤਰਾ ਇਕ ਕਦਮ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦੀ ਹੈ\"",
-    "quoteAuthor": "— ਲਾਓ ਸੁ"
+    "unexpectedError": "एक अनपेक्षित त्रुटि हुई है",
+    "networkError": "ਸਰਵਰ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਇੰਟਰਨੈੱਟ ਕਨੈਕਸ਼ਨ ਚੈੱਕ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
   },
   "chat": {
     "headerTitle": "स्वामी जी से पूछें",
@@ -394,6 +479,18 @@
     "noStreamSubtitle": "निर्धारित सत्संग समय में फिर देखें",
     "upcomingStreams": "आगामी स्ट्रीम"
   },
+  "profileLogin": {
+    "title": "ਸਵਾਗਤ ਹੈ, ਸਾਧਕ",
+    "subtitle": "ਆਪਣੀ ਆਧਿਆਤਮਿਕ ਯਾਤਰਾ ਅਤੇ ਕਮਿਊਨਿਟੀ ਲਈ ਸਾਇਨ ਇਨ ਕਰੋ.",
+    "benefits": {
+      "savedTeachings": "ਆਪਣੇ ਮਨਪਸੰਦ ਉਪਦੇਸ਼ ਸੇਵ ਕਰੋ",
+      "registerEvents": "ਆਉਣ ਵਾਲੇ ਸਮਾਗਮਾਂ ਲਈ ਰਜਿਸਟਰ ਕਰੋ",
+      "trackContributions": "ਆਪਣੇ ਸੇਵਾ ਯੋਗਦਾਨ ਟਰੈਕ ਕਰੋ",
+      "personalizedNotifications": "ਵਿਅਕਤੀਗਤ ਸੂਚਨਾਵਾਂ ਪ੍ਰਾਪਤ ਕਰੋ"
+    },
+    "quote": "\"ਹਜ਼ਾਰ ਮੀਲ ਦੀ ਯਾਤਰਾ ਇਕ ਕਦਮ ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦੀ ਹੈ\"",
+    "quoteAuthor": "— ਲਾਓ ਸੁ"
+  },
   "contact": {
     "title": "संपर्क करें",
     "introTitle": "संपर्क में रहें",
@@ -412,8 +509,10 @@
     "footerSubtext": "सभी प्राणी सुखी हों",
     "placeholders": {
       "name": "अपना नाम दर्ज करें",
-      "email": "your@email.com",
-      "message": "अपना संदेश यहाँ लिखें..."
+      "email": "ਤੁਹਾਡਾ@email.com",
+      "message": "अपना संदेश यहाँ लिखें...",
+      "subject": "ਤੁਸੀਂ ਕਿਸ ਬਾਰੇ ਲਿਖਣਾ ਚਾਹੁੰਦੇ ਹੋ?",
+      "writeToSwami": "ਸਵਾਮੀ ਜੀ ਜਾਂ ਆਸ਼ਰਮ ਦਫ਼ਤਰ ਲਈ ਆਪਣਾ ਸੁਨੇਹਾ ਲਿਖੋ..."
     },
     "errors": {
       "nameRequired": "नाम आवश्यक है",
@@ -421,8 +520,12 @@
       "emailValid": "कृपया मान्य ईमेल दर्ज करें",
       "messageRequired": "संदेश आवश्यक है",
       "messageMin": "संदेश कम से कम 10 अक्षरों का होना चाहिए",
-      "submitFailed": "संदेश भेजा नहीं जा सका"
-    }
+      "submitFailed": "संदेश भेजा नहीं जा सका",
+      "subjectRequired": "ਕਿਰਪਾ ਕਰਕੇ ਵਿਸ਼ਾ ਦਰਜ ਕਰੋ"
+    },
+    "subject": "ਵਿਸ਼ਾ",
+    "writeToSwamiTitle": "ਸਵਾਮੀ ਜੀ ਨੂੰ ਲਿਖੋ",
+    "writeToSwamiSubtitle": "ਆਪਣਾ ਸੁਨੇਹਾ, ਅਸੀਸਾਂ ਦੀ ਬੇਨਤੀ ਜਾਂ ਆਤਮਿਕ ਨੋਟ ਆਸ਼ਰਮ ਦਫ਼ਤਰ ਨਾਲ ਸਾਂਝਾ ਕਰੋ ਤਾਂ ਜੋ ਇਸਨੂੰ ਧਿਆਨ ਨਾਲ ਪ੍ਰਾਪਤ ਕੀਤਾ ਜਾ ਸਕੇ।"
   },
   "panchangNotifications": {
     "headerTitle": "सूचना सेटिंग्स",
@@ -483,10 +586,13 @@
       "genre": "श्रेणी",
       "aboutThisBook": "इस पुस्तक के बारे में",
       "quote": "पुस्तकें सभ्यता की वाहक हैं। पुस्तकों के बिना इतिहास मौन हो जाता है।",
-      "purchaseBook": "पुस्तक खरीदें",
-      "currentlyUnavailable": "वर्तमान में उपलब्ध नहीं",
-      "purchaseRequestTitle": "क्रय अनुरोध",
-      "purchaseRequestMessage": "\"{{title}}\" में आपकी रुचि के लिए धन्यवाद।\n\nहमारी टीम आपकी खरीद पूर्ण कराने के लिए शीघ्र संपर्क करेगी। यह पावन ज्ञान आपके मार्ग को आलोकित करे।"
+      "buyNow": "ਹੁਣੇ ਖਰੀਦੋ",
+      "linkUnavailable": "ਖਰੀਦ ਲਿੰਕ ਉਪਲਬਧ ਨਹੀਂ",
+      "openLinkFailed": "ਵਿਦੇਸ਼ੀ ਕਿਤਾਬ ਲਿੰਕ ਇਸ ਵੇਲੇ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦੇ।",
+      "externalSellerAvailable": "ਬਾਹਰੀ ਵਿਕਰੇਤਾ ਲਿੰਕ ਉਪਲਬਧ",
+      "purchaseNoticeTitle": "ਖਰੀਦ ਸੂਚਨਾ",
+      "externalSellerNoticeShort": "Swami Avdheshanand G ਸਿਰਫ਼ ਇਹ ਕਿਤਾਬਾਂ ਅਤੇ ਉਨ੍ਹਾਂ ਦੇ ਬਾਹਰੀ ਖਰੀਦ ਲਿੰਕ ਦਿਖਾਉਂਦਾ ਹੈ। ਵਿਕਰੀ ਅਤੇ ਪੂਰਾ ਕਰਨ ਦੀ ਜ਼ਿੰਮੇਵਾਰੀ ਸਿਰਫ਼ ਸੰਬੰਧਿਤ ਵਿਕਰੇਤਾ ਜਾਂ ਮਾਰਕੀਟਪਲੇਸ ਦੀ ਹੈ।",
+      "externalSellerNotice": "Swami Avdheshanand G ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਇਹ ਕਿਤਾਬਾਂ ਨਹੀਂ ਵੇਚਦਾ, ਪੂਰਾ ਕਰਦਾ ਜਾਂ ਵੰਡਦਾ। ਕੋਈ ਵੀ ਖਰੀਦ ਸਿਰਫ਼ ਸੰਬੰਧਿਤ ਤੀਜੇ ਪੱਖ ਦੇ ਵਿਕਰੇਤਾ, ਪ੍ਰਕਾਸ਼ਕ ਜਾਂ ਮਾਰਕੀਟਪਲੇਸ ਨਾਲ ਪੂਰੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਜੋ ਕੀਮਤ, ਉਪਲਬਧਤਾ, ਸ਼ਿਪਿੰਗ, ਵਾਪਸੀ ਅਤੇ ਗਾਹਕ ਸਹਾਇਤਾ ਲਈ ਸਿਰਫ਼ ਜ਼ਿੰਮੇਵਾਰ ਰਹਿੰਦਾ ਹੈ।"
     },
     "podcast": {
       "title": "पॉडकास्ट",
@@ -615,5 +721,176 @@
         "monthLoadFailed": "मासिक लाइव पंचांग डेटा लोड नहीं हो सका। कृपया बैकएंड कनेक्शन जांचें।"
       }
     }
+  },
+  "appDrawer": {
+    "openMenu": "ਐਪ ਮੀਨੂ ਖੋਲ੍ਹੋ",
+    "eyebrow": "Swami Avdheshanand G",
+    "title": "ਮਿਸ਼ਨ ਗਾਈਡ",
+    "subtitle": "ਇੱਕ ਹੀ ਥਾਂ ਤੋਂ ਵਿਸ਼ਾਲ ਆਤਮਿਕ ਯਾਤਰਾ, ਉਪਦੇਸ਼, ਕਾਨੂੰਨੀ ਪੰਨੇ ਅਤੇ ਸੇਵਾ ਮਾਰਗਾਂ ਨੂੰ ਬਰਾਊਜ਼ ਕਰੋ।",
+    "sections": {
+      "browse": "ਬਰਾਊਜ਼ ਕਰੋ",
+      "mission": "ਮਿਸ਼ਨ",
+      "policies": "ਨੀਤੀਆਂ"
+    },
+    "items": {
+      "aboutSwami": "ਸਵਾਮੀ ਜੀ ਬਾਰੇ",
+      "missionTeachings": "ਮਿਸ਼ਨ ਅਤੇ ਉਪਦੇਸ਼",
+      "mantraDiksha": "ਮੰਤਰ ਦীক্ষਾ",
+      "writeToSwami": "ਸਵਾਮੀ ਜੀ ਨੂੰ ਲਿਖੋ",
+      "privacy": "ਗੋਪਨੀਯਤਾ ਨੀਤੀ",
+      "terms": "ਸੇਵਾ ਸ਼ਰਤਾਂ"
+    },
+    "footerTitle": "ਖੋਜਣ ਦਾ ਇੱਕ ਸ਼ਾਂਤ ਤਰੀਕਾ",
+    "footerText": "ਮੋਬਾਈਲ ਐਪ ਹੁਣ ਵੈਬਸਾਈਟ ਦੇ ਭਰੋਸੇ ਅਤੇ ਸੰਦਰਭ ਪੱਧਰ ਨੂੰ ਵਧੇਰੇ ਦਰਸਾਉਂਦਾ ਹੈ ਤਾਂ ਜੋ ਭਗਤ ਮਿਸ਼ਨ ਨੂੰ ਸਮਝ ਸਕਣ, ਸਿਰਫ਼ ਸਮੱਗਰੀ ਨਹੀਂ।"
+  },
+  "aboutSwami": {
+    "eyebrow": "ਆਤਮਿਕ ਵਿਰਾਸਤ",
+    "title": "ਸਵਾਮੀ ਜੀ ਬਾਰੇ",
+    "subtitle": "ਤਪੱਸਿਆ, ਵੰਸ਼, ਸੇਵਾ ਅਤੇ ਦਇਆਵਾਨ ਆਤਮਿਕ ਨੇਤ੍ਰਿਤਵ ਵਿੱਚ ਜੜੀ ਇੱਕ ਜ਼ਿੰਦਗੀ।",
+    "heroTitle": "ਪੁਰਾਤਨ ਪਰੰਪਰਾ ਵਿੱਚ ਜੜੀ ਇੱਕ ਆਧੁਨਿਕ ਆਤਮਿਕ ਗਾਈਡ",
+    "heroText": "Swami Avdheshanand Giri Ji Maharaj ਵੈਦਾਂਤਿਕ ਗਿਆਨ, ਅਨੁਸ਼ਾਸਿਤ ਸਾਧਨਾ ਅਤੇ ਨਿਸ਼ਕਾਮ ਸੇਵਾ ਦੀ ਇੱਕ ਜੀਵੰਤ ਲਗਾਤਾਰਤਾ ਦਾ ਪ੍ਰਤੀਕ ਹੈ। ਉਸ ਦੀ ਯਾਤਰਾ ਤਿਆਗ, ਸ਼ਾਸਤਰੀ ਗਹਿਰਾਈ ਅਤੇ ਸਮਾਜ ਲਈ ਸਰਗਰਮ ਦੇਖਭਾਲ ਨੂੰ ਜੋੜਦੀ ਹੈ।",
+    "biographyTitle": "ਜੀਵਨ ਯਾਤਰਾ",
+    "biographySubtitle": "ਉਹ ਮੁੱਖ ਪਲ ਜਿਨ੍ਹਾਂ ਨੇ ਉਸ ਦੇ ਆਤਮਿਕ ਮਾਰਗ ਅਤੇ ਦੁਨੀਆ ਪ੍ਰਤੀ ਜ਼ਿੰਮੇਵਾਰੀ ਨੂੰ ਰੂਪ ਦਿੱਤਾ।",
+    "milestones": {
+      "early": {
+        "title": "ਪ੍ਰਾਰੰਭਿਕ ਆਧਿਆਤਮਿਕ ਰੁਝਾਨ",
+        "description": "ਬਚਪਨ ਤੋਂ ਹੀ, ਸਵਾਮੀ ਜੀ ਨੇ ਅਸਧਾਰਨ ਅੰਦਰੂਨੀਪਨ, ਅਨੁਸ਼ਾਸਨ ਅਤੇ ਆਧਿਆਤਮਿਕ ਜੀਵਨ ਵੱਲ ਆਕਰਸ਼ਣ ਦਿਖਾਇਆ।"
+      },
+      "himalaya": {
+        "title": "ਹਿਮਾਲਿਆ ਦੀ ਯਾਤਰਾ",
+        "description": "ਉਸਨੇ ਸੰਸਾਰਿਕ ਆਰਾਮ ਤੋਂ ਪਰੇ ਸੱਚ ਦੀ ਖੋਜ ਵਿੱਚ ਤਪੱਸਿਆ, ਮਨਨ ਅਤੇ ਸ਼ਾਸਤਰੀ ਅਧਿਐਨ ਅਪਣਾਇਆ।"
+      },
+      "lineage": {
+        "title": "ਸੰਨਿਆਸ ਅਤੇ ਪਰੰਪਰਾ",
+        "description": "ਉਸਨੇ ਪਵਿੱਤਰ ਜੂਨਾ ਅਖਾੜਾ ਪਰੰਪਰਾ ਵਿੱਚ ਸੰਨਿਆਸ ਦਿਖਸ਼ਾ ਪ੍ਰਾਪਤ ਕੀਤੀ ਅਤੇ ਇੱਕ ਮਾਣਯੋਗ ਆਧਿਆਤਮਿਕ ਨੇਤਾ ਵਜੋਂ ਉਭਰੇ।"
+      },
+      "global": {
+        "title": "ਵਿਸ਼ਵ ਆਧਿਆਤਮਿਕ ਨੇਤ੍ਰਿਤਵ",
+        "description": "ਅੱਜ ਉਹ ਭਾਰਤ ਅਤੇ ਵਿਦੇਸ਼ਾਂ ਵਿੱਚ ਖੋਜੀਆਂ ਨੂੰ ਗਿਆਨ, ਦਇਆ ਅਤੇ ਧਰਤੀ ਨਾਲ ਜੁੜੇ ਕਾਰਜਾਂ ਰਾਹੀਂ ਮਾਰਗਦਰਸ਼ਨ ਕਰਦੇ ਹਨ।"
+      }
+    },
+    "recognitionsTitle": "ਮਾਨਤਾ ਅਤੇ ਪ੍ਰਭਾਵ",
+    "recognitionsSubtitle": "ਆਧਿਆਤਮਿਕ ਅਤੇ ਜਨਤਕ ਜੀਵਨ ਵਿੱਚ ਸਵਾਮੀ ਜੀ ਦੁਆਰਾ ਪ੍ਰਾਪਤ ਕੀਤੇ ਮਾਣ ਦਾ ਕੁਝ ਸਬੂਤ।",
+    "recognitions": {
+      "one": "ਸਨਾਤਨ ਧਰਮ ਨੂੰ ਸਪਸ਼ਟਤਾ ਅਤੇ ਦਇਆ ਨਾਲ ਅੱਗੇ ਵਧਾਉਣ ਲਈ ਵਿਸ਼ਵ ਪੱਧਰ 'ਤੇ ਮਾਨਤਾ ਪ੍ਰਾਪਤ।",
+      "two": "ਆਧਿਆਤਮਿਕ ਸਾਹਿਤ, ਚਰਚਾ ਅਤੇ ਜਨਤਕ ਵਿਚਾਰ ਵਿੱਚ ਯੋਗਦਾਨ ਲਈ ਸਨਮਾਨਿਤ।",
+      "three": "ਅਖਾੜਿਆਂ, ਸੰਸਥਾਵਾਂ ਅਤੇ ਸਮੁਦਾਇਕਾਂ ਵਿੱਚ ਸਿਧਾਂਤਕ ਨੇਤ੍ਰਿਤਵ ਲਈ ਮਾਣਯੋਗ।",
+      "four": "ਸੇਵਾ, ਸਿੱਖਿਆ ਅਤੇ ਸਮਾਜਿਕ ਉਤਥਾਨ ਨਾਲ ਸ਼ਾਸਤਰੀ ਗਿਆਨ ਨੂੰ ਜੋੜਨ ਲਈ ਜਾਣੇ ਜਾਂਦੇ ਹਨ।"
+    },
+    "thoughtsTitle": "ਮਾਰਗਦਰਸ਼ਕ ਵਿਚਾਰ",
+    "thoughtsSubtitle": "ਸਵਾਮੀ ਜੀ ਦੇ ਸੰਦੇਸ਼ ਵਿੱਚ ਮੁੜ ਮੁੜ ਆਉਣ ਵਾਲੇ ਵਿਸ਼ੇ।",
+    "thoughts": {
+      "one": "ਅਸੀਂ ਲਹਿਰਾਂ ਵਾਂਗ ਹਾਂ ਜੋ ਰੱਬੀ ਸਮੁੰਦਰ ਵਿੱਚ ਵਾਪਸ ਮਿਲਣ ਦੀ ਲਾਲਸਾ ਕਰ ਰਹੀਆਂ ਹਨ।",
+      "two": "ਅਨੁਸ਼ਾਸਨ, ਸਯਮ ਅਤੇ ਨਮਰਤਾ ਅਸਲ ਸ਼ਾਂਤੀ ਵੱਲ ਰਸਤਾ ਖੋਲ੍ਹਦੇ ਹਨ।",
+      "three": "ਸੇਵਾ, ਸਿਮਰਨ ਅਤੇ ਸਹੀ ਜੀਵਨ ਰਾਹੀਂ, ਰੱਬ ਹਰ ਥਾਂ ਦਿਸਦਾ ਹੈ।"
+    },
+    "cta": "ਸਵਾਮੀ ਜੀ ਨੂੰ ਲਿਖੋ"
+  },
+  "missionScreen": {
+    "eyebrow": "ਮਿਸ਼ਨ",
+    "title": "ਮਿਸ਼ਨ ਅਤੇ ਉਪਦੇਸ਼",
+    "subtitle": "ਮਿਸ਼ਨ ਦੀ ਦ੍ਰਿਸ਼ਟੀ, ਮੁੱਲ ਅਤੇ ਸੇਵਾ-ਕੇਂਦ੍ਰਿਤ ਪ੍ਰਗਟਾਵਾਂ ਦਾ ਵਿਸ਼ਾਲ ਨਜ਼ਰੀਆ।",
+    "teachingsTitle": "ਉਪਦੇਸ਼ ਦੀ ਦਿਸ਼ਾ",
+    "teachingsSubtitle": "ਕਿਵੇਂ ਮਿਸ਼ਨ ਗਿਆਨ ਨੂੰ ਜੀਵਤ ਮਾਰਗਦਰਸ਼ਨ ਵਿੱਚ ਤਬਦੀਲ ਕਰਦਾ ਹੈ।",
+    "teachings": {
+      "one": {
+        "title": "ਵੇਦਾਂਤਿਕ ਅੰਦਰੂਨੀ ਦ੍ਰਿਸ਼ਟੀ",
+        "description": "ਉਪਦੇਸ਼ ਏਕਤਾ, ਸਵੈ-ਜਾਗਰੂਕਤਾ, ਅਨੁਸ਼ਾਸਿਤ ਜੀਵਨ ਅਤੇ ਸਿੱਧੇ ਅਨੁਭਵ ਵਿੱਚ ਜੜੀ ਭਗਤੀ ਵੱਲ ਵਾਪਸ ਜਾਂਦੇ ਹਨ।"
+      },
+      "two": {
+        "title": "ਧਿਆਨ ਅਭਿਆਸ",
+        "description": "ਚੁੱਪ, ਮੰਤਰ, ਅਰਦਾਸ ਅਤੇ ਮਨਨ ਅਭਿਆਸ ਅੰਦਰੂਨੀ ਜੀਵਨ ਨੂੰ ਗਹਿਰਾ ਕਰਨ ਦੇ ਵਿਆਵਹਾਰਿਕ ਤਰੀਕੇ ਵਜੋਂ ਪੇਸ਼ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।"
+      },
+      "three": {
+        "title": "ਸੇਵਾ ਅਤੇ ਜ਼ਿੰਮੇਵਾਰੀ",
+        "description": "ਮਿਸ਼ਨ ਨਿਸ਼ਕਾਮ ਸੇਵਾ ਨੂੰ ਆਧਿਆਤਮਿਕ ਪੱਕੇਪਨ ਅਤੇ ਦਇਆ ਦਾ ਕੁਦਰਤੀ ਪ੍ਰਗਟਾਵਾ ਮੰਨਦਾ ਹੈ।"
+      }
+    },
+    "initiativesTitle": "ਪਹਿਲਕਦਮ",
+    "initiativesSubtitle": "ਕੰਮ ਜੋ ਮਿਸ਼ਨ ਨੂੰ ਸਮਾਜ ਵਿੱਚ ਲੈ ਜਾਂਦਾ ਹੈ।",
+    "initiatives": {
+      "one": "ਆਧਿਆਤਮਿਕ ਚਰਚਾ, ਸਤਸੰਗ ਅਤੇ ਹਰ ਉਮਰ ਦੇ ਖੋਜੀਆਂ ਲਈ ਮਾਰਗਦਰਸ਼ਨ।",
+      "two": "ਸਿੱਖਿਆ, ਮਨੁੱਖਤਾ ਅਤੇ ਸਮੁਦਾਇਕ ਪਹੁੰਚ ਰਾਹੀਂ ਸਮਾਜਿਕ ਉਤਥਾਨ।",
+      "three": "ਕਿਤਾਬਾਂ, ਮੀਡੀਆ ਅਤੇ ਆਧਿਆਤਮਿਕ ਪ੍ਰੋਗਰਾਮਿੰਗ ਰਾਹੀਂ ਮੁੱਲ-ਅਧਾਰਿਤ ਜੀਵਨ ਲਈ ਸਹਾਇਤਾ।",
+      "four": "ਪਰਿਆਵਰਣੀ ਜਾਗਰੂਕਤਾ, ਧਾਰਮਿਕ ਸੰਸਕ੍ਰਿਤੀ ਅਤੇ ਦਇਆਵਾਨ ਸੇਵਾ ਦਾ ਉਤਸ਼ਾਹ।"
+    },
+    "presenceTitle": "ਵਿਸ਼ਵ ਪਹਿਚਾਨ",
+    "presenceSubtitle": "ਮਿਸ਼ਨ ਦੀ ਪਹਿਚਾਨ ਯਾਤਰਾ, ਪ੍ਰੋਗਰਾਮਾਂ ਅਤੇ ਡਿਜ਼ੀਟਲ ਪਲੇਟਫਾਰਮਾਂ ਰਾਹੀਂ ਭਗਤਾਂ ਤੱਕ ਪਹੁੰਚਦੀ ਰਹਿੰਦੀ ਹੈ।",
+    "presence": {
+      "one": "ਹਰਿਦੁਆਰ ਅਤੇ ਜੁੜੇ ਆਧਿਆਤਮਿਕ ਸਥਾਨਾਂ ਦੇ ਆਸ-ਪਾਸ ਮੁੱਖ ਆਸ਼ਰਮ ਗਤੀਵਿਧੀ।",
+      "two": "ਭਾਰਤ ਭਰ ਵਿੱਚ ਭਗਤਾਂ ਤੱਕ ਪਹੁੰਚਣ ਵਾਲੇ ਸਮਾਗਮਾਂ, ਵਾਰਤਾਲਾਪਾਂ ਅਤੇ ਮੀਡੀਆ ਰਾਹੀਂ ਨਿਯਮਿਤ ਪਹੁੰਚ।",
+      "three": "ਲੇਖਾਂ, ਕਿਤਾਬਾਂ, ਵੀਡੀਓ, ਲਾਈਵ ਸੈਸ਼ਨਾਂ ਅਤੇ ਮਿਸ਼ਨ ਅਪਡੇਟਾਂ ਰਾਹੀਂ ਵਧਦੀ ਡਿਜ਼ੀਟਲ ਪਹਿਚਾਨ।"
+    }
+  },
+  "legal": {
+    "policyEyebrow": "ਨੀਤੀ",
+    "lastUpdated": "ਆਖਰੀ ਅਪਡੇਟ: 4 ਅਪ੍ਰੈਲ, 2026",
+    "effectiveDate": "ਲਾਗੂ ਮਿਤੀ: 4 ਅਪ੍ਰੈਲ, 2026",
+    "privacy": {
+      "title": "ਨਿੱਜਤਾ ਨੀਤੀ",
+      "subtitle": "ਮਿਸ਼ਨ ਦੇ ਡਿਜ਼ੀਟਲ ਉਤਪਾਦਾਂ ਵਿੱਚ ਜਾਣਕਾਰੀ ਕਿਵੇਂ ਇਕੱਠੀ, ਸੁਰੱਖਿਅਤ ਅਤੇ ਵਰਤੀ ਜਾਂਦੀ ਹੈ।",
+      "sections": {
+        "collect": {
+          "title": "ਅਸੀਂ ਕੀ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰਦੇ ਹਾਂ",
+          "body": "ਅਸੀਂ ਸਿੱਧੇ ਤੁਹਾਡੇ ਦੁਆਰਾ ਦਿੱਤੀ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰਦੇ ਹਾਂ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਵੇਰਵੇ, ਰਜਿਸਟ੍ਰੇਸ਼ਨ, ਸੇਵਾ ਸਬਮਿਸ਼ਨ, ਅਤੇ ਦਾਨ ਦੇ ਵੇਰਵੇ ਸ਼ਾਮਲ ਹਨ ਜੋ ਤੁਹਾਡੀਆਂ ਬੇਨਤੀਆਂ ਨੂੰ ਸੁਰੱਖਿਅਤ ਤਰੀਕੇ ਨਾਲ ਪ੍ਰਕਿਰਿਆ ਕਰਨ ਲਈ ਲੋੜੀਂਦੇ ਹਨ।"
+        },
+        "use": {
+          "title": "ਅਸੀਂ ਜਾਣਕਾਰੀ ਕਿਵੇਂ ਵਰਤਦੇ ਹਾਂ",
+          "body": "ਅਸੀਂ ਤੁਹਾਡੀ ਜਾਣਕਾਰੀ ਨੂੰ ਸੇਵਾਵਾਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰਨ, ਅੱਪਡੇਟਾਂ ਸੰਚਾਰ ਕਰਨ, ਉਪਭੋਗਤਾ ਅਨੁਭਵ ਨੂੰ ਸੁਧਾਰਨ, ਮਿਸ਼ਨ ਦੇ ਕਾਰਜਾਂ ਦਾ ਸਮਰਥਨ ਕਰਨ, ਅਤੇ ਸੁਰੱਖਿਆ ਅਤੇ ਧੋਖਾਧੜੀ ਰੋਕਥਾਮ ਨਿਯੰਤਰਣਾਂ ਨੂੰ ਬਣਾਈ ਰੱਖਣ ਲਈ ਵਰਤਦੇ ਹਾਂ।"
+        },
+        "share": {
+          "title": "ਡਾਟਾ ਸਾਂਝਾ ਕਰਨਾ",
+          "body": "ਅਸੀਂ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਨਹੀਂ ਵੇਚਦੇ। ਸੀਮਿਤ ਜਾਣਕਾਰੀ ਨੂੰ ਭਰੋਸੇਮੰਦ ਪ੍ਰਦਾਤਾਵਾਂ ਨਾਲ ਸੁਰੱਖਿਅਤ ਹੋਸਟਿੰਗ, ਸੰਚਾਰ, ਭੁਗਤਾਨ ਜਾਂ ਵਿਸ਼ਲੇਸ਼ਣ ਲਈ ਉਚਿਤ ਸੁਰੱਖਿਆ ਦੇ ਅਧੀਨ ਸਾਂਝਾ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ।"
+        },
+        "choices": {
+          "title": "ਤੁਹਾਡੇ ਚੋਣਾਂ",
+          "body": "ਤੁਸੀਂ ਕਾਨੂੰਨੀ ਤੌਰ 'ਤੇ ਇਜਾਜ਼ਤ ਹੋਣ 'ਤੇ ਨਿੱਜੀ ਡਾਟਾ ਦੀ ਸਹੀ ਕਰਨ ਜਾਂ ਮਿਟਾਉਣ ਦੀ ਬੇਨਤੀ ਕਰ ਸਕਦੇ ਹੋ। ਇਸ ਤਰ੍ਹਾਂ ਦੀਆਂ ਬੇਨਤੀਆਂ ਲਈ, ਕਿਰਪਾ ਕਰਕੇ ਪਲੇਟਫਾਰਮ ਰਾਹੀਂ ਮਿਸ਼ਨ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"
+        }
+      }
+    },
+    "terms": {
+      "title": "ਸੇਵਾ ਦੀਆਂ ਸ਼ਰਤਾਂ",
+      "subtitle": "AvdheshanandG ਮਿਸ਼ਨ ਦੇ ਡਿਜ਼ੀਟਲ ਪਲੇਟਫਾਰਮਾਂ ਦੀ ਵਰਤੋਂ ਲਈ ਚੱਲਣ ਵਾਲੀਆਂ ਸ਼ਰਤਾਂ ਅਤੇ ਜ਼ਿੰਮੇਵਾਰੀਆਂ।",
+      "sections": {
+        "use": {
+          "title": "ਪਲੇਟਫਾਰਮ ਦੀ ਵਰਤੋਂ",
+          "body": "ਪਲੇਟਫਾਰਮ ਦੀ ਵਰਤੋਂ ਕਰਕੇ, ਤੁਸੀਂ ਇਸਨੂੰ ਕਾਨੂੰਨੀ, ਸਤਿਕਾਰਪੂਰਨ ਅਤੇ ਬਿਨਾਂ ਕਿਸੇ ਗਲਤ ਵਰਤੋਂ, ਨੁਕਸਾਨਦਾਇਕ ਵਿਘਨ ਜਾਂ ਬਿਨਾਂ ਇਜਾਜ਼ਤ ਪਹੁੰਚ ਦੇ ਵਰਤਣ ਲਈ ਸਹਿਮਤ ਹੋ।"
+        },
+        "content": {
+          "title": "ਸਮੱਗਰੀ ਅਤੇ ਉਪਲਬਧਤਾ",
+          "body": "ਅਸੀਂ ਜਾਣਕਾਰੀ ਨੂੰ ਸਹੀ ਅਤੇ ਸੇਵਾਵਾਂ ਨੂੰ ਉਪਲਬਧ ਰੱਖਣ ਲਈ ਕੰਮ ਕਰਦੇ ਹਾਂ, ਹਾਲਾਂਕਿ ਫੀਚਰਾਂ ਦੇਖਭਾਲ ਜਾਂ ਕਾਰਜਕਾਰੀ ਅੱਪਡੇਟਾਂ ਦੌਰਾਨ ਵਿਕਸਿਤ, ਰੋਕੇ ਜਾਂ ਬਦਲ ਸਕਦੇ ਹਨ।"
+        },
+        "donations": {
+          "title": "ਦਾਨ ਅਤੇ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+          "body": "ਦਾਨ ਪ੍ਰਕਿਰਿਆ, ਰਜਿਸਟ੍ਰੇਸ਼ਨ, ਅਤੇ ਕੁਝ ਜੁੜੀਆਂ ਸੇਵਾਵਾਂ ਵਿੱਚ ਤੀਜੀ ਪੱਖੀ ਪ੍ਰਦਾਤਾਵਾਂ ਸ਼ਾਮਲ ਹੋ ਸਕਦੇ ਹਨ। ਉਪਭੋਗਤਾ ਸਹੀ ਜਾਣਕਾਰੀ ਸਬਮਿਟ ਕਰਨ ਅਤੇ ਪੂਰਾ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਵੇਰਵਿਆਂ ਦੀ ਸਮੀਖਿਆ ਕਰਨ ਲਈ ਜ਼ਿੰਮੇਵਾਰ ਹਨ।"
+        },
+        "liability": {
+          "title": "ਜ਼ਿੰਮੇਵਾਰੀ ਦੀ ਸੀਮਾ",
+          "body": "ਕਾਨੂੰਨ ਦੁਆਰਾ ਇਜਾਜ਼ਤ ਦੇ ਤੌਰ 'ਤੇ, ਪਲੇਟਫਾਰਮ ਬਿਨਾਂ ਕਿਸੇ ਗੈਰ-ਰੁਕਾਵਟ ਉਪਲਬਧਤਾ ਦੀ ਗਾਰੰਟੀ ਦੇ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਅਪਰੋਕਸ਼ ਜਾਂ ਨਤੀਜਾ ਸਵਰੂਪ ਨੁਕਸਾਨ ਲਈ ਜ਼ਿੰਮੇਵਾਰੀ ਸੀਮਿਤ ਹੈ।"
+        }
+      }
+    }
+  },
+  "mantraDikshaScreen": {
+    "eyebrow": "ਪਵਿੱਤਰ ਮਾਰਗ",
+    "title": "ਮੰਤਰ ਦীক্ষਾ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+    "subtitle": "ਪ੍ਰਕਿਰਿਆ ਦੀ ਮਹੱਤਤਾ ਨੂੰ ਸਮਝੋ ਅਤੇ ਆਸ਼ਰਮ ਦਫ਼ਤਰ ਰਾਹੀਂ ਆਪਣੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਾਰਗਦਰਸ਼ਨ ਸ਼ੁਰੂ ਕਰੋ।",
+    "introTitle": "ਇੱਕ ਪਵਿੱਤਰ ਵਚਨਬੱਧਤਾ, ਸਧਾਰਨ ਫਾਰਮ ਨਹੀਂ",
+    "introText": "ਮੰਤਰ ਦীক্ষਾ ਨੂੰ ਸਤਿਕਾਰ, ਤਿਆਰੀ ਅਤੇ ਅੰਦਰੂਨੀ ਇਮਾਨਦਾਰੀ ਨਾਲ ਪੇਸ਼ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇਹ ਸਕ੍ਰੀਨ ਤੁਹਾਡੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਯਾਤਰਾ ਦੀ ਸ਼ੁਰੂਆਤ ਹੈ ਤਾਂ ਜੋ ਆਸ਼ਰਮ ਟੀਮ ਤੁਹਾਨੂੰ ਢੰਗ ਨਾਲ ਮਾਰਗਦਰਸ਼ਨ ਕਰ ਸਕੇ।",
+    "readinessTitle": "ਸ਼ੁਰੂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ",
+    "readinessSubtitle": "ਕੁਝ ਉਮੀਦਾਂ ਜੋ ਭਗਤਾਂ ਨੂੰ ਦਿਲ ਵਿੱਚ ਰੱਖਣੀਆਂ ਚਾਹੀਦੀਆਂ ਹਨ।",
+    "readiness": {
+      "one": "ਵਿਸ਼ਵਾਸ, ਨਿਮਰਤਾ ਅਤੇ ਇਰਾਦੇ ਦੀ ਗੰਭੀਰਤਾ ਨਾਲ ਪ੍ਰਕਿਰਿਆ ਨੂੰ ਪੇਸ਼ ਕਰੋ।",
+      "two": "ਲੋੜ ਅਨੁਸਾਰ ਪਛਾਣ ਵੇਰਵੇ ਅਤੇ ਸਹਾਇਕ ਦਸਤਾਵੇਜ਼ ਸਾਂਝੇ ਕਰਨ ਲਈ ਤਿਆਰ ਰਹੋ।",
+      "three": "ਅੰਤਿਮ ਪ੍ਰਕਿਰਿਆ ਵਿੱਚ ਆਸ਼ਰਮ ਪਾਸੋਂ ਸਮਾਂ-ਸਾਰਣੀ, ਸਮੀਖਿਆ ਅਤੇ ਮਾਰਗਦਰਸ਼ਨ ਸ਼ਾਮਲ ਹੋ ਸਕਦਾ ਹੈ।",
+      "four": "ਇਹ ਮਾਰਗ ਸੱਚੇ ਖੋਜੀਆਂ ਲਈ ਹੈ ਜੋ ਅਨੁਸ਼ਾਸਨ ਅਤੇ ਅਭਿਆਸ ਲਈ ਤਿਆਰ ਹਨ।"
+    },
+    "registrationTitle": "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਾਰਗਦਰਸ਼ਨ",
+    "registrationSubtitle": "ਮੋਬਾਈਲ ਯਾਤਰਾ ਇਸ ਵੇਲੇ ਕਿਵੇਂ ਕੰਮ ਕਰਦੀ ਹੈ।",
+    "registrationText": "ਆਸ਼ਰਮ ਦਫ਼ਤਰ ਪੂਰੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਪ੍ਰਕਿਰਿਆ, ਦਸਤਾਵੇਜ਼ ਦੀਆਂ ਲੋੜਾਂ, ਅਤੇ ਅਗਲੇ ਕਦਮਾਂ ਲਈ ਮਾਰਗਦਰਸ਼ਨ ਕਰਨ ਵਿੱਚ ਮਦਦ ਕਰੇਗਾ। ਹੇਠਾਂ ਦਿੱਤੇ ਬਟਨ ਦੀ ਵਰਤੋਂ ਕਰੋ ਗੱਲਬਾਤ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਅਤੇ ਅਧਿਕਾਰਕ ਅਰਜ਼ੀ ਲਈ ਦਿਸ਼ਾ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ।",
+    "cta": "ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਮਾਰਗਦਰਸ਼ਨ ਸ਼ੁਰੂ ਕਰੋ",
+    "contactTitle": "ਮੰਤਰ ਦীক্ষਾ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
+    "contactSubtitle": "ਮੰਤਰ ਦীক্ষਾ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਪ੍ਰਕਿਰਿਆ ਸ਼ੁਰੂ ਕਰਨ ਦਾ ਆਪਣਾ ਇਰਾਦਾ ਸਾਂਝਾ ਕਰੋ। ਆਸ਼ਰਮ ਦਫ਼ਤਰ ਲੋੜੀਂਦੇ ਕਦਮਾਂ ਅਤੇ ਦਸਤਾਵੇਜ਼ਾਂ ਲਈ ਮਾਰਗਦਰਸ਼ਨ ਕਰੇਗਾ।",
+    "contactPlaceholder": "ਕਿਰਪਾ ਕਰਕੇ ਮੰਤਰ ਦীক্ষਾ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਲਈ ਆਪਣਾ ਇਰਾਦਾ, ਪਿਛੋਕੜ, ਅਤੇ ਕੋਈ ਵੀ ਸਬੰਧਤ ਵੇਰਵੇ ਸਾਂਝੇ ਕਰੋ..."
   }
 }

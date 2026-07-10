@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Modal,
   Pressable,
@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { colors, borderRadius, spacing, shadows } from '../theme';
+import { borderRadius, spacing, shadows, type ColorPalette } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 export const APP_LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -39,6 +40,8 @@ export default function LanguagePickerModal({
   onSelectLanguage,
 }: LanguagePickerModalProps) {
   const { i18n, t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const currentLanguage = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0];
 
   const handleSelect = async (languageCode: string) => {
@@ -97,7 +100,7 @@ export default function LanguagePickerModal({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',

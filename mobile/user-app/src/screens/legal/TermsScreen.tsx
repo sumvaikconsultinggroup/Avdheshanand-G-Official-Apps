@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ScreenHeader, SurfaceCard } from '../../components/common';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 export function TermsScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   const sections = [
     { title: t('legal.terms.sections.use.title'), body: t('legal.terms.sections.use.body') },
@@ -15,7 +20,11 @@ export function TermsScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingTop: insets.top }}
+      showsVerticalScrollIndicator={false}
+    >
       <ScreenHeader
         eyebrow={t('legal.policyEyebrow')}
         title={t('legal.terms.title')}
@@ -38,7 +47,7 @@ export function TermsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

@@ -1,6 +1,11 @@
-export const colors = {
+// Light (default) palette — the original warm saffron/maroon temple theme.
+export const lightColors = {
   primary: {
-    saffron: '#FF6B00',
+    // Official brand red — RGB(157, 31, 28). Used for primary actions, icons and accents.
+    brand: '#9D1F1C',
+    // `saffron` is kept as an alias so existing references resolve to the brand red
+    // (the app previously used an orange #FF6B00 accent which has been retired).
+    saffron: '#9D1F1C',
     maroon: '#800020',
     deepRed: '#6E0000',
     vermillion: '#E34234',
@@ -38,6 +43,58 @@ export const colors = {
     maroon: 'rgba(128, 0, 32, 0.2)',
   },
 };
+
+// Dark palette — deep warm "temple night" tones. Same token shape as light, with
+// brand colours brightened so they stay readable both as text and as fills on
+// the dark surfaces. `text.white` stays white (used on coloured buttons).
+export const darkColors: typeof lightColors = {
+  primary: {
+    brand: '#E0552E',
+    saffron: '#E0552E',
+    maroon: '#E0607A',
+    deepRed: '#C03A50',
+    vermillion: '#FF6F5E',
+  },
+  gold: {
+    main: '#E8B84B',
+    light: '#FFD970',
+    dark: '#E0A93B',
+  },
+  background: {
+    parchment: '#15100A',
+    sandstone: '#33261A',
+    warmWhite: '#221811',
+    cream: '#2A1E12',
+  },
+  accent: {
+    peacock: '#3AA9AB',
+    lotus: '#E8A0BF',
+    sage: '#B8C4A8',
+  },
+  text: {
+    primary: '#F3E8D6',
+    secondary: '#B5A693',
+    gold: '#E8B84B',
+    white: '#FFFFFF',
+  },
+  status: {
+    success: '#5DBB63',
+    warning: '#FFB74D',
+    error: '#FF6B5E',
+    info: '#5AA9F0',
+  },
+  border: {
+    gold: 'rgba(232, 184, 75, 0.22)',
+    maroon: 'rgba(224, 96, 122, 0.30)',
+  },
+};
+
+export type ColorPalette = typeof lightColors;
+
+// Backward-compatible default export: any module that imports `colors` directly
+// (not yet theme-aware) keeps the light palette. Theme-aware screens use
+// `useTheme().colors` instead.
+export const colors = lightColors;
 
 export const fonts = {
   regular: 'System',

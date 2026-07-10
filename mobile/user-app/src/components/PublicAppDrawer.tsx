@@ -10,11 +10,13 @@ import {
   View,
 } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import LanguageDrawer from './LanguageDrawer';
 import type { RootStackParamList } from '../navigation/AppNavigator';
-import { borderRadius, colors, shadows, spacing, typography } from '../theme';
+import { borderRadius, shadows, spacing, typography, type ColorPalette } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 const LOGO_SOURCE = require('../../assets/images/avdheshanandg-mission-logo.png');
 const SWAMIJI_SOURCE = require('../../assets/images/swamiji-onboarding.jpg');
@@ -49,6 +51,8 @@ interface PublicAppDrawerProps {
 export default function PublicAppDrawer({ visible, onClose }: PublicAppDrawerProps) {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [languageVisible, setLanguageVisible] = useState(false);
 
   const primaryItems = useMemo(
@@ -146,20 +150,22 @@ export default function PublicAppDrawer({ visible, onClose }: PublicAppDrawerPro
   ) => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      {items.map((item) => (
-        <TouchableOpacity
-          key={`${title}-${item.label}`}
-          style={styles.item}
-          onPress={() => handleSelect(item.target)}
-          activeOpacity={0.85}
-        >
-          <View style={styles.itemIconWrap}>
-            <Icon name={item.icon} size={20} color={colors.primary.saffron} />
-          </View>
-          <Text style={styles.itemLabel}>{item.label}</Text>
-          <Icon name="chevron-right" size={18} color={colors.text.secondary} />
-        </TouchableOpacity>
-      ))}
+      <View style={styles.sectionCard}>
+        {items.map((item, index) => (
+          <TouchableOpacity
+            key={`${title}-${item.label}`}
+            style={[styles.item, index < items.length - 1 && styles.itemDivider]}
+            onPress={() => handleSelect(item.target)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.itemIconWrap}>
+              <Icon name={item.icon} size={19} color={colors.primary.maroon} />
+            </View>
+            <Text style={styles.itemLabel}>{item.label}</Text>
+            <Icon name="chevron-right" size={18} color={colors.gold.dark} />
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 
@@ -169,23 +175,28 @@ export default function PublicAppDrawer({ visible, onClose }: PublicAppDrawerPro
         <View style={styles.overlay}>
           <Pressable style={styles.backdrop} onPress={onClose} />
           <View style={styles.drawer}>
-            <View style={styles.hero}>
-              <Image source={SWAMIJI_SOURCE} style={styles.heroImage} />
-              <View style={styles.heroOverlay} />
-              <View style={styles.heroContent}>
-                <View style={styles.heroTop}>
-                  <View style={styles.brandSeal}>
-                    <Image source={LOGO_SOURCE} style={styles.brandLogo} />
-                  </View>
-                  <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.8}>
-                    <Icon name="close" size={18} color={colors.primary.maroon} />
-                  </TouchableOpacity>
+            <LinearGradient
+              colors={[colors.primary.brand, colors.primary.maroon, colors.primary.deepRed]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.hero}
+            >
+              <View style={styles.heroTopRow}>
+                <View style={styles.brandSeal}>
+                  <Image source={LOGO_SOURCE} style={styles.brandLogo} />
                 </View>
-                <Text style={styles.heroEyebrow}>{t('appDrawer.eyebrow')}</Text>
-                <Text style={styles.heroTitle}>{t('appDrawer.title')}</Text>
-                <Text style={styles.heroSubtitle}>{t('appDrawer.subtitle')}</Text>
+                <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.8}>
+                  <Icon name="close" size={18} color={colors.primary.maroon} />
+                </TouchableOpacity>
               </View>
-            </View>
+              <View style={styles.heroProfile}>
+                <View style={styles.avatarRing}>
+                  <Image source={SWAMIJI_SOURCE} style={styles.avatar} />
+                </View>
+                <Text style={styles.heroTitle}>{t('appDrawer.eyebrow')}</Text>
+                <Text style={styles.heroTagline}>Hari Om Tat Sat</Text>
+              </View>
+            </LinearGradient>
 
             <ScrollView
               showsVerticalScrollIndicator={false}
@@ -208,7 +219,7 @@ export default function PublicAppDrawer({ visible, onClose }: PublicAppDrawerPro
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   overlay: {
     flex: 1,
     flexDirection: 'row',
@@ -218,52 +229,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   drawer: {
-    width: '84%',
-    maxWidth: 390,
+    width: '85%',
+    maxWidth: 400,
     backgroundColor: '#FFF8EB',
-    borderTopLeftRadius: 30,
-    borderBottomLeftRadius: 30,
     overflow: 'hidden',
     borderLeftWidth: 1,
     borderColor: '#F0D8AF',
     ...shadows.temple,
   },
   hero: {
-    minHeight: 232,
-  },
-  heroImage: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
-  },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(74, 0, 16, 0.46)',
-  },
-  heroContent: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
     paddingTop: spacing.xxl,
-    paddingBottom: spacing.lg,
-    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
   },
-  heroTop: {
+  heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   brandSeal: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.88)',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(255,255,255,0.92)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   brandLogo: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   closeButton: {
     width: 36,
@@ -273,20 +268,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  heroEyebrow: {
-    ...typography.label,
-    color: 'rgba(255,255,255,0.82)',
+  heroProfile: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
+  avatarRing: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    padding: 3,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.55)',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 45,
+    resizeMode: 'cover',
   },
   heroTitle: {
-    ...typography.h1,
+    ...typography.h2,
     color: colors.text.white,
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
-  heroSubtitle: {
+  heroTagline: {
     ...typography.bodySm,
-    color: 'rgba(255,255,255,0.88)',
-    marginTop: spacing.sm,
-    maxWidth: 260,
+    color: 'rgba(255,249,239,0.9)',
+    fontStyle: 'italic',
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
@@ -300,22 +312,33 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...typography.label,
     color: colors.gold.dark,
+    marginLeft: spacing.xs,
+  },
+  sectionCard: {
+    backgroundColor: colors.background.warmWhite,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    overflow: 'hidden',
+    ...shadows.warm,
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.border.gold as string,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
   },
+  itemDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(212,160,23,0.16)',
+  },
   itemIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#FFF2DB',
+    borderWidth: 1,
+    borderColor: 'rgba(212,160,23,0.25)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -323,6 +346,7 @@ const styles = StyleSheet.create({
   itemLabel: {
     ...typography.body,
     color: colors.text.primary,
+    fontWeight: '600',
     flex: 1,
   },
   footerCard: {

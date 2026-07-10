@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
-import { Card, Searchbar, ActivityIndicator, Chip, IconButton } from 'react-native-paper';
+import { Card, Searchbar, ActivityIndicator, IconButton } from 'react-native-paper';
 import { colors, spacing, borderRadius } from '../../theme';
+import { Avatar, Badge } from '../../components/common';
 import api from '../../services/api';
 import { User } from '../../types';
 
@@ -69,45 +70,35 @@ export function UsersScreen() {
   const getRoleBadgeColor = (role: string) => {
     switch (role?.toLowerCase()) {
       case 'admin':
-        return colors.primary.saffron;
+      case 'superadmin':
+        return colors.primary.maroon;
       case 'moderator':
-        return colors.accent.peacock;
+        return colors.gold.dark;
       default:
-        return colors.text.secondary;
+        return colors.primary.saffron;
     }
   };
 
   const renderUserCard = ({ item }: { item: User }) => (
-    <TouchableOpacity onPress={() => handleUserPress(item)} activeOpacity={0.7}>
+    <TouchableOpacity onPress={() => handleUserPress(item)} activeOpacity={0.8}>
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>
-              {item.name?.charAt(0)?.toUpperCase() || '?'}
-            </Text>
-          </View>
+          <Avatar name={item.name} size={50} style={styles.avatarSpacing} />
           <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.name || 'Unknown'}</Text>
-            <Text style={styles.userEmail}>{item.email}</Text>
+            <Text style={styles.userName} numberOfLines={1}>{item.name || 'Unknown'}</Text>
+            <Text style={styles.userEmail} numberOfLines={1}>{item.email}</Text>
             <View style={styles.badges}>
-              <Chip
-                style={[styles.chip, { backgroundColor: getRoleBadgeColor(item.role) }]}
-                textStyle={styles.chipText}
-                compact
-              >
-                {item.role || 'User'}
-              </Chip>
+              <Badge
+                label={(item.role || 'User').toUpperCase()}
+                tone={getRoleBadgeColor(item.role)}
+                variant="soft"
+              />
               {item.isVerified && (
-                <Chip
-                  style={[styles.chip, { backgroundColor: colors.status.success }]}
-                  textStyle={styles.chipText}
-                  compact
-                >
-                  Verified
-                </Chip>
+                <Badge label="Verified" tone={colors.status.success} variant="soft" icon="check-decagram" />
               )}
             </View>
           </View>
+          <IconButton icon="chevron-right" size={22} iconColor={colors.gold.dark} />
         </Card.Content>
       </Card>
     </TouchableOpacity>
@@ -124,7 +115,7 @@ export function UsersScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading users...</Text>
       </View>
     );
@@ -149,7 +140,7 @@ export function UsersScreen() {
         value={searchQuery}
         style={styles.searchBar}
         inputStyle={styles.searchInput}
-        iconColor={colors.primary.saffron}
+        iconColor={colors.primary.maroon}
       />
 
       <FlatList
@@ -161,8 +152,8 @@ export function UsersScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -188,11 +179,7 @@ export function UsersScreen() {
             </View>
             {selectedUser && (
               <View style={styles.modalBody}>
-                <View style={styles.modalAvatar}>
-                  <Text style={styles.modalAvatarText}>
-                    {selectedUser.name?.charAt(0)?.toUpperCase() || '?'}
-                  </Text>
-                </View>
+                <Avatar name={selectedUser.name} size={80} style={styles.modalAvatar} />
                 <DetailRow label="Name" value={selectedUser.name || 'N/A'} />
                 <DetailRow label="Email" value={selectedUser.email} />
                 <DetailRow label="Phone" value={selectedUser.phone || 'N/A'} />
@@ -287,19 +274,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatarContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.primary.saffron,
-    justifyContent: 'center',
-    alignItems: 'center',
+  avatarSpacing: {
     marginRight: spacing.md,
-  },
-  avatarText: {
-    color: colors.text.white,
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   userInfo: {
     flex: 1,
@@ -366,18 +342,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.primary.saffron,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: spacing.lg,
-  },
-  modalAvatarText: {
-    color: colors.text.white,
-    fontSize: 32,
-    fontWeight: 'bold',
   },
   detailRow: {
     flexDirection: 'row',

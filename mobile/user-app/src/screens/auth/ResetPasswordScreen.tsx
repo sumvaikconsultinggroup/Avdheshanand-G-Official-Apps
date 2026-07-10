@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,13 @@ import {
 } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, borderRadius } from '../../theme';
+import { spacing, borderRadius, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import api from '../../services/api';
 
 export function ResetPasswordScreen({ navigation, route }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const email = route?.params?.email || '';
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -124,7 +127,7 @@ export function ResetPasswordScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

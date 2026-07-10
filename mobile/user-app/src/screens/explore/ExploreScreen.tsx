@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { EmptyStateCard, ScreenHeader, SurfaceCard } from '../../components/common';
 
 const { width } = Dimensions.get('window');
@@ -92,6 +93,8 @@ export function ExploreScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const { t, i18n } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const initialCategory = route.params?.category || 'Articles';
 
   const [selectedCategory, setSelectedCategory] = useState<Category>(initialCategory);
@@ -136,16 +139,16 @@ export function ExploreScreen() {
     [i18n.language]
   );
 
+  // Sync the category ONLY when the navigation param changes (e.g. arriving from
+  // a Home quick-link). It must NOT depend on selectedCategory, otherwise tapping
+  // a different category tab would be immediately reverted to the route's value.
   useEffect(() => {
     const routeCategory = route.params?.category;
-    if (
-      routeCategory &&
-      categories.some((category) => category.key === routeCategory) &&
-      routeCategory !== selectedCategory
-    ) {
+    if (routeCategory && categories.some((category) => category.key === routeCategory)) {
       setSelectedCategory(routeCategory);
     }
-  }, [route.params?.category, selectedCategory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.category]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -368,11 +371,12 @@ export function ExploreScreen() {
               <TouchableOpacity
                 style={[styles.categoryTab, selectedCategory === item.key && styles.categoryTabActive]}
                 onPress={() => setSelectedCategory(item.key)}
+                activeOpacity={0.85}
               >
                 <Icon
                   name={item.icon}
                   size={18}
-                  color={selectedCategory === item.key ? colors.text.white : colors.text.primary}
+                  color={selectedCategory === item.key ? colors.text.white : colors.primary.maroon}
                 />
                 <Text style={[styles.categoryText, selectedCategory === item.key && styles.categoryTextActive]}>
                   {categoryLabels[item.key]}
@@ -414,17 +418,9 @@ export function ExploreScreen() {
     </View>
   );
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
-      </View>
-    );
-  }
-
   return (
     <FlatList
-      data={filteredData}
+      data={loading ? [] : filteredData}
       keyExtractor={(item) => item._id}
       renderItem={renderItem}
       numColumns={selectedCategory === 'Gallery' ? 2 : 1}
@@ -445,17 +441,23 @@ export function ExploreScreen() {
         />
       }
       ListEmptyComponent={
-        <EmptyStateCard
-          icon={categories.find((c) => c.key === selectedCategory)?.icon || 'alert'}
-          title={t('explore.noItemsTitle', { category: categoryLabels[selectedCategory] })}
-          subtitle={searchQuery ? t('explore.searchTryDifferent') : t('explore.checkBackLater')}
-        />
+        loading ? (
+          <View style={styles.listLoading}>
+            <ActivityIndicator size="large" color={colors.primary.saffron} />
+          </View>
+        ) : (
+          <EmptyStateCard
+            icon={categories.find((c) => c.key === selectedCategory)?.icon || 'alert'}
+            title={t('explore.noItemsTitle', { category: categoryLabels[selectedCategory] })}
+            subtitle={searchQuery ? t('explore.searchTryDifferent') : t('explore.checkBackLater')}
+          />
+        )
       }
     />
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -474,20 +476,25 @@ const styles = StyleSheet.create({
   categoryTab: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    gap: 7,
+    paddingHorizontal: spacing.md + 2,
+    paddingVertical: spacing.sm + 1,
     marginRight: spacing.sm,
     borderRadius: borderRadius.full,
     backgroundColor: colors.background.sandstone,
   },
   categoryTabActive: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
+    shadowColor: colors.primary.maroon,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
   },
   categoryText: {
-    ...typography.bodySm,
-    color: colors.text.primary,
-    fontWeight: '600',
-    marginLeft: spacing.xs,
+    fontSize: 14,
+    color: colors.primary.maroon,
+    fontWeight: '700',
   },
   categoryTextActive: {
     color: colors.text.white,
@@ -525,6 +532,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.background.parchment,
+  },
+  listLoading: {
+    paddingVertical: spacing.xxl,
+    alignItems: 'center',
   },
   listContainer: {
     paddingBottom: spacing.xxl,
@@ -577,7 +588,10 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     ...typography.title,
-    color: colors.text.primary,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '700',
+    color: colors.primary.maroon,
     marginBottom: spacing.xs,
   },
   itemDescription: {

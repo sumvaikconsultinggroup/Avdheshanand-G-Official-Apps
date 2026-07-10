@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Connect from '@/models/Connect';
 import mongoose from 'mongoose';
-import { sendEmail } from '@/utils/sendEmail';
+import { sendResendEmail, buildPrayerResponseEmail } from '@/utils/resendMailer';
 
 /**
  * GET handler for fetching a single contact submission by ID
@@ -93,28 +93,40 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ success: false, message: 'Contact submission not found' }, { status: 404 });
     }
 
-    if (body.sendResponse && body.responseText && updated.email) {
-      try {
-        const subject = `Hari Om - Update on your prayer request${updated.subject ? `: ${updated.subject}` : ''}`;
-        const text = `Hari Om ${updated.fullName},\n\n${body.responseText}\n\nWith regards,\nAvdheshanandG Mission Team`;
-        const html = `
-          <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #7b1e1e;">Hari Om</h1>
-            <p>Dear <strong>${updated.fullName}</strong>,</p>
-            <p>${String(body.responseText).replace(/\n/g, '<br />')}</p>
-            <p style="margin-top: 24px;">With regards,<br />AvdheshanandG Mission Team</p>
-          </div>
-        `;
-        await sendEmail(updated.email, subject, text, html);
-      } catch (error) {
-        console.error('Error sending connect response email:', error);
+    let emailSent = false;
+    let emailError;
+
+    if (body.sendResponse && body.responseText) {
+      if (!updated.email) {
+        emailError = 'This request has no email address on file.';
+      } else {
+        const mail = buildPrayerResponseEmail({
+          fullName: updated.fullName,
+          subject: updated.subject,
+          responseText: body.responseText,
+        });
+        const result = await sendResendEmail({
+          to: updated.email,
+          subject: mail.subject,
+          html: mail.html,
+          text: mail.text,
+          replyTo: 'office@avdheshanandg.org',
+        });
+        emailSent = result.success;
+        if (!result.success) {
+          emailError = result.skipped
+            ? 'Email service not configured (RESEND_API_KEY missing).'
+            : result.error || 'Resend could not deliver the email.';
+        }
       }
     }
 
     return NextResponse.json({
       success: true,
       message: 'Contact submission updated successfully',
-      data: updated,
+      // _emailSent/_emailError ride along inside data so the app can show an
+      // accurate result (the client unwraps the response to `data`).
+      data: { ...updated, _emailSent: emailSent, _emailError: emailError },
     });
   } catch (error) {
     console.error('Error updating contact submission:', error);

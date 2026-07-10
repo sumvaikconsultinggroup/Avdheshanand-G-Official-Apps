@@ -1,9 +1,12 @@
 export const colors = {
   primary: {
-    saffron: '#FF6B00',
+    // "saffron" is the primary ACTION accent across the app. Retuned from the
+    // old neon orange (#FF6B00) to a deep crimson-rose so the palette reads as
+    // a premium maroon + crimson + gold temple scheme — no orange anywhere.
+    saffron: '#A3123A',
     maroon: '#800020',
     deepRed: '#6E0000',
-    vermillion: '#E34234',
+    vermillion: '#B01A3E',
   },
   gold: {
     main: '#D4A017',
@@ -28,10 +31,10 @@ export const colors = {
     white: '#FFFFFF',
   },
   status: {
-    success: '#4CAF50',
-    warning: '#FF9800',
-    error: '#F44336',
-    info: '#2196F3',
+    success: '#2E9E5B',
+    warning: '#C98A04',
+    error: '#C0392B',
+    info: '#2E6BA8',
   },
   border: {
     gold: 'rgba(212, 160, 23, 0.3)',
@@ -120,4 +123,21 @@ export const shadows = {
     shadowRadius: 28,
     elevation: 6,
   },
+  // Coloured glow for primary/maroon surfaces (buttons, active tab bar).
+  maroonGlow: {
+    shadowColor: '#800020',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+};
+
+// Reusable gradient stops for LinearGradient across the admin app.
+export const gradients = {
+  maroon: ['#8A0A26', '#800020', '#6E0000'] as const,
+  crimson: ['#B0143F', '#A3123A', '#800020'] as const,
+  gold: ['#E6B93A', '#D4A017', '#B8860B'] as const,
+  hero: ['#8A0A26', '#6E0000'] as const,
+  parchment: ['#FFF8E7', '#FBEFD6', '#F5E6CC'] as const,
 };

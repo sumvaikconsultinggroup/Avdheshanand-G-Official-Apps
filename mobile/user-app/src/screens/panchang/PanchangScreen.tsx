@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { getPanchangFestivals, getPanchangToday } from '../../services/panchangApi';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import CityPickerModal, { City } from './CityPickerModal';
 
 const STORAGE_KEY_CITY = '@panchang_selected_city';
@@ -198,6 +199,8 @@ function formatDisplayDate(date?: string, locale = 'en-IN'): string {
 // ─── Sub-Components ──────────────────────────────────────────────────
 
 function SectionHeader({ icon, title }: { icon: React.ComponentProps<typeof Icon>['name']; title: string }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.sectionHeader}>
       <Icon name={icon} size={18} color={colors.primary.saffron} />
@@ -207,6 +210,8 @@ function SectionHeader({ icon, title }: { icon: React.ComponentProps<typeof Icon
 }
 
 function TimeBox({ icon, label, time }: { icon: React.ComponentProps<typeof Icon>['name']; label: string; time: string }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.timeBox}>
       <Icon name={icon} size={20} color={colors.gold.dark} />
@@ -221,6 +226,8 @@ function MuhurtaRow({ label, start, end, variant, note }: {
   variant: 'auspicious' | 'inauspicious'; note?: string;
 }) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const isAuspicious = variant === 'auspicious';
   return (
     <View style={[styles.muhurtaRow, isAuspicious ? styles.muhurtaAuspicious : styles.muhurtaInauspicious]}>
@@ -241,6 +248,8 @@ function MuhurtaRow({ label, start, end, variant, note }: {
 }
 
 function DayQualityBadge({ quality, showHindiMeta }: { quality?: DayQualityInfo; showHindiMeta: boolean }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   if (!quality?.score) return null;
   const dots = Array.from({ length: 10 }, (_, i) => i < (quality.score || 0));
   return (
@@ -258,6 +267,8 @@ function DayQualityBadge({ quality, showHindiMeta }: { quality?: DayQualityInfo;
 }
 
 function InfoChip({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View style={styles.infoChip}>
       <Text style={styles.infoChipLabel}>{label}</Text>
@@ -269,6 +280,8 @@ function InfoChip({ label, value, valueColor }: { label: string; value: string; 
 // ─── Main Screen ─────────────────────────────────────────────────────
 
 export default function PanchangScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
@@ -354,8 +367,15 @@ export default function PanchangScreen() {
   }, [selectedCity]);
 
   const handleSelectCity = (city: City) => { setSelectedCity(city); saveCity(city); };
-  const handleGPSLocation = (lat: number, lng: number) => {
-    const gpsCity: City = { _id: 'gps', name: 'Current Location', country: '', lat, lng };
+  const handleGPSLocation = (lat: number, lng: number, cityName?: string, timezone?: string) => {
+    const gpsCity: City = {
+      _id: 'gps',
+      name: cityName || 'Current Location',
+      country: '',
+      lat,
+      lng,
+      timezone,
+    };
     setSelectedCity(gpsCity); saveCity(gpsCity);
   };
 
@@ -737,7 +757,7 @@ export default function PanchangScreen() {
 
 // ─── Styles ──────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background.parchment },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background.parchment },
   loadingText: { marginTop: spacing.md, fontSize: 14, color: colors.text.secondary },
@@ -767,36 +787,36 @@ const styles = StyleSheet.create({
   dayInfoText: { fontSize: 12, color: colors.gold.dark, marginTop: spacing.xs, fontWeight: '500' },
 
   // Hero Card
-  heroCard: { margin: spacing.lg, marginTop: spacing.sm, padding: spacing.lg, backgroundColor: colors.background.warmWhite, borderRadius: borderRadius.lg, borderWidth: 1, borderColor: colors.border.gold as string, overflow: 'hidden', ...shadows.warm },
+  heroCard: { margin: spacing.lg, marginTop: spacing.sm, padding: spacing.xl, backgroundColor: colors.background.warmWhite, borderRadius: borderRadius.xl, borderWidth: 1, borderColor: colors.border.gold as string, overflow: 'hidden', ...shadows.warm },
   ekadashiCard: { borderColor: colors.gold.main, borderWidth: 2 },
-  heroLabel: { fontSize: 22, fontWeight: '700', color: colors.primary.maroon, textAlign: 'center' },
-  heroSubLabel: { fontSize: 13, color: colors.text.secondary, textAlign: 'center', marginBottom: spacing.sm },
+  heroLabel: { fontSize: 27, fontWeight: '800', color: colors.primary.maroon, textAlign: 'center', letterSpacing: 0.2 },
+  heroSubLabel: { fontSize: 11, color: colors.gold.dark, textAlign: 'center', marginBottom: spacing.md, textTransform: 'uppercase', letterSpacing: 1.6, fontWeight: '700' },
   heroMetaWrap: { alignItems: 'center', marginBottom: spacing.lg, gap: spacing.xs },
   heroDateBadge: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: spacing.xs, backgroundColor: 'rgba(128, 0, 32, 0.06)', borderWidth: 1, borderColor: 'rgba(128, 0, 32, 0.12)', borderRadius: borderRadius.full, paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
   heroDateText: { fontSize: 12, fontWeight: '600', color: colors.primary.maroon, textAlign: 'center' },
   heroLocationBadge: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, backgroundColor: 'rgba(212,160,23,0.08)', borderWidth: 1, borderColor: 'rgba(212,160,23,0.18)', borderRadius: borderRadius.full, paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
   heroLocationText: { fontSize: 11, fontWeight: '500', color: colors.gold.dark, textAlign: 'center' },
-  tithiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
+  tithiRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: spacing.xs, paddingBottom: spacing.lg },
   tithiMain: { alignItems: 'center' },
-  tithiLabel: { fontSize: 13, color: colors.text.secondary, marginBottom: spacing.xs },
-  tithiName: { fontSize: 24, fontWeight: '700', color: colors.primary.saffron },
-  tithiEndTime: { fontSize: 11, color: colors.text.secondary, marginTop: 2 },
+  tithiLabel: { fontSize: 11, color: colors.gold.dark, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 },
+  tithiName: { fontSize: 30, fontWeight: '800', color: colors.primary.saffron, letterSpacing: 0.2 },
+  tithiEndTime: { fontSize: 12, color: colors.text.secondary, marginTop: 4 },
   pakshaBadge: { marginLeft: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.xs, borderRadius: borderRadius.full },
   shukla: { backgroundColor: 'rgba(255, 213, 79, 0.3)' },
   krishna: { backgroundColor: 'rgba(128, 0, 32, 0.15)' },
   pakshaText: { fontSize: 13, fontWeight: '600', color: colors.primary.maroon },
   ekadashiBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(212,160,23,0.15)', paddingVertical: spacing.xs, borderRadius: borderRadius.sm, marginBottom: spacing.md },
   ekadashiText: { fontSize: 13, fontWeight: '600', color: colors.gold.dark, marginHorizontal: spacing.sm },
-  infoRow: { alignItems: 'center', marginBottom: spacing.md },
-  infoLabel: { fontSize: 13, color: colors.text.secondary, marginBottom: spacing.xs },
-  infoValue: { fontSize: 17, fontWeight: '600', color: colors.text.primary },
-  infoSubValue: { fontSize: 11, color: colors.text.secondary, marginTop: 2 },
-  gridRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: colors.border.gold as string, paddingTop: spacing.md, marginTop: spacing.sm },
+  infoRow: { alignItems: 'center', paddingVertical: spacing.lg, borderTopWidth: 1, borderTopColor: 'rgba(212,160,23,0.18)' },
+  infoLabel: { fontSize: 11, color: colors.gold.dark, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 },
+  infoValue: { fontSize: 20, fontWeight: '700', color: colors.primary.maroon, textAlign: 'center' },
+  infoSubValue: { fontSize: 12, color: colors.text.secondary, marginTop: 4 },
+  gridRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: 'rgba(212,160,23,0.18)', paddingTop: spacing.lg, paddingBottom: spacing.xs },
   gridCell: { flex: 1, alignItems: 'center' },
-  gridDivider: { width: 1, backgroundColor: colors.border.gold as string },
-  gridLabel: { fontSize: 14, fontWeight: '600', color: colors.primary.maroon },
+  gridDivider: { width: 1, backgroundColor: 'rgba(212,160,23,0.18)' },
+  gridLabel: { fontSize: 11, fontWeight: '700', color: colors.gold.dark, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 },
   gridLabelEn: { fontSize: 11, color: colors.text.secondary, marginBottom: spacing.xs },
-  gridValue: { fontSize: 16, fontWeight: '600', color: colors.text.primary },
+  gridValue: { fontSize: 19, fontWeight: '700', color: colors.primary.maroon },
   natureBadge: { marginTop: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
   natureBadgeGood: { backgroundColor: 'rgba(22,163,74,0.1)' },
   natureBadgeBad: { backgroundColor: 'rgba(220,38,38,0.1)' },
@@ -805,8 +825,8 @@ const styles = StyleSheet.create({
   natureBadgeTextGood: { color: '#16A34A' },
   natureBadgeTextBad: { color: '#DC2626' },
   natureBadgeTextNeutral: { color: '#CA8A04' },
-  samvatRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.md, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border.gold as string, gap: spacing.lg },
-  samvatText: { fontSize: 13, color: colors.gold.dark, fontWeight: '500' },
+  samvatRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: 'rgba(212,160,23,0.18)', gap: spacing.lg },
+  samvatText: { fontSize: 12, color: colors.gold.dark, fontWeight: '600', letterSpacing: 0.3 },
 
   // Rashi Section
   rashiGrid: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },

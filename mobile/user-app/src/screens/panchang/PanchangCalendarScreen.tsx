@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { getPanchangMonth, getPanchangToday } from '../../services/panchangApi';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DAY_SIZE = Math.floor((SCREEN_WIDTH - spacing.lg * 2 - 6) / 7);
@@ -122,6 +123,8 @@ function mapDayFromPayload(item: any): DayData | null {
 }
 
 export default function PanchangCalendarScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const route = useRoute<any>();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -514,6 +517,8 @@ function DetailRow({
   value: string;
   variant?: 'warning';
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <View
       style={[
@@ -534,7 +539,7 @@ function DetailRow({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

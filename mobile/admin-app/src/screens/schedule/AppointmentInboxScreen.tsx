@@ -10,11 +10,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Card, ActivityIndicator, Chip, Portal, Modal, Button } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { Card, ActivityIndicator, Portal, Modal, Button } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { Badge, Avatar } from '../../components/common';
 import api from '../../services/api';
 import { ScheduleRegistration } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+
+const statusTone = (status?: string) =>
+  status === 'Approved'
+    ? colors.status.success
+    : status === 'Rejected'
+      ? colors.status.error
+      : colors.gold.dark;
 
 type StatusFilter = 'Pending' | 'Approved' | 'Rejected';
 
@@ -133,32 +142,29 @@ export function AppointmentInboxScreen() {
       <Card style={styles.card}>
         <Card.Content>
           <View style={styles.cardHeader}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.metaText}>{item.purpose}</Text>
-              <Text style={styles.metaText}>
+            <Avatar name={item.name} size={44} />
+            <View style={styles.cardHeaderText}>
+              <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+              <Text style={styles.metaText} numberOfLines={1}>{item.purpose}</Text>
+              <Text style={styles.metaText} numberOfLines={1}>
                 {item.requestedSchedule?.baseLocation || 'Ashram'} •{' '}
                 {item.requestedSchedule?.eventLocation || 'Location pending'}
               </Text>
             </View>
-            <Chip
-              style={[
-                styles.statusChip,
-                item.status === 'Approved'
-                  ? styles.approvedChip
-                  : item.status === 'Rejected'
-                    ? styles.rejectedChip
-                    : styles.pendingChip,
-              ]}
-              textStyle={styles.statusChipText}
-            >
-              {item.status}
-            </Chip>
+            <Badge
+              label={item.status}
+              tone={statusTone(item.status)}
+              variant="soft"
+              dot
+            />
           </View>
 
           <View style={styles.row}>
-            <Text style={styles.infoLabel}>Date</Text>
-            <Text style={styles.infoValue}>
+            <View style={styles.infoLabelWrap}>
+              <MaterialCommunityIcons name="calendar" size={16} color={colors.primary.maroon} />
+              <Text style={styles.infoLabel}>Date</Text>
+            </View>
+            <Text style={styles.infoValue} numberOfLines={1}>
               {item.requestedSchedule?.eventDate
                 ? new Date(item.requestedSchedule.eventDate).toLocaleDateString('en-IN', {
                     weekday: 'short',
@@ -171,13 +177,19 @@ export function AppointmentInboxScreen() {
           </View>
 
           <View style={styles.row}>
-            <Text style={styles.infoLabel}>Preferred</Text>
-            <Text style={styles.infoValue}>{item.preferedTime || 'Not provided'}</Text>
+            <View style={styles.infoLabelWrap}>
+              <MaterialCommunityIcons name="clock-outline" size={16} color={colors.primary.maroon} />
+              <Text style={styles.infoLabel}>Preferred</Text>
+            </View>
+            <Text style={styles.infoValue} numberOfLines={1}>{item.preferedTime || 'Not provided'}</Text>
           </View>
 
           <View style={styles.row}>
-            <Text style={styles.infoLabel}>Phone</Text>
-            <Text style={styles.infoValue}>{item.phone}</Text>
+            <View style={styles.infoLabelWrap}>
+              <MaterialCommunityIcons name="phone-outline" size={16} color={colors.primary.maroon} />
+              <Text style={styles.infoLabel}>Phone</Text>
+            </View>
+            <Text style={styles.infoValue} numberOfLines={1}>{item.phone}</Text>
           </View>
         </Card.Content>
       </Card>
@@ -230,7 +242,7 @@ export function AppointmentInboxScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
       </View>
     );
   }
@@ -247,12 +259,13 @@ export function AppointmentInboxScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>
+            <MaterialCommunityIcons name="calendar-check-outline" size={48} color={colors.gold.dark} />
             <Text style={styles.emptyTitle}>No requests in this queue</Text>
             <Text style={styles.emptySubtitle}>New devotee appointment requests will appear here.</Text>
           </View>
@@ -370,10 +383,13 @@ const styles = StyleSheet.create({
   summaryCard: {
     marginTop: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
     padding: spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    ...shadows.soft,
   },
   summaryItem: {
     alignItems: 'center',
@@ -414,12 +430,18 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    ...shadows.soft,
   },
   cardHeader: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: spacing.sm,
+  },
+  cardHeaderText: {
+    flex: 1,
   },
   name: {
     fontSize: 16,
@@ -430,26 +452,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
     color: colors.text.secondary,
   },
-  statusChip: {
-    alignSelf: 'flex-start',
-  },
-  statusChipText: {
-    color: colors.text.white,
-    fontWeight: '700',
-  },
-  approvedChip: {
-    backgroundColor: colors.status.success,
-  },
-  rejectedChip: {
-    backgroundColor: colors.status.error,
-  },
-  pendingChip: {
-    backgroundColor: colors.status.warning,
-  },
   row: {
     marginTop: spacing.sm,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  infoLabelWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   infoLabel: {
     color: colors.text.secondary,
@@ -457,12 +469,14 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     color: colors.text.primary,
-    flexShrink: 1,
+    flex: 1,
     textAlign: 'right',
+    marginLeft: spacing.md,
   },
   emptyState: {
     marginTop: spacing.xxl,
     alignItems: 'center',
+    gap: spacing.sm,
   },
   emptyTitle: {
     fontSize: 18,

@@ -671,37 +671,38 @@ layer(base);
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Editorial maroon / cream / gold theme (Swami Avdheshanand G admin). */
+  --background: #F7F1E7;
+  --foreground: #2A211C;
+  --card: #FDFAF3;
+  --card-foreground: #2A211C;
+  --popover: #FFFDF8;
+  --popover-foreground: #2A211C;
+  --primary: #800020;
+  --primary-foreground: #FFF8E7;
+  --secondary: #F0E7D5;
+  --secondary-foreground: #5E0016;
+  --muted: #F0E7D5;
+  --muted-foreground: #8B7E6A;
+  --accent: #EFE4CE;
+  --accent-foreground: #5E0016;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #E7DCC6;
+  --input: #E1D6C2;
+  --ring: #800020;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #FBF7EF;
+  --sidebar-foreground: #2A211C;
+  --sidebar-primary: #800020;
+  --sidebar-primary-foreground: #FFF8E7;
+  --sidebar-accent: #EFE4CE;
+  --sidebar-accent-foreground: #5E0016;
+  --sidebar-border: #E7DCC6;
+  --sidebar-ring: #800020;
 }
 
 /*

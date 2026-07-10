@@ -17,15 +17,19 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
     // Parse request body
     const body = await req.json();
     const { email, password } = body;
-    const username = (body.username || body.name || '').trim();
+    const fullName = (body.name || body.username || '').trim();
+    // The schema caps username at 20 chars, so derive a safe value from the
+    // display name (falling back to the email local-part) and truncate it.
+    const rawUsername = (body.username || body.name || email?.split('@')[0] || '').trim();
+    const username = rawUsername.slice(0, 20);
 
     // Validate input
-    if (!email || !password || !username) {
+    if (!email || !password || !fullName) {
       return NextResponse.json(
-        { 
-          success: false, 
-          message: 'All fields are required' 
-        }, 
+        {
+          success: false,
+          message: 'All fields are required'
+        },
         { status: 400 }
       );
     }
@@ -34,27 +38,18 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          message: 'User with this email already exists' 
+          message: 'User with this email already exists'
         },
         { status: 409 } // 409 Conflict
       );
     }
 
-    // Check if username is taken
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Username is already taken'
-        },
-        { status: 409 }
-      );
-    }
-
-    // Create new user with normal auth method
+    // Create new user with normal auth method.
+    // Username is not unique (schema unique:false) and is only a display
+    // handle, so we don't block registration on a duplicate name — accounts
+    // are identified by their unique email.
     const newUser = new User({
       email,
       password,
@@ -64,7 +59,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       status: 'active',
       role: 'user',
       profile: {
-        fullName: username, // Default to username for fullName
+        fullName: fullName || username, // Store the full display name
         profileImage: '/placeholder.svg'
       }
     });

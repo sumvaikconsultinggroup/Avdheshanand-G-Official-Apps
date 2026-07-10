@@ -8,18 +8,24 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/avdheshanandg-mission-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFF8E7"
     },
+    "androidStatusBar": {
+      "backgroundColor": "#FFF8E7",
+      "barStyle": "dark-content"
+    },
     "ios": {
+      "bundleIdentifier": "com.avdheshanandg.app",
       "supportsTablet": true,
-      "statusBarStyle": "dark",
       "associatedDomains": [
         "applinks:www.avdheshanandg.org"
       ]
     },
     "android": {
+      "package": "com.avdheshanandg.app",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#FFF8E7",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -27,8 +33,6 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "statusBarColor": "#FFF8E7",
-      "statusBarStyle": "dark",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -53,7 +57,17 @@
       "expo-router",
       "expo-secure-store",
       "expo-notifications",
-      "expo-localization"
-    ]
+      "expo-localization",
+      "expo-font",
+      "@react-native-community/datetimepicker",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8753ab18-6531-437d-8417-3adbfad54771"
+      }
+    },
+    "owner": "chiragsumvaik"
   }
 }

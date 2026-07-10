@@ -27,7 +27,10 @@ import {
 } from '@/lib/panchang/muhurta';
 import { EKADASHI_NAMES } from '@/lib/panchang/types';
 
-export const PANCHANG_ENGINE_VERSION = 'sidereal-lahiri-v1';
+// Bumped to v2 when the five core elements were anchored to sunrise (instead of
+// the request instant). The version is part of the cache key, so bumping it
+// invalidates stale cached panchang computed by the previous method.
+export const PANCHANG_ENGINE_VERSION = 'sidereal-lahiri-v2';
 
 interface CityEntry {
   name: string;
@@ -136,25 +139,33 @@ export function buildPanchangData({
   timezone,
 }: BuildPanchangArgs) {
   const dateKey = formatDateKey(date, timezone);
-  const ayanamshaDegrees = getLahiriAyanamsha(date);
-  const tropicalSunLongitude = getSunLongitude(date);
-  const tropicalMoonLongitude = getMoonLongitude(date);
-  const siderealSunLongitude = getSunSiderealLongitude(date);
-  const siderealMoonLongitude = getMoonSiderealLongitude(date);
   const sunTimes = getSunTimes(date, lat, lng);
   const moonTimes = getMoonTimes(date, lat, lng);
+
+  // Traditional Panchang reports the element prevailing at sunrise. Anchor the
+  // five core elements to the day's sunrise (not the request instant) so the
+  // result is stable throughout the day and matches standard panchang sources.
+  const sunrise = sunTimes.sunrise;
+  const observance =
+    sunrise instanceof Date && !Number.isNaN(sunrise.getTime()) ? sunrise : date;
+
+  const ayanamshaDegrees = getLahiriAyanamsha(observance);
+  const tropicalSunLongitude = getSunLongitude(observance);
+  const tropicalMoonLongitude = getMoonLongitude(observance);
+  const siderealSunLongitude = getSunSiderealLongitude(observance);
+  const siderealMoonLongitude = getMoonSiderealLongitude(observance);
   const nextDaySunrise = getSunTimes(
     new Date(date.getTime() + 24 * 60 * 60 * 1000),
     lat,
     lng
   ).sunrise;
 
-  const tithi = calculateTithi(date);
-  const nakshatra = calculateNakshatra(date);
-  const yoga = calculateYoga(date);
+  const tithi = calculateTithi(observance);
+  const nakshatra = calculateNakshatra(observance);
+  const yoga = calculateYoga(observance);
   const karana = calculateKarana(tithi.number);
-  const hinduMonth = calculateHinduMonth(date);
-  const angleWithinTithi = getMoonSunAngle(date) % 12;
+  const hinduMonth = calculateHinduMonth(observance);
+  const angleWithinTithi = getMoonSunAngle(observance) % 12;
   const currentKaranaHalf: 'first' | 'second' = angleWithinTithi < 6 ? 'first' : 'second';
   const currentKaranaName = currentKaranaHalf === 'first' ? karana.first : karana.second;
 
@@ -192,9 +203,10 @@ export function buildPanchangData({
   if (tithi.number === 4 && tithi.paksha === 'Krishna') vratDays.push('Sankashti Chaturthi');
   if (tithi.number === 14 && tithi.paksha === 'Krishna') vratDays.push('Shivaratri');
 
-  // Enhanced calculations
-  const moonRashi = getMoonRashi(date);
-  const sunRashi = getSunRashi(date);
+  // Enhanced calculations. Rashi is part of the day's panchang → anchor to
+  // sunrise; Hora is time-of-day specific → keep it at the request instant.
+  const moonRashi = getMoonRashi(observance);
+  const sunRashi = getSunRashi(observance);
   const hora = getCurrentHora(date, sunTimes.sunrise, sunTimes.sunset, dayOfWeek);
   const dishaShool = getDishaShool(dayOfWeek);
   const durMuhurta = calculateDurMuhurta(sunTimes.sunrise, sunTimes.sunset, dayOfWeek);
@@ -286,7 +298,7 @@ export function buildPanchangData({
     samvatYear: vikramSamvat,
     shakaSamvat: calculateShakaSamvat(date),
     ritu: calculateRitu(hinduMonth),
-    ayana: calculateAyana(date),
+    ayana: calculateAyana(observance),
     // Choghadiya
     choghadiya: {
       day: choghadiya.day.map((period) => ({

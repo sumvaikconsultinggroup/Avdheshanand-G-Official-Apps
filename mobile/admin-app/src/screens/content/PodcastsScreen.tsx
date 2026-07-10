@@ -17,7 +17,6 @@ import {
 import {
   Card,
   ActivityIndicator,
-  Chip,
   FAB,
   TextInput,
   Button,
@@ -26,7 +25,18 @@ import {
   Snackbar,
   Switch,
 } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import {
+  colors,
+  spacing,
+  borderRadius,
+  typography,
+  shadows,
+  gradients,
+} from '../../theme';
+import { AdminHero, Badge } from '../../components/common';
 import api from '../../services/api';
 import { pickImage } from '../../services/imageUpload';
 import { Podcast } from '../../types';
@@ -63,6 +73,14 @@ export function PodcastsScreen() {
   const [form, setForm] = useState<PodcastFormData>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+
+  const toIsoDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
 
   const fetchPodcasts = useCallback(async () => {
     try {
@@ -157,10 +175,10 @@ export function PodcastsScreen() {
       const config = { headers: { 'Content-Type': 'multipart/form-data' } };
       if (editingPodcast) {
         await api.put(`/podcasts/${editingPodcast._id}`, fd, config);
-        showSnackbar('Podcast updated successfully');
+        showSnackbar('Podcast updated — your changes are now live on the user app and the website.');
       } else {
         await api.post('/podcasts', fd, config);
-        showSnackbar('Podcast created successfully');
+        showSnackbar('Podcast published — the new podcast is now live on the user app and the website.');
       }
       setModalVisible(false);
       fetchPodcasts();
@@ -232,10 +250,23 @@ export function PodcastsScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <View style={styles.coverPlaceholder}>
+              <LinearGradient
+                colors={gradients.maroon as readonly [string, string, ...string[]]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.coverPlaceholder}
+              >
                 <Text style={styles.placeholderIcon}>🎙️</Text>
-              </View>
+              </LinearGradient>
             )}
+            <View style={styles.micBadge}>
+              <IconButton
+                icon="microphone"
+                size={13}
+                iconColor={colors.text.white}
+                style={styles.micBadgeIcon}
+              />
+            </View>
             {item.duration ? (
               <View style={styles.durationBadge}>
                 <Text style={styles.durationBadgeText}>{item.duration}</Text>
@@ -253,36 +284,33 @@ export function PodcastsScreen() {
             ) : null}
             <View style={styles.chipRow}>
               {item.category ? (
-                <Chip
-                  style={styles.categoryChip}
-                  textStyle={styles.categoryChipText}
-                  compact
-                >
-                  {item.category}
-                </Chip>
+                <Badge label={item.category} tone={colors.primary.saffron} variant="soft" />
               ) : null}
               {item.date ? (
-                <Text style={styles.dateText}>{formatDate(item.date)}</Text>
+                <View style={styles.datePill}>
+                  <IconButton
+                    icon="calendar-blank"
+                    size={11}
+                    iconColor={colors.primary.maroon}
+                    style={styles.dateIcon}
+                  />
+                  <Text style={styles.dateText}>{formatDate(item.date)}</Text>
+                </View>
               ) : null}
             </View>
             {item.featured ? (
-              <Chip
-                style={styles.featuredChip}
-                textStyle={styles.featuredChipText}
-                icon="star"
-                compact
-              >
-                Featured
-              </Chip>
+              <Badge label="Featured" tone={colors.gold.dark} variant="soft" icon="star" style={{ marginTop: spacing.sm }} />
             ) : null}
           </View>
         </View>
       </TouchableOpacity>
       <View style={styles.cardActions}>
+        <Badge label="Live on app & website" tone={colors.status.success} variant="soft" dot />
+        <View style={styles.cardActionButtons}>
         <IconButton
           icon="pencil"
           size={18}
-          iconColor={colors.accent.peacock}
+          iconColor={colors.primary.maroon}
           onPress={() => openEditModal(item)}
         />
         <IconButton
@@ -297,13 +325,16 @@ export function PodcastsScreen() {
           iconColor={colors.status.error}
           onPress={() => openYouTube(item.videoUrl)}
         />
+        </View>
       </View>
     </Card>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>🎙️</Text>
+      <View style={styles.emptyIconWell}>
+        <Text style={styles.emptyStateIcon}>🎙️</Text>
+      </View>
       <Text style={styles.emptyStateText}>No podcasts available</Text>
       <Text style={styles.emptyStateSubtext}>
         Tap + to add your first podcast
@@ -313,10 +344,13 @@ export function PodcastsScreen() {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>Podcasts</Text>
-      <Text style={styles.headerSubtitle}>
-        {podcasts.length} {podcasts.length === 1 ? 'episode' : 'episodes'} available
-      </Text>
+      <AdminHero
+        eyebrow="Manage"
+        title="Podcasts"
+        subtitle="Publish once — every episode appears instantly on the user app and the website."
+        badge={`${podcasts.length} live`}
+        actions={[{ label: 'New Podcast', icon: 'plus', onPress: openCreateModal }]}
+      />
     </View>
   );
 
@@ -331,21 +365,34 @@ export function PodcastsScreen() {
         style={styles.modalContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.modalHeader}>
+        <LinearGradient
+          colors={gradients.maroon as readonly [string, string, ...string[]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.modalHeader}
+        >
           <Text style={styles.modalTitle}>
             {editingPodcast ? 'Edit Podcast' : 'Add Podcast'}
           </Text>
           <IconButton
             icon="close"
             size={24}
+            iconColor={colors.text.white}
             onPress={() => setModalVisible(false)}
           />
-        </View>
+        </LinearGradient>
         <ScrollView
           style={styles.modalBody}
           contentContainerStyle={styles.modalBodyContent}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.infoBanner}>
+            <MaterialCommunityIcons name="broadcast" size={16} color={colors.status.success} />
+            <Text style={styles.infoBannerText}>
+              Saved podcasts publish instantly to the user app and the website.
+            </Text>
+          </View>
+
           <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
             {form.coverImageUri ? (
               <Image
@@ -371,7 +418,7 @@ export function PodcastsScreen() {
             mode="outlined"
             style={styles.input}
             outlineColor={colors.border.gold}
-            activeOutlineColor={colors.primary.saffron}
+            activeOutlineColor={colors.primary.maroon}
           />
           <TextInput
             label="Description"
@@ -382,7 +429,7 @@ export function PodcastsScreen() {
             numberOfLines={3}
             style={styles.input}
             outlineColor={colors.border.gold}
-            activeOutlineColor={colors.primary.saffron}
+            activeOutlineColor={colors.primary.maroon}
           />
           <TextInput
             label="YouTube URL *"
@@ -393,7 +440,7 @@ export function PodcastsScreen() {
             autoCapitalize="none"
             style={styles.input}
             outlineColor={colors.border.gold}
-            activeOutlineColor={colors.primary.saffron}
+            activeOutlineColor={colors.primary.maroon}
           />
           <View style={styles.row}>
             <TextInput
@@ -403,7 +450,7 @@ export function PodcastsScreen() {
               mode="outlined"
               style={[styles.input, styles.halfInput]}
               outlineColor={colors.border.gold}
-              activeOutlineColor={colors.primary.saffron}
+              activeOutlineColor={colors.primary.maroon}
             />
             <TextInput
               label="Duration"
@@ -413,18 +460,34 @@ export function PodcastsScreen() {
               placeholder="e.g. 45:30"
               style={[styles.input, styles.halfInput]}
               outlineColor={colors.border.gold}
-              activeOutlineColor={colors.primary.saffron}
+              activeOutlineColor={colors.primary.maroon}
             />
           </View>
-          <TextInput
-            label="Date (YYYY-MM-DD)"
-            value={form.date}
-            onChangeText={(v) => setForm((p) => ({ ...p, date: v }))}
-            mode="outlined"
-            style={styles.input}
-            outlineColor={colors.border.gold}
-            activeOutlineColor={colors.primary.saffron}
-          />
+          <TouchableOpacity
+            onPress={() => setDatePickerVisible(true)}
+            activeOpacity={0.8}
+            style={styles.dateField}
+          >
+            <MaterialCommunityIcons name="calendar-month-outline" size={22} color={colors.primary.maroon} />
+            <View style={styles.dateFieldTextWrap}>
+              <Text style={styles.dateFieldLabel}>Date</Text>
+              <Text style={[styles.dateFieldValue, !form.date && styles.dateFieldPlaceholder]}>
+                {form.date ? formatDate(form.date) : 'Tap to select a date'}
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-down" size={22} color={colors.gold.dark} />
+          </TouchableOpacity>
+          {datePickerVisible ? (
+            <DateTimePicker
+              value={form.date ? new Date(`${form.date}T00:00:00`) : new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              onChange={(e, dt) => {
+                setDatePickerVisible(false);
+                if (e.type === 'set' && dt) setForm((p) => ({ ...p, date: toIsoDate(dt) }));
+              }}
+            />
+          ) : null}
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>Featured</Text>
             <Switch
@@ -434,16 +497,32 @@ export function PodcastsScreen() {
             />
           </View>
 
-          <Button
-            mode="contained"
-            onPress={handleSubmit}
-            loading={submitting}
-            disabled={submitting}
-            style={styles.submitButton}
-            buttonColor={colors.primary.saffron}
-            textColor={colors.text.white}
+          <LinearGradient
+            colors={gradients.maroon as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.submitGradient}
           >
-            {editingPodcast ? 'Update Podcast' : 'Create Podcast'}
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              loading={submitting}
+              disabled={submitting}
+              style={styles.submitButton}
+              buttonColor="transparent"
+              textColor={colors.text.white}
+            >
+              {editingPodcast ? 'Update Podcast' : 'Create Podcast'}
+            </Button>
+          </LinearGradient>
+
+          <Button
+            mode="outlined"
+            onPress={() => setModalVisible(false)}
+            style={styles.cancelButton}
+            textColor={colors.primary.maroon}
+          >
+            Cancel
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -453,7 +532,7 @@ export function PodcastsScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading podcasts...</Text>
       </View>
     );
@@ -482,8 +561,8 @@ export function PodcastsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -532,10 +611,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   retryButton: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.full,
+    ...shadows.maroonGlow,
   },
   retryButtonText: {
     color: colors.text.white,
@@ -543,35 +623,42 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
-    paddingBottom: 80,
+    paddingBottom: 96,
   },
   header: {
     marginBottom: spacing.lg,
+    marginTop: spacing.xs,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    ...typography.titleLg,
     color: colors.primary.maroon,
   },
   headerSubtitle: {
-    fontSize: 14,
+    ...typography.bodySm,
     color: colors.text.secondary,
     marginTop: spacing.xs,
   },
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 3,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
     overflow: 'hidden',
+    ...shadows.soft,
   },
   cardRow: {
     flexDirection: 'row',
+    padding: spacing.sm,
   },
   coverContainer: {
-    width: 120,
-    height: 100,
+    width: 108,
+    height: 108,
     position: 'relative',
+    borderRadius: borderRadius.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border.gold,
   },
   coverImage: {
     width: '100%',
@@ -581,18 +668,34 @@ const styles = StyleSheet.create({
   coverPlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.accent.peacock,
     justifyContent: 'center',
     alignItems: 'center',
   },
   placeholderIcon: {
-    fontSize: 32,
+    fontSize: 34,
+  },
+  micBadge: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.primary.maroon,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...shadows.soft,
+  },
+  micBadgeIcon: {
+    margin: 0,
+    width: 24,
+    height: 24,
   },
   durationBadge: {
     position: 'absolute',
     bottom: 4,
     right: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(74, 0, 16, 0.82)',
     borderRadius: borderRadius.sm,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -600,73 +703,157 @@ const styles = StyleSheet.create({
   durationBadgeText: {
     color: colors.text.white,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   podcastInfo: {
     flex: 1,
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
     justifyContent: 'center',
   },
   podcastTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text.primary,
+    ...typography.titleSm,
+    fontWeight: '700',
+    color: colors.primary.maroon,
     marginBottom: spacing.xs,
   },
   description: {
-    fontSize: 12,
+    ...typography.bodySm,
     color: colors.text.secondary,
-    lineHeight: 17,
     marginBottom: spacing.sm,
   },
   chipRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     flexWrap: 'wrap',
   },
   categoryChip: {
-    backgroundColor: colors.accent.peacock,
-    height: 24,
+    backgroundColor: 'rgba(163, 18, 58, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(163, 18, 58, 0.25)',
+    height: 26,
   },
   categoryChipText: {
-    color: colors.text.white,
+    color: colors.primary.saffron,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  datePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(212, 160, 23, 0.14)',
+    borderRadius: borderRadius.full,
+    paddingRight: spacing.sm,
+  },
+  dateIcon: {
+    margin: 0,
+    width: 20,
+    height: 20,
   },
   dateText: {
     fontSize: 11,
-    color: colors.text.secondary,
+    fontWeight: '600',
+    color: colors.primary.maroon,
   },
   featuredChip: {
-    backgroundColor: colors.gold.main,
-    height: 24,
-    marginTop: spacing.xs,
+    backgroundColor: 'rgba(212, 160, 23, 0.18)',
+    borderWidth: 1,
+    borderColor: colors.gold.main,
+    height: 26,
+    marginTop: spacing.sm,
     alignSelf: 'flex-start',
   },
   featuredChipText: {
-    color: colors.text.white,
+    color: colors.gold.dark,
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   cardActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: spacing.sm,
-    paddingBottom: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.gold,
+  },
+  cardActionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#F3FAF4',
+    borderWidth: 1,
+    borderColor: 'rgba(46,158,91,0.25)',
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  infoBannerText: {
+    ...typography.bodySm,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  dateField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.background.warmWhite,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  dateFieldTextWrap: {
+    flex: 1,
+  },
+  dateFieldLabel: {
+    ...typography.micro,
+    color: colors.gold.dark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  dateFieldValue: {
+    ...typography.body,
+    color: colors.text.primary,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  dateFieldPlaceholder: {
+    color: colors.text.secondary,
+    fontWeight: '400',
   },
   emptyState: {
     padding: spacing.xxl,
     alignItems: 'center',
   },
+  emptyIconWell: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: 'rgba(163, 18, 58, 0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(163, 18, 58, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
   emptyStateIcon: {
-    fontSize: 48,
-    marginBottom: spacing.md,
+    fontSize: 44,
   },
   emptyStateText: {
-    color: colors.text.secondary,
-    fontSize: 18,
-    fontWeight: '600',
+    ...typography.title,
+    color: colors.primary.maroon,
   },
   emptyStateSubtext: {
     color: colors.text.secondary,
@@ -678,8 +865,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     borderRadius: borderRadius.full,
+    ...shadows.maroonGlow,
   },
   modalContainer: {
     flex: 1,
@@ -691,14 +879,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.gold,
-    backgroundColor: colors.background.warmWhite,
+    borderBottomLeftRadius: borderRadius.xl,
+    borderBottomRightRadius: borderRadius.xl,
+    ...shadows.maroonGlow,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.primary.maroon,
+    ...typography.title,
+    color: colors.text.white,
+    marginLeft: spacing.xs,
   },
   modalBody: {
     flex: 1,
@@ -710,10 +898,10 @@ const styles = StyleSheet.create({
   imagePicker: {
     width: '100%',
     height: 180,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
     marginBottom: spacing.md,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border.gold,
     borderStyle: 'dashed',
   },
@@ -748,18 +936,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
     marginBottom: spacing.sm,
   },
   switchLabel: {
-    fontSize: 16,
-    color: colors.text.primary,
+    ...typography.titleSm,
+    color: colors.primary.maroon,
+  },
+  submitGradient: {
+    marginTop: spacing.lg,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    ...shadows.maroonGlow,
   },
   submitButton: {
-    marginTop: spacing.md,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.xs,
+  },
+  cancelButton: {
+    marginTop: spacing.sm,
+    borderRadius: borderRadius.full,
+    borderColor: colors.border.maroon,
     paddingVertical: spacing.xs,
   },
 });

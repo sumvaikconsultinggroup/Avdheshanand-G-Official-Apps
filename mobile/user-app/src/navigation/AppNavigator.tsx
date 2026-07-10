@@ -10,7 +10,7 @@ import * as Linking from 'expo-linking';
 import { useAuth } from '../context/AuthContext';
 import { useOnboarding } from '../context/OnboardingContext';
 import { AppShellProvider, useAppShell } from '../context/AppShellContext';
-import { colors } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import PublicAppDrawer from '../components/PublicAppDrawer';
 
 // Auth screens
@@ -43,6 +43,9 @@ import {
 import { ScheduleScreen } from '../screens/schedule';
 import { DonateScreen } from '../screens/donate';
 import { DonationHistoryScreen, ProfileLoginPrompt, ProfileScreen } from '../screens/profile';
+import { MyRegistrationsScreen } from '../screens/profile/MyRegistrationsScreen';
+import { SettingsScreen } from '../screens/profile/SettingsScreen';
+import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
 import LiveStreamScreen from '../screens/live/LiveStreamScreen';
 import PanchangScreen from '../screens/panchang/PanchangScreen';
 import PanchangCalendarScreen from '../screens/panchang/PanchangCalendarScreen';
@@ -81,6 +84,9 @@ export type RootStackParamList = {
   PanchangCalendar: { lat?: number; lng?: number; cityName?: string; timezone?: string };
   NotificationPreferences: undefined;
   DonationHistory: undefined;
+  MyRegistrations: undefined;
+  Settings: undefined;
+  EditProfile: undefined;
   AboutSwami: undefined;
   Mission: undefined;
   PrivacyPolicy: undefined;
@@ -105,6 +111,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 function DrawerButton() {
   const { t } = useTranslation();
   const { openDrawer } = useAppShell();
+  const { colors } = useTheme();
 
   return (
     <TouchableOpacity
@@ -176,6 +183,7 @@ function MainTabs() {
   const insets = useSafeAreaInsets();
   const bottomPad = Math.max(insets.bottom, 6);
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
   return (
     <Tab.Navigator
@@ -256,6 +264,7 @@ export function AppNavigator() {
   const { isLoading, isAuthenticated } = useAuth();
   const { isLoading: onboardingLoading, hasCompletedOnboarding } = useOnboarding();
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   if (isLoading || onboardingLoading) {
@@ -283,7 +292,11 @@ export function AppNavigator() {
             headerShown: false,
           }}
         >
-          {showOnboarding ? (
+          {/* Onboarding screens only exist for first-run, unauthenticated users.
+              When onboarding finishes (or the user authenticates) these are
+              removed and the navigator falls through to "Main". "Main" is always
+              registered so auth modals can reliably reset to it after sign-in. */}
+          {showOnboarding && (
             <>
               <Stack.Screen name="OnboardingWelcome" component={OnboardingWelcomeScreen} />
               <Stack.Screen
@@ -297,9 +310,8 @@ export function AppNavigator() {
                 options={{ animation: 'slide_from_right' }}
               />
             </>
-          ) : (
-            <Stack.Screen name="Main" component={MainTabs} />
           )}
+          <Stack.Screen name="Main" component={MainTabs} />
 
           {/* Auth screens as modals */}
           <Stack.Screen
@@ -478,6 +490,21 @@ export function AppNavigator() {
               headerStyle: { backgroundColor: colors.background.warmWhite },
               headerTintColor: colors.primary.maroon,
             }}
+          />
+          <Stack.Screen
+            name="MyRegistrations"
+            component={MyRegistrationsScreen}
+            options={{ headerShown: false, animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{ headerShown: false, animation: 'slide_from_right' }}
+          />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfileScreen}
+            options={{ headerShown: false, animation: 'slide_from_right' }}
           />
         </Stack.Navigator>
         <PublicAppDrawer visible={drawerVisible} onClose={() => setDrawerVisible(false)} />

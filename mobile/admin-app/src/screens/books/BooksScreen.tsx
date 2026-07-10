@@ -16,7 +16,6 @@ import {
 import {
   Card,
   ActivityIndicator,
-  Chip,
   FAB,
   TextInput,
   Button,
@@ -24,7 +23,11 @@ import {
   Portal,
   Snackbar,
 } from 'react-native-paper';
-import { colors, spacing, borderRadius } from '../../theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, spacing, borderRadius, typography, shadows, gradients } from '../../theme';
+import { AdminHero, Badge } from '../../components/common';
 import api from '../../services/api';
 import { pickImage } from '../../services/imageUpload';
 import { Book } from '../../types';
@@ -67,6 +70,14 @@ export function BooksScreen() {
   const [form, setForm] = useState<BookFormData>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({ visible: false, message: '' });
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+
+  const toIsoDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
 
   const fetchBooks = useCallback(async () => {
     try {
@@ -176,10 +187,10 @@ export function BooksScreen() {
       const config = { headers: { 'Content-Type': 'multipart/form-data' } };
       if (editingBook) {
         await api.put(`/allbooks/${editingBook._id}`, fd, config);
-        showSnackbar('Book updated successfully');
+        showSnackbar('Book updated — your changes are now live on the user app and the website.');
       } else {
         await api.post('/allbooks', fd, config);
-        showSnackbar('Book created successfully');
+        showSnackbar('Book published — the new book is now live on the user app and the website.');
       }
       setModalVisible(false);
       fetchBooks();
@@ -253,42 +264,57 @@ export function BooksScreen() {
             <Text style={styles.bookTitle} numberOfLines={2}>
               {item.title}
             </Text>
-            <Text style={styles.authorText}>by {item.author || 'Unknown Author'}</Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaIcon}>✍️</Text>
+              <Text style={styles.authorText} numberOfLines={1}>
+                {item.author || 'Unknown Author'}
+              </Text>
+            </View>
+            {item.language ? (
+              <View style={styles.metaRow}>
+                <Text style={styles.metaIcon}>🌐</Text>
+                <Text style={styles.metaText} numberOfLines={1}>
+                  {item.language}
+                </Text>
+              </View>
+            ) : null}
             <View style={styles.priceRow}>
               <Text style={styles.price}>{formatPrice(item.price)}</Text>
             </View>
             <View style={styles.chipRow}>
               {item.purchaseUrl ? (
-                <Chip style={styles.linkChip} textStyle={styles.linkChipText} compact>
-                  External Buy Link
-                </Chip>
+                <Badge
+                  label="External Buy Link"
+                  tone={colors.gold.dark}
+                  variant="soft"
+                  icon="open-in-new"
+                />
               ) : null}
-              <Chip
-                style={[styles.stockChip, { backgroundColor: stockStatus.color }]}
-                textStyle={styles.stockChipText}
-                compact
-              >
-                {stockStatus.label}
-                {item.stock && item.stock.available > 0
-                  ? ` (${item.stock.available})`
-                  : ''}
-              </Chip>
+              <Badge
+                label={`${stockStatus.label}${
+                  item.stock && item.stock.available > 0
+                    ? ` (${item.stock.available})`
+                    : ''
+                }`}
+                tone={stockStatus.color}
+                variant="solid"
+              />
               {item.genre ? (
-                <Chip
-                  style={styles.genreChip}
-                  textStyle={styles.genreChipText}
-                  compact
-                >
-                  {item.genre}
-                </Chip>
+                <Badge label={item.genre} tone={colors.primary.saffron} variant="soft" />
               ) : null}
+              <Badge
+                label="Live on app & website"
+                tone={colors.status.success}
+                variant="soft"
+                dot
+              />
             </View>
           </View>
           <View style={styles.cardActions}>
             <IconButton
               icon="pencil"
               size={18}
-              iconColor={colors.accent.peacock}
+              iconColor={colors.primary.maroon}
               onPress={() => openEditModal(item)}
             />
             <IconButton
@@ -305,7 +331,9 @@ export function BooksScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateIcon}>📖</Text>
+      <View style={styles.emptyIconWell}>
+        <Text style={styles.emptyStateIcon}>📖</Text>
+      </View>
       <Text style={styles.emptyStateText}>No books available</Text>
       <Text style={styles.emptyStateSubtext}>
         Tap + to add your first book
@@ -319,8 +347,23 @@ export function BooksScreen() {
     const outOfStock = totalBooks - inStock;
 
     return (
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>Book Inventory</Text>
+      <View>
+        <View style={styles.heroWrap}>
+          <AdminHero
+            eyebrow="Manage"
+            title="Books"
+            subtitle="Publish once — every book appears instantly on the user app and the website."
+            badge={`${books.length} live`}
+            actions={[{ label: 'New Book', icon: 'plus', onPress: openCreateModal }]}
+          />
+        </View>
+        <LinearGradient
+          colors={gradients.maroon as readonly [string, string, ...string[]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.summaryCard}
+        >
+          <Text style={styles.summaryTitle}>Book Inventory</Text>
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryValue}>{totalBooks}</Text>
@@ -337,6 +380,7 @@ export function BooksScreen() {
             <Text style={styles.summaryLabel}>Out of Stock</Text>
           </View>
         </View>
+        </LinearGradient>
       </View>
     );
   };
@@ -352,21 +396,39 @@ export function BooksScreen() {
         style={styles.modalContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.modalHeader}>
+        <LinearGradient
+          colors={gradients.maroon as readonly [string, string, ...string[]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.modalHeader}
+        >
           <Text style={styles.modalTitle}>
             {editingBook ? 'Edit Book' : 'Add Book'}
           </Text>
           <IconButton
             icon="close"
             size={24}
+            iconColor={colors.text.white}
             onPress={() => setModalVisible(false)}
           />
-        </View>
+        </LinearGradient>
         <ScrollView
           style={styles.modalBody}
           contentContainerStyle={styles.modalBodyContent}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.publishBanner}>
+            <MaterialCommunityIcons
+              name="broadcast"
+              size={20}
+              color={colors.status.success}
+              style={styles.publishBannerIcon}
+            />
+            <Text style={styles.publishBannerText}>
+              Saved books publish instantly to the user app and the website.
+            </Text>
+          </View>
+
           <TouchableOpacity style={styles.imagePicker} onPress={handlePickImage}>
             {form.coverImageUri ? (
               <Image
@@ -480,26 +542,70 @@ export function BooksScreen() {
               activeOutlineColor={colors.primary.saffron}
             />
           </View>
-          <TextInput
-            label="Published Date (YYYY-MM-DD)"
-            value={form.publishedDate}
-            onChangeText={(v) => setForm((p) => ({ ...p, publishedDate: v }))}
-            mode="outlined"
-            style={styles.input}
-            outlineColor={colors.border.gold}
-            activeOutlineColor={colors.primary.saffron}
-          />
+          <TouchableOpacity
+            style={styles.dateField}
+            onPress={() => setDatePickerVisible(true)}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons
+              name="calendar"
+              size={20}
+              color={colors.primary.maroon}
+              style={styles.dateFieldIcon}
+            />
+            <View style={styles.dateFieldTextWrap}>
+              <Text style={styles.dateFieldLabel}>Published Date</Text>
+              <Text
+                style={[
+                  styles.dateFieldValue,
+                  !form.publishedDate && styles.dateFieldPlaceholder,
+                ]}
+              >
+                {form.publishedDate || 'Tap to select a date'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+          {datePickerVisible ? (
+            <DateTimePicker
+              value={form.publishedDate ? new Date(form.publishedDate) : new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={(_event, selectedDate) => {
+                setDatePickerVisible(Platform.OS === 'ios');
+                if (selectedDate) {
+                  setForm((p) => ({ ...p, publishedDate: toIsoDate(selectedDate) }));
+                }
+              }}
+            />
+          ) : null}
+
+          <LinearGradient
+            colors={gradients.maroon as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.submitGradient}
+          >
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              loading={submitting}
+              disabled={submitting}
+              style={styles.submitButton}
+              buttonColor="transparent"
+              textColor={colors.text.white}
+            >
+              {editingBook ? 'Update Book' : 'Create Book'}
+            </Button>
+          </LinearGradient>
 
           <Button
-            mode="contained"
-            onPress={handleSubmit}
-            loading={submitting}
+            mode="outlined"
+            onPress={() => setModalVisible(false)}
             disabled={submitting}
-            style={styles.submitButton}
-            buttonColor={colors.primary.saffron}
-            textColor={colors.text.white}
+            style={styles.cancelButton}
+            textColor={colors.primary.maroon}
           >
-            {editingBook ? 'Update Book' : 'Create Book'}
+            Cancel
           </Button>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -509,7 +615,7 @@ export function BooksScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading books...</Text>
       </View>
     );
@@ -538,8 +644,8 @@ export function BooksScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -588,10 +694,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   retryButton: {
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.md,
+    ...shadows.maroonGlow,
   },
   retryButtonText: {
     color: colors.text.white,
@@ -601,11 +708,16 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: 80,
   },
+  heroWrap: {
+    marginBottom: spacing.lg,
+  },
   summaryCard: {
-    backgroundColor: colors.primary.maroon,
-    borderRadius: borderRadius.lg,
+    borderRadius: borderRadius.xl,
     padding: spacing.lg,
     marginBottom: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    ...shadows.maroonGlow,
   },
   summaryTitle: {
     color: colors.gold.light,
@@ -641,16 +753,25 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 3,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
     overflow: 'hidden',
+    ...shadows.soft,
   },
   cardRow: {
     flexDirection: 'row',
+    padding: spacing.sm,
+    alignItems: 'center',
   },
   coverContainer: {
-    width: 100,
-    height: 140,
+    width: 92,
+    height: 132,
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    ...shadows.soft,
   },
   coverImage: {
     width: '100%',
@@ -673,15 +794,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   bookTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
-    lineHeight: 22,
+    ...typography.titleSm,
+    fontWeight: '700',
+    color: colors.primary.maroon,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+    gap: spacing.xs,
+  },
+  metaIcon: {
+    fontSize: 11,
   },
   authorText: {
     fontSize: 13,
     color: colors.text.secondary,
-    marginTop: spacing.xs,
+    flexShrink: 1,
+  },
+  metaText: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    flexShrink: 1,
   },
   priceRow: {
     marginTop: spacing.sm,
@@ -698,32 +832,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     flexWrap: 'wrap',
   },
-  stockChip: {
-    height: 24,
-  },
-  stockChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  genreChip: {
-    backgroundColor: colors.accent.peacock,
-    height: 24,
-  },
-  linkChip: {
-    backgroundColor: colors.primary.vermillion,
-    height: 24,
-  },
-  linkChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  genreChipText: {
-    color: colors.text.white,
-    fontSize: 10,
-    fontWeight: '600',
-  },
   cardActions: {
     justifyContent: 'center',
     paddingRight: spacing.xs,
@@ -732,14 +840,24 @@ const styles = StyleSheet.create({
     padding: spacing.xxl,
     alignItems: 'center',
   },
-  emptyStateIcon: {
-    fontSize: 48,
+  emptyIconWell: {
+    width: 96,
+    height: 96,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(163, 18, 58, 0.10)',
+    borderWidth: 1,
+    borderColor: colors.primary.saffron,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: spacing.md,
   },
+  emptyStateIcon: {
+    fontSize: 44,
+  },
   emptyStateText: {
-    color: colors.text.secondary,
+    color: colors.primary.maroon,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   emptyStateSubtext: {
     color: colors.text.secondary,
@@ -758,8 +876,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     borderRadius: borderRadius.full,
+    ...shadows.maroonGlow,
   },
   modalContainer: {
     flex: 1,
@@ -771,14 +890,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.gold,
-    backgroundColor: colors.background.warmWhite,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.gold.main,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: colors.primary.maroon,
+    color: colors.text.white,
   },
   modalBody: {
     flex: 1,
@@ -816,6 +934,60 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     backgroundColor: colors.background.warmWhite,
   },
+  publishBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(46, 125, 50, 0.10)',
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(46, 125, 50, 0.28)',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  publishBannerIcon: {
+    marginRight: spacing.xs,
+  },
+  publishBannerText: {
+    flex: 1,
+    color: colors.status.success,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '600',
+  },
+  dateField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.warmWhite,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  dateFieldIcon: {
+    marginRight: spacing.xs,
+  },
+  dateFieldTextWrap: {
+    flex: 1,
+  },
+  dateFieldLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 2,
+  },
+  dateFieldValue: {
+    fontSize: 15,
+    color: colors.text.primary,
+    fontWeight: '600',
+  },
+  dateFieldPlaceholder: {
+    color: colors.text.secondary,
+    fontWeight: '400',
+  },
   row: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -823,9 +995,21 @@ const styles = StyleSheet.create({
   halfInput: {
     flex: 1,
   },
-  submitButton: {
+  submitGradient: {
     marginTop: spacing.md,
     borderRadius: borderRadius.md,
+    overflow: 'hidden',
+    ...shadows.maroonGlow,
+  },
+  submitButton: {
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.xs,
+  },
+  cancelButton: {
+    marginTop: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderColor: colors.border.gold,
+    borderWidth: 1.5,
     paddingVertical: spacing.xs,
   },
 });

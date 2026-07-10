@@ -1,4 +1,14 @@
 {
+  "settings": {
+    "appearance": "ऐप प्राथमिकताएँ",
+    "theme": {
+      "title": "थीम",
+      "subtitle": "ऐप कैसे दिखे, चुनें",
+      "light": "लाइट",
+      "dark": "डार्क",
+      "system": "सिस्टम"
+    }
+  },
   "tabs": {
     "home": "होम",
     "explore": "खोजें",
@@ -109,7 +119,7 @@
     "emptySchedulesSubtitle": "अद्यतन के लिए बाद में देखें",
     "placeholders": {
       "name": "आपका नाम",
-      "email": "you@example.com",
+      "email": "आप@example.com",
       "phone": "+91",
       "additionalInfo": "सेवा दल को बताएं कि आप स्वामी जी से क्यों मिलना चाहते हैं"
     },
@@ -214,8 +224,8 @@
       "campaign": "अभियान",
       "reference": "भुगतान संदर्भ",
       "share": "इस सेवा को साझा करें",
-      "shareTitle": "मैंने AvdheshanandG Mission का समर्थन किया",
-      "shareText": "मैंने AvdheshanandG Mission के माध्यम से {{campaign}} हेतु {{amount}} अर्पित किए।"
+      "shareTitle": "मैंने Swami Avdheshanand G का समर्थन किया",
+      "shareText": "मैंने Swami Avdheshanand G के माध्यम से {{campaign}} हेतु {{amount}} अर्पित किए।"
     },
     "history": {
       "title": "दान इतिहास",
@@ -247,6 +257,14 @@
   "profile": {
     "title": "प्रोफ़ाइल",
     "editProfile": "प्रोफ़ाइल संपादित करें",
+    "saveChanges": "परिवर्तन सहेजें",
+    "updateSuccess": "प्रोफ़ाइल अपडेट हुई",
+    "updateFailed": "प्रोफ़ाइल अपडेट नहीं हो सकी",
+    "emailLocked": "ईमेल पता नहीं बदला जा सकता",
+    "errors": {
+      "nameRequired": "नाम आवश्यक है",
+      "phoneInvalid": "मान्य 10-अंकीय फोन नंबर दर्ज करें"
+    },
     "myEvents": "मेरे कार्यक्रम",
     "settings": "सेटिंग्स",
     "language": "भाषा",
@@ -305,6 +323,7 @@
     "sendResetLink": "रीसेट लिंक भेजें",
     "backToLogin": "लॉगिन पर वापस जाएं",
     "googleSignInComingSoon": "Google साइन-इन (जल्द आ रहा है)",
+    "continueWithGoogle": "Google के साथ जारी रखें",
     "browseWithoutSignIn": "साइन इन किए बिना देखें",
     "registerFlow": {
       "subtitle": "हमारे आध्यात्मिक समुदाय से जुड़ें",
@@ -437,7 +456,8 @@
     "tryAgain": "फिर कोशिश करें",
     "ok": "ठीक है",
     "goBack": "वापस जाएँ",
-    "unexpectedError": "एक अनपेक्षित त्रुटि हुई है"
+    "unexpectedError": "एक अनपेक्षित त्रुटि हुई है",
+    "networkError": "सर्वर तक नहीं पहुंच सकते। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।"
   },
   "chat": {
     "headerTitle": "स्वामी जी से पूछें",
@@ -489,7 +509,7 @@
     "footerSubtext": "सभी प्राणी सुखी हों",
     "placeholders": {
       "name": "अपना नाम दर्ज करें",
-      "email": "your@email.com",
+      "email": "आपका@email.com",
       "message": "अपना संदेश यहाँ लिखें...",
       "subject": "आप किस विषय में लिखना चाहते हैं?",
       "writeToSwami": "स्वामी जी या आश्रम कार्यालय के लिए अपना संदेश लिखें..."

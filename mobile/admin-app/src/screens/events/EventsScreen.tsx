@@ -23,9 +23,20 @@ import {
   Portal,
 } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
-import { colors, spacing, borderRadius } from '../../theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { colors, spacing, borderRadius, typography, shadows, gradients } from '../../theme';
+import { AdminHero, Badge } from '../../components/common';
 import api from '../../services/api';
 import { Event } from '../../types';
+
+const toIsoDate = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
 
 interface EventFormData {
   eventName: string;
@@ -56,6 +67,7 @@ export function EventsScreen() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [form, setForm] = useState<EventFormData>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   // Delete confirmation
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -201,10 +213,10 @@ export function EventsScreen() {
         if (updatedEvent) {
           setEvents(prev => prev.map(e => e._id === editingEvent._id ? { ...e, ...updatedEvent } : e));
         }
-        Alert.alert('Success', 'Event updated successfully');
+        Alert.alert('Event updated', 'Your changes are now live on the user app and the website.');
       } else {
         await api.post('/events', fd, config);
-        Alert.alert('Success', 'Event created successfully');
+        Alert.alert('Event published', 'The new event is now live on the user app and the website.');
       }
 
       setModalVisible(false);
@@ -254,52 +266,84 @@ export function EventsScreen() {
       <TouchableOpacity
         onPress={() => openEditModal(item)}
         onLongPress={() => confirmDelete(item)}
-        activeOpacity={0.7}
+        activeOpacity={0.85}
       >
         <Card style={styles.card}>
           {item.eventImage ? (
-            <Image
-              source={{ uri: item.eventImage }}
-              style={styles.cardImage}
-              resizeMode="cover"
-            />
-          ) : null}
-          <Card.Content>
-            <View style={styles.cardHeader}>
-              <View style={styles.dateBox}>
+            <View style={styles.cardImageWrap}>
+              <Image
+                source={{ uri: item.eventImage }}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
+              <LinearGradient
+                colors={['transparent', 'rgba(74,0,16,0.55)']}
+                style={styles.cardImageScrim}
+              />
+              <View style={styles.dateBadge}>
                 <Text style={styles.dateDay}>{eventDate.getDate()}</Text>
                 <Text style={styles.dateMonth}>
                   {eventDate.toLocaleString('en', { month: 'short' })}
                 </Text>
               </View>
+            </View>
+          ) : null}
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.cardHeader}>
+              {!item.eventImage ? (
+                <View style={styles.dateBox}>
+                  <Text style={styles.dateDay}>{eventDate.getDate()}</Text>
+                  <Text style={styles.dateMonth}>
+                    {eventDate.toLocaleString('en', { month: 'short' })}
+                  </Text>
+                </View>
+              ) : null}
               <View style={styles.eventInfo}>
-                <Text style={styles.eventName} numberOfLines={1}>
+                <Text style={styles.eventName} numberOfLines={2}>
                   {item.eventName}
                 </Text>
                 <View style={styles.eventMeta}>
-                  <Text style={styles.metaText}>
-                    {String.fromCodePoint(0x1f4cd)} {item.eventLocation || 'TBA'}
+                  <MaterialCommunityIcons
+                    name="calendar-outline"
+                    size={15}
+                    color={colors.primary.saffron}
+                    style={styles.metaIcon}
+                  />
+                  <Text style={styles.metaText} numberOfLines={1}>
+                    {formatDate(item.eventDate)}
                   </Text>
                 </View>
                 <View style={styles.eventMeta}>
-                  <Text style={styles.metaText}>
-                    {String.fromCodePoint(0x1f465)} {item.registeredUsers?.length || 0} registered
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={15}
+                    color={colors.gold.dark}
+                    style={styles.metaIcon}
+                  />
+                  <Text style={styles.metaText} numberOfLines={1}>
+                    {item.eventLocation || 'TBA'}
                   </Text>
                 </View>
               </View>
-              <View style={styles.cardActions}>
-                <IconButton
-                  icon="pencil"
-                  iconColor={colors.accent.peacock}
-                  size={20}
-                  onPress={() => openEditModal(item)}
-                />
-                <IconButton
-                  icon="delete"
-                  iconColor={colors.status.error}
-                  size={20}
-                  onPress={() => confirmDelete(item)}
-                />
+            </View>
+
+            {item.description ? (
+              <Text style={styles.cardDescription} numberOfLines={2}>
+                {item.description}
+              </Text>
+            ) : null}
+
+            <View style={styles.cardFooter}>
+              <Badge label="Live on app & website" tone={colors.status.success} variant="soft" dot />
+              <View style={styles.footerActions}>
+                <TouchableOpacity style={styles.footerBtn} onPress={() => openEditModal(item)} activeOpacity={0.8}>
+                  <MaterialCommunityIcons name="pencil" size={16} color={colors.primary.maroon} />
+                  <Text style={styles.footerBtnText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.footerBtnDelete} onPress={() => confirmDelete(item)} activeOpacity={0.8}>
+                  <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.status.error} />
+                  <Text style={styles.footerBtnDeleteText}>Delete</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Card.Content>
@@ -310,9 +354,16 @@ export function EventsScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyStateText}>No events available</Text>
+      <View style={styles.emptyIconWell}>
+        <MaterialCommunityIcons
+          name="calendar-star"
+          size={40}
+          color={colors.primary.saffron}
+        />
+      </View>
+      <Text style={styles.emptyStateText}>No events yet</Text>
       <Text style={styles.emptyStateSubtext}>
-        Create your first event using the + button
+        Create your first event using the + button below
       </Text>
     </View>
   );
@@ -320,7 +371,7 @@ export function EventsScreen() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.primary.saffron} />
+        <ActivityIndicator size="large" color={colors.primary.maroon} />
         <Text style={styles.loadingText}>Loading events...</Text>
       </View>
     );
@@ -329,8 +380,15 @@ export function EventsScreen() {
   if (error && events.length === 0) {
     return (
       <View style={styles.centered}>
+        <View style={styles.emptyIconWell}>
+          <MaterialCommunityIcons
+            name="calendar-alert"
+            size={40}
+            color={colors.status.error}
+          />
+        </View>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={fetchEvents}>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchEvents} activeOpacity={0.85}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -344,12 +402,23 @@ export function EventsScreen() {
         keyExtractor={(item) => item._id}
         renderItem={renderEventCard}
         contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.listHeader}>
+            <AdminHero
+              eyebrow="Manage"
+              title="Events"
+              subtitle="Publish once — every event appears instantly on the user app and the website."
+              badge={`${events.length} live`}
+              actions={[{ label: 'New Event', icon: 'plus', onPress: openCreateModal }]}
+            />
+          </View>
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.primary.saffron]}
-            tintColor={colors.primary.saffron}
+            colors={[colors.primary.maroon]}
+            tintColor={colors.primary.maroon}
           />
         }
         ListEmptyComponent={renderEmptyState}
@@ -372,13 +441,19 @@ export function EventsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {editingEvent ? 'Edit Event' : 'Create Event'}
-              </Text>
+              <View>
+                <Text style={styles.modalEyebrow}>
+                  {editingEvent ? 'UPDATE' : 'NEW'}
+                </Text>
+                <Text style={styles.modalTitle}>
+                  {editingEvent ? 'Edit Event' : 'Create Event'}
+                </Text>
+              </View>
               <IconButton
                 icon="close"
-                iconColor={colors.text.primary}
+                iconColor={colors.primary.maroon}
                 size={24}
                 onPress={() => setModalVisible(false)}
               />
@@ -389,6 +464,13 @@ export function EventsScreen() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
+              <View style={styles.infoBanner}>
+                <MaterialCommunityIcons name="broadcast" size={16} color={colors.status.success} />
+                <Text style={styles.infoBannerText}>
+                  Saved events publish instantly to the user app and the website.
+                </Text>
+              </View>
+
               <TextInput
                 label="Event Name *"
                 value={form.eventName}
@@ -396,19 +478,36 @@ export function EventsScreen() {
                 mode="outlined"
                 style={styles.input}
                 outlineColor={colors.border.gold}
-                activeOutlineColor={colors.primary.saffron}
+                activeOutlineColor={colors.primary.maroon}
               />
 
-              <TextInput
-                label="Event Date *"
-                value={form.eventDate}
-                onChangeText={(v) => setForm((p) => ({ ...p, eventDate: v }))}
-                placeholder="YYYY-MM-DD"
-                mode="outlined"
-                style={styles.input}
-                outlineColor={colors.border.gold}
-                activeOutlineColor={colors.primary.saffron}
-              />
+              <TouchableOpacity
+                onPress={() => setDatePickerVisible(true)}
+                activeOpacity={0.8}
+                style={styles.dateField}
+              >
+                <MaterialCommunityIcons name="calendar-month-outline" size={22} color={colors.primary.maroon} />
+                <View style={styles.dateFieldTextWrap}>
+                  <Text style={styles.dateFieldLabel}>Event Date *</Text>
+                  <Text style={[styles.dateFieldValue, !form.eventDate && styles.dateFieldPlaceholder]}>
+                    {form.eventDate ? formatDate(form.eventDate) : 'Tap to select a date'}
+                  </Text>
+                </View>
+                <MaterialCommunityIcons name="chevron-down" size={22} color={colors.gold.dark} />
+              </TouchableOpacity>
+              {datePickerVisible ? (
+                <DateTimePicker
+                  value={form.eventDate ? new Date(`${form.eventDate}T00:00:00`) : new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                  onChange={(event, date) => {
+                    setDatePickerVisible(false);
+                    if (event.type === 'set' && date) {
+                      setForm((p) => ({ ...p, eventDate: toIsoDate(date) }));
+                    }
+                  }}
+                />
+              ) : null}
 
               <TextInput
                 label="Event Location *"
@@ -417,7 +516,7 @@ export function EventsScreen() {
                 mode="outlined"
                 style={styles.input}
                 outlineColor={colors.border.gold}
-                activeOutlineColor={colors.primary.saffron}
+                activeOutlineColor={colors.primary.maroon}
               />
 
               <TextInput
@@ -429,7 +528,7 @@ export function EventsScreen() {
                 numberOfLines={4}
                 style={[styles.input, styles.multilineInput]}
                 outlineColor={colors.border.gold}
-                activeOutlineColor={colors.primary.saffron}
+                activeOutlineColor={colors.primary.maroon}
               />
 
               {/* Image picker */}
@@ -442,7 +541,11 @@ export function EventsScreen() {
                   />
                 ) : (
                   <View style={styles.imagePlaceholder}>
-                    <IconButton icon="camera-plus" iconColor={colors.text.secondary} size={32} />
+                    <MaterialCommunityIcons
+                      name="camera-plus-outline"
+                      size={30}
+                      color={colors.primary.saffron}
+                    />
                     <Text style={styles.imagePlaceholderText}>Tap to select an image</Text>
                   </View>
                 )}
@@ -453,21 +556,31 @@ export function EventsScreen() {
                   mode="outlined"
                   onPress={() => setModalVisible(false)}
                   style={styles.cancelButton}
-                  textColor={colors.text.secondary}
+                  textColor={colors.primary.maroon}
                 >
                   Cancel
                 </Button>
-                <Button
-                  mode="contained"
+                <TouchableOpacity
                   onPress={handleSubmit}
-                  loading={submitting}
                   disabled={submitting}
-                  style={styles.submitButton}
-                  buttonColor={colors.primary.saffron}
-                  textColor={colors.text.white}
+                  activeOpacity={0.85}
+                  style={styles.submitButtonWrap}
                 >
-                  {editingEvent ? 'Update' : 'Create'}
-                </Button>
+                  <LinearGradient
+                    colors={gradients.maroon as readonly [string, string, ...string[]]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={[styles.submitGradient, submitting && styles.submitGradientDisabled]}
+                  >
+                    {submitting ? (
+                      <ActivityIndicator size={18} color={colors.text.white} />
+                    ) : (
+                      <Text style={styles.submitButtonText}>
+                        {editingEvent ? 'Update' : 'Create'}
+                      </Text>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
@@ -523,51 +636,97 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   errorText: {
-    color: colors.status.error,
-    fontSize: 16,
+    ...typography.title,
+    color: colors.primary.maroon,
     marginBottom: spacing.md,
+    textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: colors.primary.saffron,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary.maroon,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.full,
+    ...shadows.maroonGlow,
   },
   retryButtonText: {
     color: colors.text.white,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   listContent: {
     padding: spacing.md,
-    paddingBottom: 100,
+    paddingBottom: 120,
+  },
+  listHeader: {
+    marginBottom: spacing.md,
+    marginTop: spacing.xs,
+  },
+  eyebrow: {
+    ...typography.micro,
+    color: colors.gold.dark,
+    letterSpacing: 2,
+    marginBottom: 2,
+  },
+  listTitle: {
+    ...typography.titleLg,
+    color: colors.primary.maroon,
   },
   card: {
     marginBottom: spacing.md,
     backgroundColor: colors.background.warmWhite,
-    borderRadius: borderRadius.md,
-    elevation: 3,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.primary.saffron,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
     overflow: 'hidden',
+    ...shadows.soft,
+  },
+  cardImageWrap: {
+    position: 'relative',
   },
   cardImage: {
     width: '100%',
-    height: 150,
+    height: 160,
     backgroundColor: colors.background.sandstone,
+  },
+  cardImageScrim: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 70,
+  },
+  dateBadge: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    minWidth: 52,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.primary.maroon,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.gold.main,
+    ...shadows.maroonGlow,
+  },
+  cardContent: {
+    paddingVertical: spacing.md,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.xs,
   },
   dateBox: {
     width: 56,
     height: 56,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.maroon,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.gold.main,
   },
   dateDay: {
     color: colors.text.white,
@@ -575,65 +734,197 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   dateMonth: {
-    color: colors.text.white,
+    color: colors.gold.light,
     fontSize: 12,
+    fontWeight: '700',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   eventInfo: {
     flex: 1,
   },
   eventName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
+    ...typography.title,
+    color: colors.primary.maroon,
     marginBottom: spacing.xs,
   },
   eventMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    marginTop: 3,
+  },
+  metaIcon: {
+    marginRight: spacing.xs + 1,
   },
   metaText: {
-    fontSize: 13,
+    ...typography.bodySm,
     color: colors.text.secondary,
+    flexShrink: 1,
   },
-  cardActions: {
-    flexDirection: 'column',
+  cardDescription: {
+    ...typography.bodySm,
+    color: colors.text.secondary,
+    lineHeight: 19,
+    marginTop: spacing.sm,
+  },
+  cardFooter: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.gold,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  footerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    backgroundColor: colors.background.cream,
+  },
+  footerBtnText: {
+    ...typography.label,
+    color: colors.primary.maroon,
+    fontWeight: '700',
+  },
+  footerBtnDelete: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 7,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: `${colors.status.error}44`,
+    backgroundColor: `${colors.status.error}12`,
+  },
+  footerBtnDeleteText: {
+    ...typography.label,
+    color: colors.status.error,
+    fontWeight: '700',
+  },
+  // Date picker field
+  dateField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.background.warmWhite,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.md,
+  },
+  dateFieldTextWrap: {
+    flex: 1,
+  },
+  dateFieldLabel: {
+    ...typography.micro,
+    color: colors.gold.dark,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
+  dateFieldValue: {
+    ...typography.body,
+    color: colors.text.primary,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  dateFieldPlaceholder: {
+    color: colors.text.secondary,
+    fontWeight: '400',
+  },
+  // Info banner
+  infoBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#F3FAF4',
+    borderWidth: 1,
+    borderColor: 'rgba(46,158,91,0.25)',
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  infoBannerText: {
+    ...typography.bodySm,
+    color: colors.text.primary,
+    flex: 1,
   },
   emptyState: {
     padding: spacing.xl,
+    paddingTop: spacing.xxl,
     alignItems: 'center',
   },
+  emptyIconWell: {
+    width: 88,
+    height: 88,
+    borderRadius: borderRadius.full,
+    backgroundColor: 'rgba(163, 18, 58, 0.08)',
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
   emptyStateText: {
-    color: colors.text.secondary,
-    fontSize: 18,
-    fontWeight: '600',
+    ...typography.title,
+    color: colors.primary.maroon,
   },
   emptyStateSubtext: {
+    ...typography.body,
     color: colors.text.secondary,
-    fontSize: 14,
     marginTop: spacing.sm,
+    textAlign: 'center',
+    maxWidth: 260,
   },
   fab: {
     position: 'absolute',
     right: spacing.lg,
     bottom: spacing.lg,
-    backgroundColor: colors.primary.saffron,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary.maroon,
+    ...shadows.maroonGlow,
   },
 
   // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(74, 0, 16, 0.55)',
     justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: colors.background.warmWhite,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
     maxHeight: '90%',
+    borderTopWidth: 1,
+    borderColor: colors.border.gold,
+  },
+  modalHandle: {
+    alignSelf: 'center',
+    width: 44,
+    height: 5,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.border.gold,
+    marginBottom: spacing.md,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -644,9 +935,14 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border.gold,
     paddingBottom: spacing.sm,
   },
+  modalEyebrow: {
+    ...typography.micro,
+    color: colors.gold.dark,
+    letterSpacing: 2,
+    marginBottom: 2,
+  },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...typography.titleLg,
     color: colors.primary.maroon,
   },
   formScroll: {
@@ -663,7 +959,7 @@ const styles = StyleSheet.create({
   // Image picker
   imagePicker: {
     marginBottom: spacing.md,
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.border.gold,
@@ -678,25 +974,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.background.sandstone,
+    gap: spacing.xs,
   },
   imagePlaceholderText: {
+    ...typography.bodySm,
     color: colors.text.secondary,
-    fontSize: 14,
-    marginTop: -spacing.sm,
   },
 
   // Form actions
   formActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    alignItems: 'center',
     gap: spacing.sm,
     marginTop: spacing.sm,
     marginBottom: spacing.lg,
   },
   cancelButton: {
-    borderColor: colors.border.gold,
+    borderColor: colors.primary.maroon,
+    borderRadius: borderRadius.full,
   },
-  submitButton: {
-    minWidth: 100,
+  submitButtonWrap: {
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    ...shadows.maroonGlow,
+  },
+  submitGradient: {
+    minWidth: 120,
+    height: 44,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.full,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  submitGradientDisabled: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: colors.text.white,
+    fontWeight: '700',
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
 });

@@ -10,10 +10,12 @@ export interface ISmartNote extends Document {
   title: string;
   body: string;
   tags: string[];
+  priority?: 'low' | 'medium' | 'high';
+  city?: string;
   assignedToId?: string;
   assignedToName?: string;
   mentionedMembers: IMentionedMember[];
-  assignmentStatus: 'unassigned' | 'auto_assigned' | 'acknowledged' | 'completed';
+  assignmentStatus: 'unassigned' | 'assigned' | 'auto_assigned' | 'acknowledged' | 'completed';
   linkedSevaTaskId?: string;
   createTask: boolean;
   createdById?: string;
@@ -51,6 +53,15 @@ const SmartNoteSchema = new Schema<ISmartNote>(
       type: [String],
       default: [],
     },
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium',
+    },
+    city: {
+      type: String,
+      trim: true,
+    },
     assignedToId: {
       type: String,
       trim: true,
@@ -65,7 +76,7 @@ const SmartNoteSchema = new Schema<ISmartNote>(
     },
     assignmentStatus: {
       type: String,
-      enum: ['unassigned', 'auto_assigned', 'acknowledged', 'completed'],
+      enum: ['unassigned', 'assigned', 'auto_assigned', 'acknowledged', 'completed'],
       default: 'unassigned',
     },
     linkedSevaTaskId: {

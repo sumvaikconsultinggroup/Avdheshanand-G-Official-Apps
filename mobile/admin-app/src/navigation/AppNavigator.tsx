@@ -73,7 +73,20 @@ function TabIcon({ label, focused, color }: { label: string; focused: boolean; c
     SmartNotes: 'note-text-outline',
     More: 'apps',
   };
-  return <Icon name={icons[label] || 'circle'} size={focused ? 23 : 21} color={color} />;
+  return (
+    <View
+      style={{
+        width: 46,
+        height: 30,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: focused ? 'rgba(163,18,58,0.13)' : 'transparent',
+      }}
+    >
+      <Icon name={icons[label] || 'circle'} size={focused ? 22 : 21} color={color} />
+    </View>
+  );
 }
 
 // Wrap each screen in its own stack for proper header
@@ -123,26 +136,41 @@ function AdminTabs() {
           backgroundColor: colors.background.warmWhite,
           borderTopColor: colors.border.gold as string,
           borderTopWidth: 1,
+          borderTopLeftRadius: 22,
+          borderTopRightRadius: 22,
           paddingBottom: bottomPad,
-          paddingTop: 6,
-          height: 62 + bottomPad,
+          paddingTop: 8,
+          height: 66 + bottomPad,
+          shadowColor: '#2F1505',
+          shadowOffset: { width: 0, height: -6 },
+          shadowOpacity: 0.1,
+          shadowRadius: 16,
+          elevation: 16,
         },
         tabBarIcon: ({ focused, color }) => (
           <TabIcon label={route.name} focused={focused} color={color} />
         ),
-        headerStyle: { backgroundColor: colors.background.warmWhite },
+        headerStyle: {
+          backgroundColor: colors.background.warmWhite,
+          shadowColor: '#2F1505',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          elevation: 2,
+        },
         headerTintColor: colors.primary.maroon,
-        headerTitleStyle: { fontWeight: '700' as const },
+        headerTitleStyle: { fontWeight: '700' as const, fontSize: 18 },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: 10.5,
+          fontWeight: '700',
+          marginTop: 3,
         },
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: t('tabs.dashboard') }} />
       <Tab.Screen name="Events" component={EventsScreen} options={{ title: t('tabs.events') }} />
       <Tab.Screen name="Donations" component={DonationsScreen} options={{ title: t('tabs.donations') }} />
-      <Tab.Screen name="SmartNotes" component={SmartNotesScreen} options={{ title: t('admin.smartNotes') }} />
+      <Tab.Screen name="SmartNotes" component={SmartNotesScreen} options={{ title: t('admin.smartNotes'), tabBarLabel: t('tabs.notes') }} />
       <Tab.Screen name="More" component={MoreScreen} options={{ title: t('tabs.more'), headerShown: false }} />
     </Tab.Navigator>
   );

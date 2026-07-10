@@ -1,6 +1,21 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { resolveUserApiBaseUrl } from './api';
+
+// Storage keys shared with the Panchang notification-preferences screen so the
+// token and the user's saved preferences stay in sync across the app.
+const STORAGE_KEY_PUSH_TOKEN = '@push_notification_token';
+const STORAGE_KEY_NOTIF = '@panchang_notification_prefs';
+const STORAGE_KEY_CITY = '@panchang_selected_city';
+
+// EAS project id is required by getExpoPushTokenAsync() in real builds; it is
+// injected into expo config by `eas init`.
+const EAS_PROJECT_ID =
+  Constants.expoConfig?.extra?.eas?.projectId ??
+  (Constants as any)?.easConfig?.projectId;
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -54,10 +69,110 @@ export async function registerForPushNotifications(): Promise<string | null> {
       importance: Notifications.AndroidImportance.HIGH,
       sound: 'default',
     });
+
+    // General announcements channel — the dashboard broadcast targets this
+    // channelId, so it must exist or Android announcement pushes won't display.
+    await Notifications.setNotificationChannelAsync('general_announcements', {
+      name: 'Announcements',
+      description: 'Messages and announcements from the Ashram',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      sound: 'default',
+    });
+
+    // Schedule & registration updates — the backend (scheduleNotifications)
+    // sends Swami Ji schedule changes and registration status to this channel.
+    await Notifications.setNotificationChannelAsync('schedule_updates', {
+      name: 'Schedule & Darshan Updates',
+      description: "Swami Ji's schedule changes and your registration updates",
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      sound: 'default',
+    });
   }
 
-  const token = (await Notifications.getExpoPushTokenAsync()).data;
+  const token = (
+    await Notifications.getExpoPushTokenAsync(
+      EAS_PROJECT_ID ? { projectId: EAS_PROJECT_ID } : undefined
+    )
+  ).data;
   return token;
+}
+
+/**
+ * POST a push token (plus the device's saved language/city) to the backend so
+ * the dashboard broadcast can reach this device. Failures are swallowed — a
+ * missing server sync should never break the UI. Returns true on success.
+ */
+export async function syncPushTokenToServer(token: string): Promise<boolean> {
+  try {
+    const [storedPrefs, storedCity] = await Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY_NOTIF),
+      AsyncStorage.getItem(STORAGE_KEY_CITY),
+    ]);
+    const prefs = storedPrefs ? JSON.parse(storedPrefs) : {};
+    const city = storedCity
+      ? JSON.parse(storedCity)
+      : { name: 'Haridwar', lat: 29.9457, lng: 78.1642, timezone: 'Asia/Kolkata' };
+
+    const baseUrl = await resolveUserApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/notifications/preferences`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pushToken: token,
+        platform: Platform.OS,
+        language: prefs.language || 'hi',
+        cityName: city.name,
+        lat: city.lat,
+        lng: city.lng,
+        timezone: city.timezone || 'Asia/Kolkata',
+        dailyPanchang: prefs.dailyPanchang !== undefined ? prefs.dailyPanchang : true,
+        festivalAlerts: prefs.festivalAlerts !== undefined ? prefs.festivalAlerts : true,
+        brahmaMuhurtaAlert:
+          prefs.brahmaMuhurtaAlert !== undefined ? prefs.brahmaMuhurtaAlert : true,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Register for push (prompting for permission if needed), persist the token
+ * locally, and sync it to the backend. Returns the token or null.
+ */
+export async function registerAndSyncPushToken(): Promise<string | null> {
+  const token = await registerForPushNotifications();
+  if (!token) return null;
+  await AsyncStorage.setItem(STORAGE_KEY_PUSH_TOKEN, token);
+  await syncPushTokenToServer(token);
+  return token;
+}
+
+/**
+ * Silent refresh for app startup: only acts if notification permission was
+ * ALREADY granted (never prompts). Re-fetches the Expo token — which can rotate
+ * between launches — and re-syncs it so previously-enabled devices stay
+ * registered on the server. No-op on emulators or when permission isn't granted.
+ */
+export async function refreshPushTokenIfEnabled(): Promise<void> {
+  try {
+    if (!Device.isDevice) return;
+    const { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted') return;
+    const token = (
+      await Notifications.getExpoPushTokenAsync(
+        EAS_PROJECT_ID ? { projectId: EAS_PROJECT_ID } : undefined
+      )
+    ).data;
+    if (!token) return;
+    await AsyncStorage.setItem(STORAGE_KEY_PUSH_TOKEN, token);
+    await syncPushTokenToServer(token);
+  } catch {
+    // Startup token refresh is best-effort.
+  }
 }
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,8 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { Book } from '../../types';
 
 const { width } = Dimensions.get('window');
@@ -34,6 +35,8 @@ export function BookDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { bookId } = route.params as RouteParams;
 
   const [book, setBook] = useState<ExtendedBook | null>(null);
@@ -260,7 +263,7 @@ export function BookDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

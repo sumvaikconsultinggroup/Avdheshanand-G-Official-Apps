@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
-import { colors, spacing, typography } from '../../theme';
+import { spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 export function MissionScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
 
   const teachings = [
@@ -92,7 +95,7 @@ export function MissionScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

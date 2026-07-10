@@ -11,7 +11,7 @@ export default function VideoSeriesPage() {
           <h1 className="text-3xl font-semibold">Video Series</h1>
           <p className="text-muted-foreground">Manage your video series and episodes.</p>
         </div>
-        <Button asChild>
+        <Button asChild className="bg-gradient-to-br from-[#800020] to-[#4A0010] text-white hover:brightness-110 focus:ring-[#800020]/20">
           <Link href="/dashboard/website/video-series/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             New Video Series

@@ -5,7 +5,6 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionContext';
 import { useI18n } from '../../i18n/I18nProvider';
-import { LanguageSwitcher } from '../../components/common/LanguageSwitcher';
 import {
   AdminHero,
   AdminMetricCard,
@@ -67,7 +66,7 @@ export function DashboardScreen({ navigation }: any) {
       title: t('admin.statEvents'),
       value: 0,
       icon: 'calendar-month-outline',
-      color: colors.accent.peacock,
+      color: colors.gold.dark,
       route: 'Events',
       module: 'events',
     },
@@ -99,7 +98,7 @@ export function DashboardScreen({ navigation }: any) {
           api.get('/donate'),
           api.get('/volunteer'),
           api.get('/connect'),
-          api.get('/schedule-registration'),
+          api.get('/scheduleRegistration'),
           api.get('/smart-notes'),
           api.get('/seva-tasks'),
         ]);
@@ -174,7 +173,7 @@ export function DashboardScreen({ navigation }: any) {
         icon: 'clipboard-text-clock-outline',
         route: 'AppointmentInboxStack',
         module: 'schedule',
-        color: colors.accent.peacock,
+        color: colors.primary.saffron,
         meta: 'Pending approvals and follow-up',
       },
       {
@@ -230,10 +229,6 @@ export function DashboardScreen({ navigation }: any) {
           { label: 'Logout', icon: 'logout', onPress: logout },
         ]}
       />
-
-      <View style={styles.languageWrap}>
-        <LanguageSwitcher />
-      </View>
 
       <AdminSectionHeader
         title="Priority work"

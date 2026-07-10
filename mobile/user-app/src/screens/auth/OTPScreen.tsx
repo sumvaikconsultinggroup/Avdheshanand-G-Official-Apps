@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,13 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, borderRadius } from '../../theme';
+import { spacing, borderRadius, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 
 export function OTPScreen({ navigation, route }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const email = route?.params?.email || '';
   const purpose = route?.params?.purpose || 'register';
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -188,7 +191,7 @@ export function OTPScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

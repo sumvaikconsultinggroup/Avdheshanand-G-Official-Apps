@@ -34,10 +34,11 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-white dark:bg-gray-900 h-16 hidden lg:flex lg:items-center">
+    <header className="sticky top-0 z-30 w-full border-b border-[#E7DCC6] dark:border-gray-800 bg-[#FBF7EF]/85 dark:bg-gray-900 backdrop-blur h-16 hidden lg:flex lg:items-center">
       <div className="container flex items-center justify-between h-full px-4 md:px-6 max-w-full">
-        <Link href="/dashboard" className="flex items-center">
-          <span className="text-lg font-semibold">{t('common.dashboard')}</span>
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <span className="h-5 w-1 rounded-full bg-gradient-to-b from-[#D4A017] to-[#800020]" />
+          <span className="font-serif text-xl font-bold text-[#5E0016] dark:text-[#FFD54F]">{t('common.dashboard')}</span>
         </Link>
 
         <div className="flex items-center gap-4">

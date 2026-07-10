@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,39 @@ import {
 } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { colors, spacing, borderRadius } from '../../theme';
+import { spacing, borderRadius, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 
 export function LoginScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { login, googleLogin } = useAuth();
   const { t } = useTranslation();
+
+  const { signIn: googleSignIn } = useGoogleSignIn(
+    async (idToken) => {
+      setGoogleLoading(true);
+      try {
+        await googleLogin(idToken);
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+      } catch (error: any) {
+        Alert.alert(
+          t('auth.errors.loginFailedTitle'),
+          error?.response?.data?.message || t('common.networkError')
+        );
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    (message) => Alert.alert(t('auth.errors.loginFailedTitle'), message)
+  );
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -30,10 +53,18 @@ export function LoginScreen({ navigation }: any) {
     setLoading(true);
     try {
       await login(email.trim(), password);
+      // Dismiss the login modal (and any onboarding screens beneath it) by
+      // resetting the stack to the app home now that the user is authenticated.
+      navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } catch (error: any) {
+      const backendMessage = error?.response?.data?.message;
+      const isUnreachable = error?.isApiUnavailable || !error?.response;
       Alert.alert(
         t('auth.errors.loginFailedTitle'),
-        error.response?.data?.message || t('auth.errors.invalidCredentials')
+        backendMessage ||
+          (isUnreachable
+            ? t('common.networkError')
+            : t('auth.errors.invalidCredentials'))
       );
     } finally {
       setLoading(false);
@@ -115,13 +146,15 @@ export function LoginScreen({ navigation }: any) {
 
           <Button
             mode="outlined"
-            disabled
+            onPress={googleSignIn}
+            loading={googleLoading}
+            disabled={googleLoading}
             textColor={colors.primary.maroon}
             style={styles.googleButton}
             contentStyle={styles.buttonContent}
             icon="google"
           >
-            {t('auth.googleSignInComingSoon')}
+            {t('auth.continueWithGoogle')}
           </Button>
         </View>
 
@@ -151,7 +184,7 @@ export function LoginScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

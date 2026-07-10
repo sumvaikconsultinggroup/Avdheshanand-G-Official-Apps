@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -12,7 +12,8 @@ import {
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 type DonationItem = {
   id: string;
@@ -49,6 +50,8 @@ function formatCurrency(amount: number) {
 }
 
 export function DonationHistoryScreen() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t, i18n } = useTranslation();
   const [data, setData] = useState<DonationHistoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,7 +214,7 @@ export function DonationHistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.parchment,

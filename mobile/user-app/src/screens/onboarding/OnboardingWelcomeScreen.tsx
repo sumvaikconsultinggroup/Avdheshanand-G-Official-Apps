@@ -11,15 +11,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import LanguagePickerModal from '../../components/LanguagePickerModal';
 import { useOnboarding } from '../../context/OnboardingContext';
-import { colors, borderRadius, spacing, shadows } from '../../theme';
+import { borderRadius, spacing, shadows, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
-const SLIDE_WIDTH = width - spacing.lg * 2;
+const SLIDE_HEIGHT = 468;
 const LOGO_SOURCE = require('../../../assets/images/avdheshanandg-mission-logo.png');
 const SWAMIJI_SOURCE = require('../../../assets/images/swamiji-onboarding.jpg');
 
@@ -31,6 +33,8 @@ type Slide = {
 };
 
 export function OnboardingWelcomeScreen({ navigation }: any) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
   const { updateState } = useOnboarding();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -68,12 +72,17 @@ export function OnboardingWelcomeScreen({ navigation }: any) {
   );
 
   const handleMomentumEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / SLIDE_WIDTH);
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(nextIndex);
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ScrollView
+        style={styles.page}
+        contentContainerStyle={styles.pageContent}
+        showsVerticalScrollIndicator={false}
+      >
       <View style={styles.topBar}>
         <View style={styles.brandMark}>
           <Image source={LOGO_SOURCE} style={styles.brandLogo} />
@@ -117,8 +126,8 @@ export function OnboardingWelcomeScreen({ navigation }: any) {
                   </View>
                   <View style={styles.heroBottomCopy}>
                     <Text style={styles.heroPhotoEyebrow}>{slide.eyebrow}</Text>
-                    <Text style={styles.heroPhotoTitle}>{slide.title}</Text>
-                    <Text style={styles.heroPhotoDescription}>{slide.description}</Text>
+                    <Text style={styles.heroPhotoTitle} numberOfLines={2}>{slide.title}</Text>
+                    <Text style={styles.heroPhotoDescription} numberOfLines={3}>{slide.description}</Text>
                   </View>
                 </LinearGradient>
               </ImageBackground>
@@ -139,8 +148,8 @@ export function OnboardingWelcomeScreen({ navigation }: any) {
                   </View>
                 </View>
                 <Text style={styles.visualEyebrow}>{slide.eyebrow}</Text>
-                <Text style={styles.visualTitle}>{slide.title}</Text>
-                <Text style={styles.visualDescription}>{slide.description}</Text>
+                <Text style={styles.visualTitle} numberOfLines={2}>{slide.title}</Text>
+                <Text style={styles.visualDescription} numberOfLines={5}>{slide.description}</Text>
               </LinearGradient>
             )}
           </View>
@@ -176,21 +185,28 @@ export function OnboardingWelcomeScreen({ navigation }: any) {
         <Text style={styles.footerText}>{t('onboarding.footer')}</Text>
       </View>
 
+      </ScrollView>
+
       <LanguagePickerModal
         visible={languageVisible}
         onClose={() => setLanguageVisible(false)}
         onSelectLanguage={(languageCode) => updateState({ languageCode })}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
+  safe: {
     flex: 1,
     backgroundColor: colors.background.parchment,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
+  },
+  page: {
+    flex: 1,
+  },
+  pageContent: {
+    flexGrow: 1,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xl,
   },
   topBar: {
@@ -198,6 +214,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
   },
   brandMark: {
     flexDirection: 'row',
@@ -241,11 +258,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
   },
   slide: {
-    width: SLIDE_WIDTH,
-    marginRight: spacing.md,
+    width,
+    paddingHorizontal: spacing.lg,
   },
   heroPhotoCard: {
-    minHeight: 420,
+    height: SLIDE_HEIGHT,
     borderRadius: 28,
     overflow: 'hidden',
     borderWidth: 1,
@@ -306,10 +323,10 @@ const styles = StyleSheet.create({
     color: 'rgba(255,249,239,0.92)',
   },
   visualCard: {
+    height: SLIDE_HEIGHT,
     borderRadius: 28,
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xxl,
-    minHeight: 360,
+    paddingVertical: spacing.xl,
     justifyContent: 'flex-start',
     overflow: 'hidden',
     borderWidth: 1,
@@ -379,7 +396,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xs,
     marginTop: spacing.sm,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.sm,
   },
   dot: {
     width: 8,
@@ -389,11 +406,12 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 24,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.brand,
   },
   contentBlock: {
-    marginTop: 'auto',
+    marginTop: spacing.md,
     alignItems: 'center',
+    paddingHorizontal: spacing.lg,
   },
   heading: {
     fontSize: 34,
@@ -413,7 +431,7 @@ const styles = StyleSheet.create({
   primaryButton: {
     width: '100%',
     marginTop: spacing.xl,
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.primary.brand,
     borderRadius: 18,
     paddingVertical: spacing.md,
     alignItems: 'center',

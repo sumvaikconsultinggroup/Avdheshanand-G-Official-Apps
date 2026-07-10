@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
-import { borderRadius, colors, shadows, spacing, typography } from '../../theme';
+import { borderRadius, shadows, spacing, typography, type ColorPalette } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 interface ScreenHeaderProps {
   eyebrow?: string;
@@ -25,6 +26,8 @@ export function ScreenHeader({
   onRightActionPress,
   rightActionLabel,
 }: ScreenHeaderProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <LinearGradient
       colors={[colors.primary.saffron, colors.primary.maroon]}
@@ -55,10 +58,10 @@ export function ScreenHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   wrap: {
     marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     borderRadius: 28,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xl,
@@ -66,7 +69,10 @@ const styles = StyleSheet.create({
   },
   compact: {
     borderRadius: borderRadius.xl,
-    paddingVertical: spacing.lg,
+    // Align inner text with the list content's inset (cards sit at lg + md),
+    // and keep the header from feeling oversized vs the cards below it.
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   iconSeal: {
     width: 44,

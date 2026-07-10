@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
-import { borderRadius, colors, shadows, spacing, typography } from '../../theme';
+import { LinearGradient } from 'expo-linear-gradient';
+import { borderRadius, colors, gradients, shadows, spacing, typography } from '../../theme';
 
 interface HeroAction {
   label: string;
@@ -20,41 +21,79 @@ interface AdminHeroProps {
 
 export function AdminHero({ eyebrow, title, subtitle, badge, style, actions }: AdminHeroProps) {
   return (
-    <View style={[styles.container, style]}>
-      <View style={styles.topRow}>
-        <View style={styles.copyBlock}>
-          {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-          <Text style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+    <View style={[styles.shadowWrap, style]}>
+      <LinearGradient
+        colors={gradients.hero as unknown as readonly [string, string, ...string[]]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.container}
+      >
+        {/* decorative rings */}
+        <View style={[styles.ring, styles.ringOne]} />
+        <View style={[styles.ring, styles.ringTwo]} />
+
+        <View style={styles.topRow}>
+          <View style={styles.copyBlock}>
+            {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
+            <Text style={styles.title}>{title}</Text>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          </View>
+          {badge ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{badge}</Text>
+            </View>
+          ) : null}
         </View>
-        {badge ? (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{badge}</Text>
+        {actions?.length ? (
+          <View style={styles.actionRow}>
+            {actions.map((action) => (
+              <TouchableOpacity
+                key={action.label}
+                style={styles.actionChip}
+                onPress={action.onPress}
+                activeOpacity={0.85}
+              >
+                {action.icon ? (
+                  <Icon name={action.icon} size={16} color={colors.primary.maroon} style={styles.actionIcon} />
+                ) : null}
+                <Text style={styles.actionText}>{action.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         ) : null}
-      </View>
-      {actions?.length ? (
-        <View style={styles.actionRow}>
-          {actions.map((action) => (
-            <TouchableOpacity key={action.label} style={styles.actionChip} onPress={action.onPress}>
-              {action.icon ? (
-                <Icon name={action.icon} size={16} color={colors.text.white} style={styles.actionIcon} />
-              ) : null}
-              <Text style={styles.actionText}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ) : null}
+      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  shadowWrap: {
+    borderRadius: borderRadius.xl,
+    ...shadows.maroonGlow,
+  },
   container: {
     borderRadius: borderRadius.xl,
     padding: spacing.lg,
-    backgroundColor: colors.primary.maroon,
-    ...shadows.raised,
+    overflow: 'hidden',
+  },
+  ring: {
+    position: 'absolute',
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,213,79,0.14)',
+  },
+  ringOne: {
+    width: 180,
+    height: 180,
+    top: -70,
+    right: -50,
+  },
+  ringTwo: {
+    width: 110,
+    height: 110,
+    bottom: -50,
+    right: 40,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   topRow: {
     flexDirection: 'row',
@@ -82,10 +121,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   badge: {
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(255,213,79,0.16)',
     borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(255,213,79,0.3)',
   },
   badgeText: {
     ...typography.micro,
@@ -101,16 +142,18 @@ const styles = StyleSheet.create({
   actionChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary.saffron,
+    backgroundColor: colors.gold.light,
     borderRadius: borderRadius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    ...shadows.soft,
   },
   actionIcon: {
     marginRight: spacing.xs,
   },
   actionText: {
     ...typography.label,
-    color: colors.text.white,
+    color: colors.primary.maroon,
+    fontWeight: '700',
   },
 });

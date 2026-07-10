@@ -16,6 +16,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  googleLogin: (idToken: string) => Promise<void>;
+  updateProfile: (data: { fullName?: string; phone?: string }) => Promise<void>;
   logout: () => Promise<void>;
   generateOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: string) => Promise<void>;
@@ -91,6 +93,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const googleLogin = async (idToken: string) => {
+    const response = await api.post('/creduser/google', { idToken });
+    if (response.data?.token) {
+      await SecureStore.setItemAsync('auth_token', response.data.token);
+      setUser(response.data.user);
+    }
+  };
+
+  const updateProfile = async (data: { fullName?: string; phone?: string }) => {
+    const response = await api.patch('/creduser/profile', data);
+    if (response.data?.user) {
+      setUser(response.data.user);
+    }
+  };
+
   const logout = async () => {
     try {
       await api.post('/creduser/logout');
@@ -116,6 +133,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         register,
+        googleLogin,
+        updateProfile,
         logout,
         generateOtp,
         verifyOtp,
