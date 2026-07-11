@@ -810,7 +810,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     flex: 1,
   },
   detailValueWarning: {
-    color: '#C62828',
+    color: colors.status.error,
   },
   modalFestival: {
     flexDirection: 'row',

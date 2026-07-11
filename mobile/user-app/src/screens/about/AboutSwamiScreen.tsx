@@ -180,7 +180,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#FFF2DB',
+    backgroundColor: colors.background.cream,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -210,7 +210,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   },
   quoteCard: {
     marginBottom: spacing.md,
-    backgroundColor: '#FFF2DB',
+    backgroundColor: colors.background.cream,
   },
   quoteText: {
     ...typography.body,

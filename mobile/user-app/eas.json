@@ -9,18 +9,33 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://avdheshanandg-dashboard.vercel.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "285604145996-nrao47b262r3b85mqp47c5f4d8hs4i45.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "285604145996-57pmdps2csmfcbcel9f7qd7i55e2os7s.apps.googleusercontent.com"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://avdheshanandg-dashboard.vercel.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "285604145996-nrao47b262r3b85mqp47c5f4d8hs4i45.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "285604145996-57pmdps2csmfcbcel9f7qd7i55e2os7s.apps.googleusercontent.com"
       }
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://avdheshanandg-dashboard.vercel.app",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "285604145996-nrao47b262r3b85mqp47c5f4d8hs4i45.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "285604145996-57pmdps2csmfcbcel9f7qd7i55e2os7s.apps.googleusercontent.com"
       }
     }
   },
