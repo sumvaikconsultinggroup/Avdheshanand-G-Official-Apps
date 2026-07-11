@@ -424,7 +424,7 @@ export default function PanchangCalendarScreen() {
               <Text style={styles.dayDetailLoadingText}>{t('panchang.calendar.loadingFull')}</Text>
             </View>
           ) : selectedDay ? (
-            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.modalBody} contentContainerStyle={styles.modalBodyContent} showsVerticalScrollIndicator={false}>
               {/* Tithi */}
               <DetailRow label={t('panchang.tithi')} value={selectedDay.tithi || t('panchang.notAvailable')} />
               {selectedDay.tithiEndTime && (
@@ -769,7 +769,11 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     color: colors.primary.maroon,
   },
   modalBody: {
+    flex: 1,
+  },
+  modalBodyContent: {
     padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   dayDetailLoadingContainer: {
     flex: 1,

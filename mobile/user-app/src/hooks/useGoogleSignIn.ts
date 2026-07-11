@@ -1,31 +1,39 @@
 import { useState } from 'react';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 
-// Configure the native Google Sign-In SDK once at module load.
-//
-// `webClientId` is what mints the id_token whose `aud` the backend
-// (/creduser/google) verifies against GOOGLE_WEB_CLIENT_ID. The sign-in itself
-// is authorized natively by the app's package name + SHA-1 (via
-// google-services.json) — there is NO browser redirect, so this avoids all the
-// redirect-uri fragility of expo-auth-session that caused Google's
-// "Error 400: invalid_request".
-if (WEB_CLIENT_ID) {
-  GoogleSignin.configure({
-    webClientId: WEB_CLIENT_ID,
-    offlineAccess: false,
-  });
+// The native Google Sign-In module is NOT present in Expo Go. Lazy-require it so
+// the app still boots for local UI/logic testing in Expo Go (Google sign-in is
+// simply unavailable there); in a dev/preview/production build it loads and the
+// native account picker works normally.
+let googleModule: any;
+let configured = false;
+function getGoogle(): any | null {
+  if (googleModule === undefined) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      googleModule = require('@react-native-google-signin/google-signin');
+    } catch {
+      googleModule = null;
+    }
+  }
+  if (googleModule && !configured && WEB_CLIENT_ID) {
+    try {
+      googleModule.GoogleSignin.configure({ webClientId: WEB_CLIENT_ID, offlineAccess: false });
+      configured = true;
+    } catch {
+      // Native module resolved but not usable (e.g. Expo Go) — treat as absent.
+      googleModule = null;
+    }
+  }
+  return googleModule ?? null;
 }
 
-/** True when the web client id needed to mint an id_token is present. */
+/** True when the web client id is present (native availability checked at sign-in). */
 export const isGoogleConfigured = Boolean(WEB_CLIENT_ID);
 
 interface UseGoogleSignIn {
-  /** Opens the native Google account chooser. Alerts via onError if unconfigured. */
+  /** Opens the native Google account chooser. Alerts via onError if unavailable. */
   signIn: () => void;
   /** False when no client id is configured. */
   ready: boolean;
@@ -36,9 +44,8 @@ interface UseGoogleSignIn {
 /**
  * Native Google sign-in via @react-native-google-signin/google-signin. Returns
  * the Google `id_token` to `onIdToken` (which POSTs it to `/creduser/google`).
- * `onError` is called on failure. Cancellations are silent. Requires a
- * dev/production build (does not work in Expo Go) with the EXPO_PUBLIC_GOOGLE_
- * client id and the app's SHA-1 registered in Firebase.
+ * `onError` is called on failure. Cancellations are silent. Requires a real
+ * build (dev/preview/production) — does NOT work in Expo Go.
  */
 export function useGoogleSignIn(
   onIdToken: (idToken: string) => void,
@@ -47,17 +54,21 @@ export function useGoogleSignIn(
   const [inProgress, setInProgress] = useState(false);
 
   const signIn = async () => {
-    if (!isGoogleConfigured) {
+    if (!WEB_CLIENT_ID) {
       onError?.('Google sign-in is not configured yet.');
       return;
     }
+    const g = getGoogle();
+    if (!g) {
+      onError?.('Google sign-in needs the full app build (not Expo Go).');
+      return;
+    }
+    const { GoogleSignin, statusCodes } = g;
     try {
       setInProgress(true);
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const result = await GoogleSignin.signIn();
 
-      // Newer versions return { type: 'success' | 'cancelled', data }.
-      // Older versions return the userInfo object directly.
       const anyResult = result as unknown as {
         type?: string;
         data?: { idToken?: string | null };

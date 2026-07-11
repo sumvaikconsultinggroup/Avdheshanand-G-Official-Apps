@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { borderRadius, shadows, spacing, typography, type ColorPalette } from '../../theme';
@@ -14,6 +15,11 @@ interface ScreenHeaderProps {
   rightActionIcon?: React.ComponentProps<typeof Icon>['name'];
   onRightActionPress?: () => void;
   rightActionLabel?: string;
+  /** When provided, the top-left seal becomes a back button and the header
+   *  clears the status bar (for pushed screens without a native header). */
+  onBackPress?: () => void;
+  /** Tighter side margin so the card + content below can sit wider. */
+  wide?: boolean;
 }
 
 export function ScreenHeader({
@@ -25,20 +31,40 @@ export function ScreenHeader({
   rightActionIcon,
   onRightActionPress,
   rightActionLabel,
+  onBackPress,
+  wide = false,
 }: ScreenHeaderProps) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   return (
     <LinearGradient
       colors={[colors.primary.saffron, colors.primary.maroon]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.wrap, compact && styles.compact]}
+      style={[
+        styles.wrap,
+        compact && styles.compact,
+        wide && { marginHorizontal: spacing.md },
+        onBackPress ? { marginTop: insets.top + spacing.sm } : null,
+      ]}
     >
       <View style={styles.topRow}>
-        <View style={styles.iconSeal}>
-          <Icon name={icon} size={compact ? 20 : 24} color={colors.gold.light} />
-        </View>
+        {onBackPress ? (
+          <TouchableOpacity
+            style={styles.iconSeal}
+            onPress={onBackPress}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <Icon name="arrow-left" size={compact ? 20 : 24} color={colors.gold.light} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.iconSeal}>
+            <Icon name={icon} size={compact ? 20 : 24} color={colors.gold.light} />
+          </View>
+        )}
         {rightActionIcon && onRightActionPress ? (
           <TouchableOpacity
             style={styles.actionButton}

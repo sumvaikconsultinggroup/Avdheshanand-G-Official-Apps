@@ -7,6 +7,7 @@ interface User {
   name: string;
   email: string;
   phone?: string;
+  picture?: string;
   role?: string;
 }
 
@@ -17,7 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   googleLogin: (idToken: string) => Promise<void>;
-  updateProfile: (data: { fullName?: string; phone?: string }) => Promise<void>;
+  updateProfile: (data: { fullName?: string; phone?: string; profileImageBase64?: string }) => Promise<void>;
   logout: () => Promise<void>;
   generateOtp: (email: string) => Promise<void>;
   verifyOtp: (email: string, otp: string) => Promise<void>;
@@ -101,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateProfile = async (data: { fullName?: string; phone?: string }) => {
+  const updateProfile = async (data: { fullName?: string; phone?: string; profileImageBase64?: string }) => {
     const response = await api.patch('/creduser/profile', data);
     if (response.data?.user) {
       setUser(response.data.user);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import User from '@/models/User';
 import { connectDB } from '@/lib/mongodb';
+import getCloudinary from '@/utils/cloudinary';
 
 // Resolve the authenticated user id from the Bearer token (or auth cookie).
 function getUserId(req: NextRequest): string | null {
@@ -28,6 +29,7 @@ function serialize(user: any) {
     username: user.username,
     email: user.email,
     phone: user.profile?.contact || user.contact || '',
+    picture: user.picture || user.profile?.profileImage || '',
     role: user.role,
     status: user.status,
     profile: user.profile,
@@ -68,6 +70,11 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const fullName = typeof body.fullName === 'string' ? body.fullName.trim() : undefined;
     const phoneRaw = typeof body.phone === 'string' ? body.phone.replace(/\D/g, '') : undefined;
+    const profileImageBase64 =
+      typeof body.profileImageBase64 === 'string' &&
+      body.profileImageBase64.startsWith('data:image')
+        ? body.profileImageBase64
+        : undefined;
 
     if (fullName !== undefined && fullName.length === 0) {
       return NextResponse.json({ success: false, message: 'Name cannot be empty' }, { status: 400 });
@@ -93,6 +100,16 @@ export async function PATCH(req: NextRequest) {
     }
     if (phoneRaw !== undefined) {
       user.profile.contact = phoneRaw;
+    }
+    if (profileImageBase64) {
+      // Upload the new avatar to Cloudinary (face-cropped square) and store the URL.
+      const uploaded = await getCloudinary().uploader.upload(profileImageBase64, {
+        folder: 'user-profiles',
+        resource_type: 'image',
+        transformation: [{ width: 512, height: 512, crop: 'fill', gravity: 'face' }],
+      });
+      user.profile.profileImage = uploaded.secure_url;
+      user.picture = uploaded.secure_url;
     }
 
     await user.save();

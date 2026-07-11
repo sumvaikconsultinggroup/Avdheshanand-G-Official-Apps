@@ -298,6 +298,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.md,
+    paddingTop: spacing.xl,
     paddingBottom: spacing.xxl,
   },
   languageWrap: {

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
@@ -7,6 +8,7 @@ import { spacing, typography, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 
 export function MissionScreen() {
+  const navigation = useNavigation<any>();
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
   const { t } = useTranslation();
@@ -37,6 +39,7 @@ export function MissionScreen() {
         title={t('missionScreen.title')}
         subtitle={t('missionScreen.subtitle')}
         icon="book-heart-outline"
+        onBackPress={() => navigation.goBack()}
       />
 
       <View style={styles.section}>

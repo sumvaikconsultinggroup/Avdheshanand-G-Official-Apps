@@ -121,6 +121,7 @@ function DrawerButton() {
         width: 40,
         height: 40,
         borderRadius: 20,
+        marginRight: 12,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#FFF4DE',

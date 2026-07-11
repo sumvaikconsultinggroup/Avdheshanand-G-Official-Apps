@@ -20,7 +20,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { EmptyStateCard, ScreenHeader, SurfaceCard } from '../../components/common';
 
 const { width } = Dimensions.get('window');
-const GALLERY_ITEM_WIDTH = (width - spacing.lg * 2 - spacing.sm) / 2;
+const GALLERY_ITEM_WIDTH = (width - spacing.md * 2 - spacing.sm) / 2;
 
 type Category = 'Articles' | 'Videos' | 'Books' | 'Podcasts' | 'Gallery';
 type LocalizedText = Record<string, string | undefined>;
@@ -353,6 +353,7 @@ export function ExploreScreen() {
     <View>
       <ScreenHeader
         compact
+        wide
         eyebrow={t('explore.title')}
         title={categoryLabels[selectedCategory]}
         subtitle={t('onboarding.slides.wisdomDescription')}
@@ -463,7 +464,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     backgroundColor: colors.background.parchment,
   },
   controlsWrap: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     paddingTop: spacing.lg,
   },
   categoryPanel: {
@@ -541,10 +542,10 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   galleryContainer: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
   },
   listItemWrap: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
     marginBottom: spacing.md,
   },
   listItem: {

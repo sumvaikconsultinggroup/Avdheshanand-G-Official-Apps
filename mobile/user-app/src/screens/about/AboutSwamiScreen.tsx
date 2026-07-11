@@ -62,6 +62,7 @@ export function AboutSwamiScreen({ navigation }: any) {
         title={t('aboutSwami.title')}
         subtitle={t('aboutSwami.subtitle')}
         icon="account-star-outline"
+        onBackPress={() => navigation.goBack()}
       />
 
       <View style={styles.section}>

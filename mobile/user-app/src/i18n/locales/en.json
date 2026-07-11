@@ -261,6 +261,9 @@
     "updateSuccess": "Profile updated",
     "updateFailed": "Could not update profile",
     "emailLocked": "Email address can't be changed",
+    "changePhoto": "Change photo",
+    "photoPermissionTitle": "Photo access needed",
+    "photoPermissionMessage": "Please allow photo access to choose a profile picture.",
     "errors": {
       "nameRequired": "Name is required",
       "phoneInvalid": "Enter a valid 10-digit phone number"
