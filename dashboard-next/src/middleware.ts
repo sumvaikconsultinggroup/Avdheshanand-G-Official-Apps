@@ -44,6 +44,7 @@ const publicApiEndpoints: { path: string; methods?: string[] }[] = [
   { path: "/api/panchang/festivals", methods: ["GET"] },
   { path: "/api/panchang/cities", methods: ["GET"] },
   { path: "/api/notifications/preferences" },
+  { path: "/api/cron" },
   { path: "/api/health", methods: ["GET"] },
   { path: "/api/dashboard/stats", methods: ["GET"] },
   { path: "/api/donation-receipt", methods: ["GET"] },

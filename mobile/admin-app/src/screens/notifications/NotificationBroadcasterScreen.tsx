@@ -1,11 +1,29 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import api from '../../services/api';
 import { borderRadius, colors, gradients, shadows, spacing } from '../../theme';
+
+const formatDT = (d: Date | string) =>
+  new Date(d).toLocaleString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+const statusColor = (status: string) =>
+  status === 'sent'
+    ? colors.status.success
+    : status === 'failed'
+    ? colors.status.error
+    : status === 'cancelled'
+    ? colors.text.secondary
+    : colors.status.warning;
 
 type PushAudience = 'all_followers' | 'city_followers';
 
@@ -51,6 +69,73 @@ export function NotificationBroadcasterScreen() {
   const [whatsAppSending, setWhatsAppSending] = useState(false);
   const [waImageUri, setWaImageUri] = useState<string | null>(null);
   const [waImageB64, setWaImageB64] = useState<string | null>(null);
+
+  const [pushSchedule, setPushSchedule] = useState<Date | null>(null);
+  const [waSchedule, setWaSchedule] = useState<Date | null>(null);
+  const [picker, setPicker] = useState<{ target: 'push' | 'wa'; step: 'date' | 'time'; temp: Date } | null>(null);
+  const [scheduledList, setScheduledList] = useState<any[]>([]);
+
+  const fetchScheduled = useCallback(async () => {
+    try {
+      const res = await api.get('/notifications/scheduled');
+      setScheduledList(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      // non-critical
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchScheduled();
+  }, [fetchScheduled]);
+
+  const cancelScheduled = async (id: string) => {
+    try {
+      await api.delete(`/notifications/scheduled/${id}`);
+      fetchScheduled();
+    } catch {
+      Alert.alert('Failed', 'Could not cancel that scheduled broadcast.');
+    }
+  };
+
+  const openScheduler = (target: 'push' | 'wa') => {
+    const base = new Date(Date.now() + 60 * 60 * 1000); // default +1h
+    setPicker({ target, step: 'date', temp: base });
+  };
+
+  const onPickerChange = (event: any, selected?: Date) => {
+    if (!picker) return;
+    if (event?.type === 'dismissed' || !selected) {
+      setPicker(null);
+      return;
+    }
+    if (picker.step === 'date') {
+      const temp = new Date(picker.temp);
+      temp.setFullYear(selected.getFullYear(), selected.getMonth(), selected.getDate());
+      setPicker({ ...picker, step: 'time', temp });
+    } else {
+      const final = new Date(picker.temp);
+      final.setHours(selected.getHours(), selected.getMinutes(), 0, 0);
+      if (picker.target === 'push') setPushSchedule(final);
+      else setWaSchedule(final);
+      setPicker(null);
+    }
+  };
+
+  const renderScheduleRow = (scheduledAt: Date | null, target: 'push' | 'wa', onClear: () => void) => (
+    <TouchableOpacity style={styles.scheduleRow} onPress={() => openScheduler(target)} activeOpacity={0.85}>
+      <Icon name="clock-outline" size={18} color={colors.primary.maroon} />
+      <Text style={styles.scheduleText}>
+        {scheduledAt ? `Scheduled: ${formatDT(scheduledAt)}` : 'Schedule for later (optional)'}
+      </Text>
+      {scheduledAt ? (
+        <TouchableOpacity onPress={onClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Icon name="close-circle" size={18} color={colors.status.error} />
+        </TouchableOpacity>
+      ) : (
+        <Icon name="chevron-right" size={18} color={colors.text.secondary} />
+      )}
+    </TouchableOpacity>
+  );
 
   const renderImagePicker = (
     uri: string | null,
@@ -112,15 +197,22 @@ export function NotificationBroadcasterScreen() {
         audience: pushAudience,
         cityName: cityName.trim() || undefined,
         imageBase64: pushImageB64 || undefined,
+        scheduledAt: pushSchedule ? pushSchedule.toISOString() : undefined,
       });
 
       const result = response.data;
-      Alert.alert('Broadcast Sent', `Push sent to ${result?.pushSent ?? 0} follower devices.`);
+      if (result?.scheduled) {
+        Alert.alert('Scheduled', `Push scheduled for ${formatDT(result.scheduledAt)}.`);
+      } else {
+        Alert.alert('Broadcast Sent', `Push sent to ${result?.pushSent ?? 0} follower devices.`);
+      }
       setTitle('');
       setBody('');
       setPushImageUri(null);
       setPushImageB64(null);
+      setPushSchedule(null);
       if (pushAudience === 'city_followers') setCityName('');
+      fetchScheduled();
     } catch (error: any) {
       console.error('Push broadcast error:', error);
       Alert.alert('Send failed', error?.response?.data?.message || 'Unable to send push notification.');
@@ -150,15 +242,22 @@ export function NotificationBroadcasterScreen() {
         eventLocation: eventLocation.trim() || undefined,
         message: whatsAppMessage.trim() || undefined,
         imageBase64: waImageB64 || undefined,
+        scheduledAt: waSchedule ? waSchedule.toISOString() : undefined,
       });
 
       const result = response.data;
-      Alert.alert(
-        'Volunteer Outreach Queued',
-        `Matched ${result?.matchedVolunteers ?? 0} volunteers and sent ${result?.whatsappSent ?? 0} WhatsApp messages.`
-      );
+      if (result?.scheduled) {
+        Alert.alert('Scheduled', `WhatsApp outreach scheduled for ${formatDT(result.scheduledAt)}.`);
+      } else {
+        Alert.alert(
+          'Volunteer Outreach Queued',
+          `Matched ${result?.matchedVolunteers ?? 0} volunteers and sent ${result?.whatsappSent ?? 0} WhatsApp messages.`
+        );
+      }
       setWaImageUri(null);
       setWaImageB64(null);
+      setWaSchedule(null);
+      fetchScheduled();
     } catch (error: any) {
       console.error('Volunteer WhatsApp error:', error);
       Alert.alert('Send failed', error?.response?.data?.message || 'Unable to send volunteer WhatsApp broadcast.');
@@ -221,6 +320,7 @@ export function NotificationBroadcasterScreen() {
             },
             colors.primary.maroon
           )}
+          {renderScheduleRow(pushSchedule, 'push', () => setPushSchedule(null))}
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={sendPushBroadcast}
@@ -234,12 +334,12 @@ export function NotificationBroadcasterScreen() {
               style={styles.primaryButtonInner}
             >
               <Icon
-                name={pushSending ? 'progress-clock' : 'send'}
+                name={pushSending ? 'progress-clock' : pushSchedule ? 'clock-outline' : 'send'}
                 size={18}
                 color={colors.text.white}
               />
               <Text style={styles.primaryButtonText}>
-                {pushSending ? 'Sending…' : 'Send Push Notification'}
+                {pushSending ? 'Sending…' : pushSchedule ? 'Schedule Notification' : 'Send Push Notification'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -308,6 +408,7 @@ export function NotificationBroadcasterScreen() {
           <Text style={styles.imageHint}>
             {waImageUri ? 'Your image will be sent with the message.' : 'Leave empty to send the Ashram logo as the header image.'}
           </Text>
+          {renderScheduleRow(waSchedule, 'wa', () => setWaSchedule(null))}
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={sendVolunteerWhatsApp}
@@ -315,16 +416,66 @@ export function NotificationBroadcasterScreen() {
             style={[styles.primaryButton, styles.whatsAppButton, whatsAppSending && styles.buttonDisabled]}
           >
             <Icon
-              name={whatsAppSending ? 'progress-clock' : 'whatsapp'}
+              name={whatsAppSending ? 'progress-clock' : waSchedule ? 'clock-outline' : 'whatsapp'}
               size={18}
               color={colors.text.white}
             />
             <Text style={styles.primaryButtonText}>
-              {whatsAppSending ? 'Sending…' : 'Send WhatsApp'}
+              {whatsAppSending ? 'Sending…' : waSchedule ? 'Schedule WhatsApp' : 'Send WhatsApp'}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {scheduledList.length > 0 ? (
+        <View style={styles.card}>
+          <View style={styles.cardBody}>
+            <View style={styles.cardHeader}>
+              <View style={styles.cardIconWrap}>
+                <Icon name="clock-check-outline" size={22} color={colors.primary.maroon} />
+              </View>
+              <Text style={styles.cardTitle} numberOfLines={2}>Scheduled &amp; Recent</Text>
+            </View>
+            {scheduledList.map((item) => (
+              <View key={item._id} style={styles.schedItem}>
+                <View style={styles.schedIconWrap}>
+                  <Icon
+                    name={item.mode === 'push' ? 'bell-ring-outline' : 'whatsapp'}
+                    size={16}
+                    color={item.mode === 'push' ? colors.primary.maroon : colors.status.success}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.schedTitle} numberOfLines={1}>{item.title}</Text>
+                  <Text style={styles.schedMeta}>{formatDT(item.scheduledAt)}</Text>
+                </View>
+                {item.status === 'pending' ? (
+                  <TouchableOpacity
+                    onPress={() => cancelScheduled(item._id)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Icon name="close-circle" size={22} color={colors.status.error} />
+                  </TouchableOpacity>
+                ) : (
+                  <View style={[styles.schedStatus, { backgroundColor: `${statusColor(item.status)}1A` }]}>
+                    <Text style={[styles.schedStatusText, { color: statusColor(item.status) }]}>{item.status}</Text>
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {picker ? (
+        <DateTimePicker
+          value={picker.temp}
+          mode={picker.step}
+          display="default"
+          minimumDate={new Date()}
+          onChange={onPickerChange}
+        />
+      ) : null}
     </ScrollView>
   );
 }
@@ -460,5 +611,61 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginTop: -spacing.sm,
     marginBottom: spacing.md,
+  },
+  scheduleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.background.parchment,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    marginBottom: spacing.md,
+  },
+  scheduleText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  schedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.gold as string,
+  },
+  schedIconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.background.parchment,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+  },
+  schedTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  schedMeta: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginTop: 1,
+  },
+  schedStatus: {
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  schedStatusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'capitalize',
   },
 });
