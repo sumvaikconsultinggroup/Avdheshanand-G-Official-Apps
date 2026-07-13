@@ -14,7 +14,6 @@ import {
   Platform,
 } from 'react-native';
 import {
-  Card,
   ActivityIndicator,
   FAB,
   TextInput,
@@ -27,7 +26,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, borderRadius, typography, shadows, gradients } from '../../theme';
-import { AdminHero, Badge } from '../../components/common';
+import { AdminHero } from '../../components/common';
 import api from '../../services/api';
 import { pickImage } from '../../services/imageUpload';
 import { Book } from '../../types';
@@ -243,89 +242,75 @@ export function BooksScreen() {
 
   const renderBookCard = ({ item }: { item: Book }) => {
     const stockStatus = getStockStatus(item.stock);
+    const metaItems = [
+      item.language ? { icon: 'translate', label: item.language } : null,
+      item.genre ? { icon: 'tag-outline', label: item.genre } : null,
+      item.pages ? { icon: 'file-document-outline', label: `${item.pages} pages` } : null,
+    ].filter(Boolean) as { icon: any; label: string }[];
 
     return (
-      <Card style={styles.card}>
+      <View style={styles.card}>
         <View style={styles.cardRow}>
           <View style={styles.coverContainer}>
             {item.coverImage ? (
-              <Image
-                source={{ uri: item.coverImage }}
-                style={styles.coverImage}
-                resizeMode="cover"
-              />
+              <Image source={{ uri: item.coverImage }} style={styles.coverImage} resizeMode="cover" />
             ) : (
               <View style={styles.coverPlaceholder}>
-                <Text style={styles.placeholderIcon}>📚</Text>
+                <MaterialCommunityIcons name="book-open-page-variant" size={34} color={colors.text.white} />
               </View>
             )}
           </View>
           <View style={styles.bookInfo}>
-            <Text style={styles.bookTitle} numberOfLines={2}>
-              {item.title}
-            </Text>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaIcon}>✍️</Text>
-              <Text style={styles.authorText} numberOfLines={1}>
-                {item.author || 'Unknown Author'}
-              </Text>
-            </View>
-            {item.language ? (
-              <View style={styles.metaRow}>
-                <Text style={styles.metaIcon}>🌐</Text>
-                <Text style={styles.metaText} numberOfLines={1}>
-                  {item.language}
-                </Text>
+            <Text style={styles.bookTitle} numberOfLines={2}>{item.title}</Text>
+            <Text style={styles.authorText} numberOfLines={1}>by {item.author || 'Unknown Author'}</Text>
+
+            {metaItems.length > 0 ? (
+              <View style={styles.metaChips}>
+                {metaItems.map((m) => (
+                  <View key={m.label} style={styles.metaChip}>
+                    <MaterialCommunityIcons name={m.icon} size={12} color={colors.text.secondary} />
+                    <Text style={styles.metaChipText} numberOfLines={1}>{m.label}</Text>
+                  </View>
+                ))}
               </View>
             ) : null}
+
             <View style={styles.priceRow}>
               <Text style={styles.price}>{formatPrice(item.price)}</Text>
+              <View style={[styles.stockPill, { borderColor: stockStatus.color, backgroundColor: `${stockStatus.color}14` }]}>
+                <View style={[styles.stockDot, { backgroundColor: stockStatus.color }]} />
+                <Text style={[styles.stockPillText, { color: stockStatus.color }]}>
+                  {stockStatus.label}
+                  {item.stock && item.stock.available > 0 ? ` · ${item.stock.available}` : ''}
+                </Text>
+              </View>
             </View>
-            <View style={styles.chipRow}>
-              {item.purchaseUrl ? (
-                <Badge
-                  label="External Buy Link"
-                  tone={colors.gold.dark}
-                  variant="soft"
-                  icon="open-in-new"
-                />
-              ) : null}
-              <Badge
-                label={`${stockStatus.label}${
-                  item.stock && item.stock.available > 0
-                    ? ` (${item.stock.available})`
-                    : ''
-                }`}
-                tone={stockStatus.color}
-                variant="solid"
-              />
-              {item.genre ? (
-                <Badge label={item.genre} tone={colors.primary.saffron} variant="soft" />
-              ) : null}
-              <Badge
-                label="Live on app & website"
-                tone={colors.status.success}
-                variant="soft"
-                dot
-              />
-            </View>
-          </View>
-          <View style={styles.cardActions}>
-            <IconButton
-              icon="pencil"
-              size={18}
-              iconColor={colors.primary.maroon}
-              onPress={() => openEditModal(item)}
-            />
-            <IconButton
-              icon="delete"
-              size={18}
-              iconColor={colors.status.error}
-              onPress={() => handleDelete(item)}
-            />
           </View>
         </View>
-      </Card>
+
+        <View style={styles.cardFooter}>
+          <View style={styles.footerTags}>
+            {item.purchaseUrl ? (
+              <View style={styles.footerTag}>
+                <MaterialCommunityIcons name="open-in-new" size={12} color={colors.gold.dark} />
+                <Text style={styles.footerTagText}>Buy link</Text>
+              </View>
+            ) : null}
+            <View style={styles.footerTag}>
+              <View style={styles.liveDot} />
+              <Text style={styles.footerTagText}>Live on app &amp; site</Text>
+            </View>
+          </View>
+          <View style={styles.footerActions}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => openEditModal(item)} activeOpacity={0.8}>
+              <MaterialCommunityIcons name="pencil" size={16} color={colors.primary.maroon} />
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDanger]} onPress={() => handleDelete(item)} activeOpacity={0.8}>
+              <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.status.error} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   };
 
@@ -761,22 +746,20 @@ const styles = StyleSheet.create({
   },
   cardRow: {
     flexDirection: 'row',
-    padding: spacing.sm,
-    alignItems: 'center',
+    padding: spacing.md,
+    gap: spacing.md,
   },
   coverContainer: {
-    width: 92,
-    height: 132,
+    width: 84,
+    height: 120,
     borderRadius: borderRadius.md,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border.gold,
+    backgroundColor: colors.background.sandstone,
     ...shadows.soft,
   },
   coverImage: {
     width: '100%',
     height: '100%',
-    backgroundColor: colors.background.sandstone,
   },
   coverPlaceholder: {
     width: '100%',
@@ -785,56 +768,123 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderIcon: {
-    fontSize: 40,
-  },
   bookInfo: {
     flex: 1,
-    padding: spacing.md,
-    justifyContent: 'space-between',
   },
   bookTitle: {
     ...typography.titleSm,
-    fontWeight: '700',
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: '800',
     color: colors.primary.maroon,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.xs,
-    gap: spacing.xs,
-  },
-  metaIcon: {
-    fontSize: 11,
   },
   authorText: {
     fontSize: 13,
     color: colors.text.secondary,
-    flexShrink: 1,
+    marginTop: 2,
+    fontStyle: 'italic',
   },
-  metaText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    flexShrink: 1,
-  },
-  priceRow: {
+  metaChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     marginTop: spacing.sm,
   },
-  price: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.gold.dark,
-  },
-  chipRow: {
+  metaChip: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.background.parchment,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
+  },
+  metaChipText: {
+    fontSize: 11,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: spacing.sm,
     gap: spacing.sm,
+  },
+  price: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: colors.gold.dark,
+  },
+  stockPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  stockDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  stockPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.gold,
+    backgroundColor: colors.background.parchment,
+  },
+  footerTags: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    flex: 1,
     flexWrap: 'wrap',
   },
-  cardActions: {
+  footerTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  footerTagText: {
+    fontSize: 11,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+  liveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: colors.status.success,
+  },
+  footerActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  actionBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.warmWhite,
+    borderWidth: 1,
+    borderColor: colors.border.gold,
     justifyContent: 'center',
-    paddingRight: spacing.xs,
+    alignItems: 'center',
+  },
+  actionBtnDanger: {
+    borderColor: `${colors.status.error}55`,
   },
   emptyState: {
     padding: spacing.xxl,
