@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { getPanchangFestivals, getPanchangToday } from '../../services/panchangApi';
+import { resyncPushTokenPreferences } from '../../services/notifications';
 import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import CityPickerModal, { City } from './CityPickerModal';
@@ -308,6 +309,8 @@ export default function PanchangScreen() {
 
   const saveCity = async (city: City) => {
     try { await AsyncStorage.setItem(STORAGE_KEY_CITY, JSON.stringify(city)); } catch {}
+    // Keep the server's notification city in sync so city-targeted broadcasts work.
+    resyncPushTokenPreferences();
   };
 
   const fetchPanchangData = async () => {

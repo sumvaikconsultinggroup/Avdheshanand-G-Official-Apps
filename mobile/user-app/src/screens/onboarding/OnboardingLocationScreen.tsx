@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
 import { useOnboarding } from '../../context/OnboardingContext';
+import { resyncPushTokenPreferences } from '../../services/notifications';
 import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -58,6 +59,10 @@ export function OnboardingLocationScreen() {
       };
 
       await AsyncStorage.setItem(STORAGE_KEY_CITY, JSON.stringify(cityPayload));
+      // Push the just-chosen city to the backend so city-targeted broadcasts
+      // reach this device (notifications are enabled before this step, so the
+      // server still has the default city until now).
+      await resyncPushTokenPreferences();
       await completeOnboarding({ locationPrompted: true, locationEnabled: true });
     } catch (error) {
       Alert.alert(t('onboarding.locationErrorTitle'), t('onboarding.locationErrorMessage'));

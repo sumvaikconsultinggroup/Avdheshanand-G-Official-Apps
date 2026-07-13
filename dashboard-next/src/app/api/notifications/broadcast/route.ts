@@ -4,9 +4,41 @@ import { connectDB } from '@/lib/mongodb';
 import NotificationPreference from '@/models/NotificationPreference';
 import Volunteer from '@/models/Volunteer';
 import Event from '@/models/Event';
-import { sendWhatsAppMessage, sendWhatsAppTemplateMessage } from '@/lib/whatsapp';
+import { sendWhatsAppMessage, sendWhatsAppTemplateMessage, sendWhatsAppImageMessage } from '@/lib/whatsapp';
+import getCloudinary from '@/utils/cloudinary';
 
 const NotificationPreferenceModel = NotificationPreference as any;
+
+// Branded logo sent as the WhatsApp header image when the admin doesn't attach a
+// custom one. Served from the deployed dashboard's /public; override via env.
+const BROADCAST_LOGO_URL =
+  process.env.WHATSAPP_BROADCAST_LOGO_URL ||
+  'https://avdheshanandg-dashboard.vercel.app/brand-logo.png';
+
+// Cap the accepted broadcast image at ~3MB (base64 is ~4/3 of the byte size).
+const MAX_IMAGE_BASE64_LENGTH = Math.ceil((3 * 1024 * 1024 * 4) / 3);
+
+/**
+ * Optionally upload a base64 broadcast image to Cloudinary and return its URL.
+ * Falls back to a provided imageUrl, or undefined. Never throws — a failed image
+ * must not block the text broadcast.
+ */
+async function resolveBroadcastImageUrl(body: any): Promise<string | undefined> {
+  if (typeof body.imageUrl === 'string' && body.imageUrl) return body.imageUrl;
+  const b64 = typeof body.imageBase64 === 'string' ? body.imageBase64 : '';
+  if (!b64.startsWith('data:image')) return undefined;
+  if (b64.length > MAX_IMAGE_BASE64_LENGTH) return undefined; // too large, skip silently
+  try {
+    const uploaded = await getCloudinary().uploader.upload(b64, {
+      folder: 'broadcasts',
+      resource_type: 'image',
+    });
+    return uploaded.secure_url;
+  } catch (error) {
+    console.error('Broadcast image upload failed:', error);
+    return undefined;
+  }
+}
 
 function ensureFirebaseAdmin() {
   if (admin.apps.length) return;
@@ -34,6 +66,9 @@ export async function POST(req: NextRequest) {
       if (!body.title || !body.body) {
         return NextResponse.json({ success: false, message: 'Title and body are required' }, { status: 400 });
       }
+
+      // Optional image (≤3MB) — attached to the push only (big-picture on Android).
+      const imageUrl = await resolveBroadcastImageUrl(body);
 
       const preferenceFilter: Record<string, unknown> = { isActive: true };
       if (body.audience === 'city_followers' && body.cityName) {
@@ -82,6 +117,7 @@ export async function POST(req: NextRequest) {
             sound: 'default',
             channelId: 'general_announcements',
             priority: 'high',
+            ...(imageUrl ? { richContent: { image: imageUrl } } : {}),
             ...(body.data && typeof body.data === 'object' ? { data: body.data } : {}),
           }));
           try {
@@ -112,7 +148,7 @@ export async function POST(req: NextRequest) {
               notification: {
                 title: String(body.title),
                 body: String(body.body),
-                ...(body.imageUrl ? { imageUrl: String(body.imageUrl) } : {}),
+                ...(imageUrl ? { imageUrl } : {}),
               },
               data: body.data && typeof body.data === 'object' ? body.data : {},
               android: {
@@ -176,6 +212,9 @@ export async function POST(req: NextRequest) {
       }
 
       const templateName = process.env.WHATSAPP_VOLUNTEER_EVENT_TEMPLATE;
+      // Image: the admin's attached picture if any, else the branded logo.
+      const customImageUrl = await resolveBroadcastImageUrl(body);
+      const whatsAppImageUrl = customImageUrl || BROADCAST_LOGO_URL;
       let sent = 0;
       const failures: string[] = [];
 
@@ -183,21 +222,47 @@ export async function POST(req: NextRequest) {
         const eventDate = body.eventDate || event?.eventDate;
         const eventLocation = body.eventLocation || event?.eventLocation || cityName;
         const eventName = body.eventName || event?.eventName || 'Ashram Seva';
-        const message = customMessage || `Hari Om ${volunteer.fullName}. With blessings, you are requested to be present for ${eventName}${eventDate ? ` on ${new Date(eventDate).toLocaleString('en-IN')}` : ''} at ${eventLocation}. Kindly confirm your availability with the Ashram team. Pranams, AvdheshanandG Mission Team`;
-
-        const result = templateName
-          ? await sendWhatsAppTemplateMessage({
-              to: volunteer.phone,
-              templateName,
-              bodyValues: [
-                volunteer.fullName,
-                eventName,
-                eventDate ? new Date(eventDate).toLocaleString('en-IN') : 'the scheduled time',
-                eventLocation,
-              ],
-              callbackData: 'volunteer_city_event_broadcast',
+        const dateStr = eventDate
+          ? new Date(eventDate).toLocaleString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
             })
-          : await sendWhatsAppMessage(volunteer.phone, message);
+          : '';
+        const message =
+          customMessage ||
+          `🕉️ *Hari Om, ${volunteer.fullName}* 🙏\n\n` +
+            `With divine blessings, you are lovingly invited to offer your *seva*:\n\n` +
+            `📿 *${eventName}*` +
+            `${dateStr ? `\n🗓️  ${dateStr}` : ''}` +
+            `${eventLocation ? `\n📍  ${eventLocation}` : ''}\n\n` +
+            `Your presence and selfless service mean a great deal to us. Kindly confirm your availability with the Ashram team. 🌸\n\n` +
+            `_With gratitude & blessings,_\n*Swami Avdheshanand G*\n_Towards Divinity_`;
+
+        // Text delivery: approved template if configured, else the plain message.
+        const sendText = () =>
+          templateName
+            ? sendWhatsAppTemplateMessage({
+                to: volunteer.phone,
+                templateName,
+                bodyValues: [
+                  volunteer.fullName,
+                  eventName,
+                  dateStr || 'the scheduled time',
+                  eventLocation,
+                ],
+                callbackData: 'volunteer_city_event_broadcast',
+              })
+            : sendWhatsAppMessage(volunteer.phone, message);
+
+        // Send the branded image with the copy as caption; fall back to text if
+        // the provider's media send fails, so the volunteer still gets the message.
+        let result = await sendWhatsAppImageMessage(volunteer.phone, whatsAppImageUrl, message);
+        if (!result.success) {
+          result = await sendText();
+        }
 
         if (result.success) {
           sent += 1;
