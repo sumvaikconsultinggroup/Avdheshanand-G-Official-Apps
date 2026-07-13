@@ -36,10 +36,10 @@ interface Registration {
 function statusStyle(status: string | undefined, colors: ColorPalette): { bg: string; color: string } {
   const s = (status || 'pending').toLowerCase();
   if (s.includes('approv') || s.includes('confirm') || s.includes('complete')) {
-    return { bg: 'rgba(76,175,80,0.12)', color: '#2E7D32' };
+    return { bg: 'rgba(76,175,80,0.12)', color: colors.status.success };
   }
   if (s.includes('reject') || s.includes('cancel') || s.includes('declin')) {
-    return { bg: 'rgba(244,67,54,0.12)', color: '#C62828' };
+    return { bg: 'rgba(244,67,54,0.12)', color: colors.status.error };
   }
   return { bg: 'rgba(212,160,23,0.15)', color: colors.gold.dark };
 }

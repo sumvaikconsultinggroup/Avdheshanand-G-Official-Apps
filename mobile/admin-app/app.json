@@ -8,22 +8,23 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/avdheshanandg-mission-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.avdheshanandg.admin",
       "supportsTablet": true,
       "associatedDomains": [
         "applinks:admin.avdheshanandg.org"
       ]
     },
     "android": {
+      "package": "com.avdheshanandg.admin",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
       "intentFilters": [
@@ -49,6 +50,12 @@
     "plugins": [
       "expo-notifications",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "11b25053-ecab-4b7a-92b9-04cb84b26090"
+      }
+    },
+    "owner": "chiragsumvaik"
   }
 }

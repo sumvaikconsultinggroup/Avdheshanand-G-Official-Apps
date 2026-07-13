@@ -140,6 +140,22 @@ export async function syncPushTokenToServer(token: string): Promise<boolean> {
 }
 
 /**
+ * Re-push the current stored city (and prefs) to the backend for the already-
+ * registered device, so the notification preference's `cityName` stays in sync
+ * whenever the user changes their location. Without this the server keeps the
+ * city that was stored when notifications were first enabled (often the default),
+ * which breaks city-targeted broadcasts. No-op if notifications were never enabled.
+ */
+export async function resyncPushTokenPreferences(): Promise<void> {
+  try {
+    const token = await AsyncStorage.getItem(STORAGE_KEY_PUSH_TOKEN);
+    if (token) await syncPushTokenToServer(token);
+  } catch {
+    // best-effort — a failed re-sync must never block a city change
+  }
+}
+
+/**
  * Register for push (prompting for permission if needed), persist the token
  * locally, and sync it to the backend. Returns the token or null.
  */

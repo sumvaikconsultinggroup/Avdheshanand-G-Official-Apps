@@ -81,9 +81,10 @@ export function GalleryScreen() {
     item: GlimpseImage;
     index: number;
   }) => {
-    // Create masonry effect with varying heights
-    const aspectRatios = [1, 1.3, 0.8, 1.2, 1, 0.9];
-    const aspectRatio = aspectRatios[index % aspectRatios.length];
+    // Uniform square cells: FlatList aligns every row to its tallest item, so
+    // mixed heights leave white gaps below shorter images. A fixed square keeps
+    // every cell the same height — the image fills it (cover), no white showing.
+    const aspectRatio = 1;
 
     return (
       <TouchableOpacity

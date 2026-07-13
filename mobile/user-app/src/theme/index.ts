@@ -188,19 +188,22 @@ export const borderRadius = {
   full: 9999,
 };
 
+// Neutral shadows so cards keep subtle depth without a colored "glow".
+// (Android 9+ respects shadowColor on elevation, so a gold/maroon color here
+// produced the golden glow around cards, very visible on the dark theme.)
 export const shadows = {
   warm: {
-    shadowColor: '#D4A017',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
   },
   temple: {
-    shadowColor: '#800020',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 32,
-    elevation: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.14,
+    shadowRadius: 18,
+    elevation: 6,
   },
 };

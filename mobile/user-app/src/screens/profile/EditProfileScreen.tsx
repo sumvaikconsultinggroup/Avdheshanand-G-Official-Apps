@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -19,8 +20,30 @@ export function EditProfileScreen() {
 
   const [fullName, setFullName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
+  const [avatarUri, setAvatarUri] = useState<string | null>(user?.picture || null);
+  const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ fullName?: string; phone?: string }>({});
   const [saving, setSaving] = useState(false);
+
+  const handlePickImage = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert(t('profile.photoPermissionTitle'), t('profile.photoPermissionMessage'));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.6,
+      base64: true,
+    });
+    if (!result.canceled && result.assets?.[0]?.base64) {
+      const asset = result.assets[0];
+      setAvatarUri(asset.uri);
+      setAvatarBase64(`data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`);
+    }
+  };
 
   const handleSave = async () => {
     const next: { fullName?: string; phone?: string } = {};
@@ -32,7 +55,11 @@ export function EditProfileScreen() {
 
     setSaving(true);
     try {
-      await updateProfile({ fullName: fullName.trim(), phone: phoneDigits });
+      await updateProfile({
+        fullName: fullName.trim(),
+        phone: phoneDigits,
+        profileImageBase64: avatarBase64 || undefined,
+      });
       Alert.alert(t('profile.updateSuccess'), '', [{ text: t('common.ok'), onPress: () => navigation.goBack() }]);
     } catch (error: any) {
       Alert.alert(
@@ -56,9 +83,19 @@ export function EditProfileScreen() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.avatarWrap}>
-          <View style={styles.avatar}>
-            <Icon name="account-circle" size={64} color={colors.primary.saffron} />
-          </View>
+          <TouchableOpacity style={styles.avatar} onPress={handlePickImage} activeOpacity={0.85}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+            ) : (
+              <Icon name="account-circle" size={64} color={colors.primary.saffron} />
+            )}
+            <View style={styles.avatarEditBadge}>
+              <Icon name="camera" size={15} color={colors.text.white} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handlePickImage} activeOpacity={0.7}>
+            <Text style={styles.avatarHint}>{t('profile.changePhoto')}</Text>
+          </TouchableOpacity>
         </View>
 
         <FloatingInput
@@ -144,6 +181,31 @@ const makeStyles = (colors: ColorPalette) =>
       borderColor: colors.border.gold as string,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    avatarImage: {
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+    },
+    avatarEditBadge: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: colors.primary.maroon,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+      borderColor: colors.background.parchment,
+    },
+    avatarHint: {
+      ...typography.caption,
+      color: colors.primary.maroon,
+      fontWeight: '700',
+      marginTop: spacing.sm,
+      textAlign: 'center',
     },
     lockedHint: {
       ...typography.caption,

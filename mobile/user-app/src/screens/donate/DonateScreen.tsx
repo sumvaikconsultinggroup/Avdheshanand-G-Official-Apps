@@ -998,7 +998,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   },
   successCard: {
     borderRadius: borderRadius.xl,
-    backgroundColor: '#F0FBF4',
+    backgroundColor: colors.background.warmWhite,
     borderWidth: 1,
     borderColor: 'rgba(76,175,80,0.25)',
     padding: spacing.lg,

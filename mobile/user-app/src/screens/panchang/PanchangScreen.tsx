@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { getPanchangFestivals, getPanchangToday } from '../../services/panchangApi';
+import { resyncPushTokenPreferences } from '../../services/notifications';
 import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import CityPickerModal, { City } from './CityPickerModal';
@@ -235,7 +236,7 @@ function MuhurtaRow({ label, start, end, variant, note }: {
         <Text style={styles.muhurtaLabel}>{label}</Text>
         {note && (
           <View style={styles.muhurtaNote}>
-            <Icon name="meditation" size={12} color="#2E7D32" />
+            <Icon name="meditation" size={12} color={colors.status.success} />
             <Text style={styles.muhurtaNoteText}>{note}</Text>
           </View>
         )}
@@ -308,6 +309,8 @@ export default function PanchangScreen() {
 
   const saveCity = async (city: City) => {
     try { await AsyncStorage.setItem(STORAGE_KEY_CITY, JSON.stringify(city)); } catch {}
+    // Keep the server's notification city in sync so city-targeted broadcasts work.
+    resyncPushTokenPreferences();
   };
 
   const fetchPanchangData = async () => {
@@ -398,6 +401,9 @@ export default function PanchangScreen() {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* City Selector Bar */}
       <View style={styles.cityBar}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7} accessibilityRole="button">
+          <Icon name="arrow-left" size={22} color={colors.primary.maroon} />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.citySelector} onPress={() => setCityPickerVisible(true)} activeOpacity={0.7}>
           <Icon name="map-marker" size={18} color={colors.primary.saffron} />
           <Text style={styles.cityName} numberOfLines={1}>{selectedCity.name}</Text>
@@ -617,7 +623,7 @@ export default function PanchangScreen() {
                 <SectionHeader icon="compass-outline" title={t('panchang.sections.dishaShool')} />
                 <View style={styles.dishaShoolCard}>
                   <View style={styles.dishaShoolHeader}>
-                    <Icon name="compass" size={28} color="#D97706" />
+                    <Icon name="compass" size={28} color={colors.status.warning} />
                     <View style={styles.dishaShoolInfo}>
                       <Text style={styles.dishaShoolDirection}>
                         {panchang.dishaShool.direction}
@@ -628,7 +634,7 @@ export default function PanchangScreen() {
                   </View>
                   {panchang.dishaShool.remedy && (
                     <View style={styles.dishaShoolRemedy}>
-                      <Icon name="shield-check-outline" size={16} color="#059669" />
+                      <Icon name="shield-check-outline" size={16} color={colors.status.success} />
                       <Text style={styles.dishaShoolRemedyText}>{t('panchang.remedyLabel')}: {panchang.dishaShool.remedy}</Text>
                     </View>
                   )}
@@ -769,6 +775,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
 
   // City Bar
   cityBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, backgroundColor: colors.background.warmWhite, borderBottomWidth: 1, borderBottomColor: colors.border.gold as string },
+  backButton: { padding: spacing.xs, marginRight: spacing.xs },
   citySelector: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.xs },
   cityName: { flex: 1, fontSize: 16, fontWeight: '600', color: colors.text.primary, marginHorizontal: spacing.sm },
   gpsButton: { padding: spacing.sm, borderRadius: borderRadius.full, backgroundColor: colors.background.parchment, marginLeft: spacing.xs },
@@ -822,9 +829,9 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   natureBadgeBad: { backgroundColor: 'rgba(220,38,38,0.1)' },
   natureBadgeNeutral: { backgroundColor: 'rgba(202,138,4,0.1)' },
   natureBadgeText: { fontSize: 10, fontWeight: '600', textTransform: 'capitalize' },
-  natureBadgeTextGood: { color: '#16A34A' },
-  natureBadgeTextBad: { color: '#DC2626' },
-  natureBadgeTextNeutral: { color: '#CA8A04' },
+  natureBadgeTextGood: { color: colors.status.success },
+  natureBadgeTextBad: { color: colors.status.error },
+  natureBadgeTextNeutral: { color: colors.gold.dark },
   samvatRow: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.lg, paddingTop: spacing.md, borderTopWidth: 1, borderTopColor: 'rgba(212,160,23,0.18)', gap: spacing.lg },
   samvatText: { fontSize: 12, color: colors.gold.dark, fontWeight: '600', letterSpacing: 0.3 },
 
@@ -878,19 +885,19 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   muhurtaLabel: { fontSize: 14, fontWeight: '600', color: colors.text.primary },
   muhurtaLabelEn: { fontSize: 12, color: colors.text.secondary },
   muhurtaNote: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
-  muhurtaNoteText: { fontSize: 11, color: '#2E7D32', fontWeight: '500', marginLeft: 4 },
+  muhurtaNoteText: { fontSize: 11, color: colors.status.success, fontWeight: '500', marginLeft: 4 },
   muhurtaTime: { fontSize: 13, fontWeight: '600' },
-  muhurtaTimeGreen: { color: '#2E7D32' },
-  muhurtaTimeRed: { color: '#C62828' },
+  muhurtaTimeGreen: { color: colors.status.success },
+  muhurtaTimeRed: { color: colors.status.error },
 
   // Disha Shool
   dishaShoolCard: { backgroundColor: 'rgba(217,119,6,0.06)', borderRadius: borderRadius.md, padding: spacing.md, borderWidth: 1, borderColor: 'rgba(217,119,6,0.2)' },
   dishaShoolHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
   dishaShoolInfo: { flex: 1 },
-  dishaShoolDirection: { fontSize: 17, fontWeight: '700', color: '#92400E' },
-  dishaShoolWarning: { fontSize: 13, color: '#B45309', marginTop: 2 },
+  dishaShoolDirection: { fontSize: 17, fontWeight: '700', color: colors.status.warning },
+  dishaShoolWarning: { fontSize: 13, color: colors.status.warning, marginTop: 2 },
   dishaShoolRemedy: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: 'rgba(217,119,6,0.15)' },
-  dishaShoolRemedyText: { fontSize: 12, color: '#059669', flex: 1 },
+  dishaShoolRemedyText: { fontSize: 12, color: colors.status.success, flex: 1 },
 
   // Auspicious Activities
   activityRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, padding: spacing.md, borderRadius: borderRadius.md, marginBottom: spacing.sm, borderWidth: 1 },

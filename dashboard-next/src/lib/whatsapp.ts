@@ -96,6 +96,73 @@ export async function sendWhatsAppMessage(to: string, message: string): Promise<
   }
 }
 
+/**
+ * Send an image (by URL) with an optional caption. Used for broadcasts that
+ * attach a picture / logo. NOTE: the media payload below targets the whatsappbiz
+ * ("Basic" auth) provider — if you switch providers, adjust the `data` fields.
+ */
+export async function sendWhatsAppImageMessage(
+  to: string,
+  imageUrl: string,
+  caption?: string
+): Promise<WhatsAppResult> {
+  const apiUrl =
+    process.env.WHATSAPP_API_URL || 'https://api.whatsappbiz.com/v1/public/message/';
+  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+  const apiKey = process.env.WHATSAPP_API_KEY;
+  const normalizedPhone = getNormalizedPhone(to);
+
+  if (!apiUrl || !normalizedPhone || !imageUrl) {
+    return { success: false, skipped: true, error: 'WhatsApp image provider is not configured' };
+  }
+
+  try {
+    const isVaibiStyleApi = Boolean(apiKey) || apiUrl.includes('whatsappbiz.com');
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    let body: Record<string, unknown>;
+
+    if (isVaibiStyleApi) {
+      headers.Authorization = `Basic ${apiKey || accessToken || ''}`;
+      body = {
+        fullPhoneNumber: normalizedPhone,
+        callbackData: 'agm_platform_media',
+        type: 'Media',
+        data: {
+          mediaType: 'image',
+          url: imageUrl,
+          ...(caption ? { caption } : {}),
+        },
+      };
+    } else {
+      if (!accessToken) {
+        return { success: false, skipped: true, error: 'WhatsApp provider token is missing' };
+      }
+      headers.Authorization = `Bearer ${accessToken}`;
+      body = { to: normalizedPhone, image: imageUrl, caption };
+    }
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+    const responseText = await response.text();
+    if (!response.ok) {
+      return { success: false, status: response.status, error: responseText };
+    }
+    let parsed: unknown = responseText;
+    try {
+      parsed = responseText ? JSON.parse(responseText) : null;
+    } catch {}
+    return { success: true, status: response.status, data: parsed };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown WhatsApp image error',
+    };
+  }
+}
+
 export async function sendWhatsAppTemplateMessage({
   to,
   templateName,

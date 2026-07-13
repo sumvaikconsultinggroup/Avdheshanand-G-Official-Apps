@@ -170,7 +170,7 @@ export function ChatScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerAvatar}>
-          <Icon name="om" size={20} color="#fff" />
+          <Icon name="om" size={20} color={colors.text.white} />
         </View>
         <View>
           <Text style={styles.headerTitle}>{t('chat.headerTitle')}</Text>
@@ -213,7 +213,7 @@ export function ChatScreen() {
           onPress={() => sendMessage()}
           disabled={!inputText.trim() || isTyping}
         >
-          <Icon name="send" size={20} color="#fff" />
+          <Icon name="send" size={20} color={colors.text.white} />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -242,7 +242,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    color: '#fff',
+    color: colors.text.white,
     fontSize: 16,
     fontWeight: '700',
   },
@@ -285,14 +285,14 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     backgroundColor: colors.background.parchment,
     borderBottomLeftRadius: 4,
     borderWidth: 1,
-    borderColor: 'rgba(128,0,32,0.1)',
+    borderColor: colors.border.maroon as string,
   },
   messageText: {
     fontSize: 14,
     lineHeight: 20,
   },
   userText: {
-    color: '#fff',
+    color: colors.text.white,
   },
   botText: {
     color: colors.text.primary,
@@ -316,9 +316,9 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     maxWidth: '80%',
   },
   suggestionPill: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.warmWhite,
     borderWidth: 1,
-    borderColor: 'rgba(128,0,32,0.2)',
+    borderColor: colors.border.maroon as string,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
@@ -345,15 +345,15 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     padding: spacing.sm,
     paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-    backgroundColor: '#fff',
+    borderTopColor: colors.border.gold as string,
+    backgroundColor: colors.background.warmWhite,
     gap: spacing.sm,
   },
   input: {
     flex: 1,
     height: 44,
     borderWidth: 1,
-    borderColor: 'rgba(128,0,32,0.2)',
+    borderColor: colors.border.maroon as string,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm + 4,
     fontSize: 14,

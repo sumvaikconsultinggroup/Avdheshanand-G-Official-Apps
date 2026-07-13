@@ -1,103 +1,101 @@
-import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-
-// Required so the auth popup/redirect can complete and hand control back.
-WebBrowser.maybeCompleteAuthSession();
+import { useState } from 'react';
 
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
-const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
 
-// expo-auth-session validates the platform-specific client id *at render time*
-// (Android needs androidClientId, iOS needs iosClientId). If the required id is
-// missing it throws a Render Error and takes the whole screen down. Resolve the
-// id this platform actually requires so we can skip the provider hook entirely
-// when it isn't configured, rather than crashing.
-const NATIVE_CLIENT_ID = Platform.select({
-  android: ANDROID_CLIENT_ID,
-  ios: IOS_CLIENT_ID,
-  default: WEB_CLIENT_ID,
-});
+// The native Google Sign-In module is NOT present in Expo Go. Lazy-require it so
+// the app still boots for local UI/logic testing in Expo Go (Google sign-in is
+// simply unavailable there); in a dev/preview/production build it loads and the
+// native account picker works normally.
+let googleModule: any;
+let configured = false;
+function getGoogle(): any | null {
+  if (googleModule === undefined) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      googleModule = require('@react-native-google-signin/google-signin');
+    } catch {
+      googleModule = null;
+    }
+  }
+  if (googleModule && !configured && WEB_CLIENT_ID) {
+    try {
+      googleModule.GoogleSignin.configure({ webClientId: WEB_CLIENT_ID, offlineAccess: false });
+      configured = true;
+    } catch {
+      // Native module resolved but not usable (e.g. Expo Go) — treat as absent.
+      googleModule = null;
+    }
+  }
+  return googleModule ?? null;
+}
 
-/**
- * True only when the client ids needed on the current platform are present.
- * Derived from build-time env vars, so it's constant for the app's lifetime —
- * safe to branch on before calling hooks. Screens should hide the Google button
- * when this is false.
- */
-export const isGoogleConfigured = Boolean(WEB_CLIENT_ID && NATIVE_CLIENT_ID);
+/** True when the web client id is present (native availability checked at sign-in). */
+export const isGoogleConfigured = Boolean(WEB_CLIENT_ID);
 
 interface UseGoogleSignIn {
-  /** Opens the Google account chooser. No-op (alerts via onError) if unconfigured. */
+  /** Opens the native Google account chooser. Alerts via onError if unavailable. */
   signIn: () => void;
-  /** False until the auth request is ready / when no client IDs are configured. */
+  /** False when no client id is configured. */
   ready: boolean;
   /** True while the Google flow is in progress. */
   inProgress: boolean;
 }
 
 /**
- * Google sign-in via Expo AuthSession. Returns the Google `id_token` to the
- * `onIdToken` callback (which should POST it to the backend `/creduser/google`).
- * `onError` is called on failure/dismissal. Requires the EXPO_PUBLIC_GOOGLE_*
- * client IDs and a development build (Google sign-in does not work in Expo Go).
+ * Native Google sign-in via @react-native-google-signin/google-signin. Returns
+ * the Google `id_token` to `onIdToken` (which POSTs it to `/creduser/google`).
+ * `onError` is called on failure. Cancellations are silent. Requires a real
+ * build (dev/preview/production) — does NOT work in Expo Go.
  */
 export function useGoogleSignIn(
   onIdToken: (idToken: string) => void,
   onError?: (message: string) => void
 ): UseGoogleSignIn {
-  // Bail out before touching expo-auth-session when the platform client id is
-  // absent — calling the provider hook would throw during render. `isGoogleConfigured`
-  // is a module constant, so this branch is stable across every render of a given
-  // component instance and does not violate the rules of hooks.
-  if (!isGoogleConfigured) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return {
-      signIn: () => onError?.('Google sign-in is not configured yet.'),
-      ready: false,
-      inProgress: false,
-    };
-  }
+  const [inProgress, setInProgress] = useState(false);
 
-  const configured = Boolean(WEB_CLIENT_ID);
-  const inProgress = useRef(false);
+  const signIn = async () => {
+    if (!WEB_CLIENT_ID) {
+      onError?.('Google sign-in is not configured yet.');
+      return;
+    }
+    const g = getGoogle();
+    if (!g) {
+      onError?.('Google sign-in needs the full app build (not Expo Go).');
+      return;
+    }
+    const { GoogleSignin, statusCodes } = g;
+    try {
+      setInProgress(true);
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const result = await GoogleSignin.signIn();
 
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: WEB_CLIENT_ID,
-    webClientId: WEB_CLIENT_ID,
-    androidClientId: ANDROID_CLIENT_ID,
-    iosClientId: IOS_CLIENT_ID,
-  });
+      const anyResult = result as unknown as {
+        type?: string;
+        data?: { idToken?: string | null };
+        idToken?: string | null;
+      };
+      if (anyResult?.type === 'cancelled') return; // user backed out, stay silent
 
-  useEffect(() => {
-    if (!response) return;
-    inProgress.current = false;
-    if (response.type === 'success') {
-      const idToken =
-        (response.params && response.params.id_token) ||
-        (response.authentication && response.authentication.idToken);
+      const idToken = anyResult?.data?.idToken ?? anyResult?.idToken ?? null;
       if (idToken) {
         onIdToken(idToken);
       } else {
         onError?.('Could not read Google credentials. Please try again.');
       }
-    } else if (response.type === 'error') {
-      onError?.(response.error?.message || 'Google sign-in failed.');
+    } catch (error) {
+      const code = (error as { code?: string })?.code;
+      if (code === statusCodes.SIGN_IN_CANCELLED || code === statusCodes.IN_PROGRESS) {
+        return; // silent
+      }
+      if (code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        onError?.('Google Play Services is unavailable or needs an update.');
+        return;
+      }
+      onError?.((error as { message?: string })?.message || 'Google sign-in failed.');
+    } finally {
+      setInProgress(false);
     }
-    // 'dismiss'/'cancel' are silent (user backed out).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [response]);
-
-  const signIn = () => {
-    if (!configured) {
-      onError?.('Google sign-in is not configured yet.');
-      return;
-    }
-    inProgress.current = true;
-    promptAsync();
   };
 
-  return { signIn, ready: configured && !!request, inProgress: inProgress.current };
+  return { signIn, ready: isGoogleConfigured, inProgress };
 }
