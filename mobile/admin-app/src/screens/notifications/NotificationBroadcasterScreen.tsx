@@ -63,7 +63,7 @@ export function NotificationBroadcasterScreen() {
 
   const [volunteerCity, setVolunteerCity] = useState('');
   const [eventName, setEventName] = useState('');
-  const [eventDate, setEventDate] = useState('');
+  const [eventDate, setEventDate] = useState<Date | null>(null);
   const [eventLocation, setEventLocation] = useState('');
   const [whatsAppMessage, setWhatsAppMessage] = useState('');
   const [whatsAppSending, setWhatsAppSending] = useState(false);
@@ -72,7 +72,7 @@ export function NotificationBroadcasterScreen() {
 
   const [pushSchedule, setPushSchedule] = useState<Date | null>(null);
   const [waSchedule, setWaSchedule] = useState<Date | null>(null);
-  const [picker, setPicker] = useState<{ target: 'push' | 'wa'; step: 'date' | 'time'; temp: Date } | null>(null);
+  const [picker, setPicker] = useState<{ target: 'push' | 'wa' | 'eventDate'; step: 'date' | 'time'; temp: Date } | null>(null);
   const [scheduledList, setScheduledList] = useState<any[]>([]);
 
   const fetchScheduled = useCallback(async () => {
@@ -97,7 +97,7 @@ export function NotificationBroadcasterScreen() {
     }
   };
 
-  const openScheduler = (target: 'push' | 'wa') => {
+  const openScheduler = (target: 'push' | 'wa' | 'eventDate') => {
     const base = new Date(Date.now() + 60 * 60 * 1000); // default +1h
     setPicker({ target, step: 'date', temp: base });
   };
@@ -116,7 +116,8 @@ export function NotificationBroadcasterScreen() {
       const final = new Date(picker.temp);
       final.setHours(selected.getHours(), selected.getMinutes(), 0, 0);
       if (picker.target === 'push') setPushSchedule(final);
-      else setWaSchedule(final);
+      else if (picker.target === 'wa') setWaSchedule(final);
+      else setEventDate(final);
       setPicker(null);
     }
   };
@@ -170,7 +171,7 @@ export function NotificationBroadcasterScreen() {
       `🕉️ Hari Om, Devotee 🙏\n\n` +
       `With divine blessings, you are lovingly invited to offer your seva:\n\n` +
       `📿 ${eventName || 'the upcoming event'}` +
-      `${eventDate ? `\n🗓️  ${eventDate}` : ''}` +
+      `${eventDate ? `\n🗓️  ${formatDT(eventDate)}` : ''}` +
       `${eventLocation ? `\n📍  ${eventLocation}` : ''}\n\n` +
       `Your presence and selfless service mean a great deal to us. Kindly confirm your availability with the Ashram team. 🌸\n\n` +
       `With gratitude & blessings,\nSwami Avdheshanand G\nTowards Divinity`
@@ -238,7 +239,7 @@ export function NotificationBroadcasterScreen() {
         mode: 'volunteer_whatsapp',
         cityName: volunteerCity.trim(),
         eventName: eventName.trim() || undefined,
-        eventDate: eventDate.trim() || undefined,
+        eventDate: eventDate ? eventDate.toISOString() : undefined,
         eventLocation: eventLocation.trim() || undefined,
         message: whatsAppMessage.trim() || undefined,
         imageBase64: waImageB64 || undefined,
@@ -249,9 +250,13 @@ export function NotificationBroadcasterScreen() {
       if (result?.scheduled) {
         Alert.alert('Scheduled', `WhatsApp outreach scheduled for ${formatDT(result.scheduledAt)}.`);
       } else {
+        const matched = result?.matchedVolunteers ?? 0;
+        const sent = result?.whatsappSent ?? 0;
+        const firstFailure = Array.isArray(result?.failures) && result.failures.length ? result.failures[0] : '';
         Alert.alert(
-          'Volunteer Outreach Queued',
-          `Matched ${result?.matchedVolunteers ?? 0} volunteers and sent ${result?.whatsappSent ?? 0} WhatsApp messages.`
+          'Volunteer Outreach',
+          `Matched ${matched} volunteer(s), sent ${sent}.` +
+            (sent === 0 && firstFailure ? `\n\nWhy nothing sent:\n${firstFailure}` : '')
         );
       }
       setWaImageUri(null);
@@ -368,13 +373,26 @@ export function NotificationBroadcasterScreen() {
             style={styles.input}
             placeholderTextColor={colors.text.secondary}
           />
-          <TextInput
-            value={eventDate}
-            onChangeText={setEventDate}
-            placeholder="Event date & time, e.g. 7 Apr 2026, 5:00 PM"
-            style={styles.input}
-            placeholderTextColor={colors.text.secondary}
-          />
+          <TouchableOpacity
+            style={[styles.input, styles.dateInput]}
+            onPress={() => openScheduler('eventDate')}
+            activeOpacity={0.85}
+          >
+            <Icon name="calendar-clock" size={18} color={colors.primary.maroon} />
+            <Text style={[styles.dateInputText, !eventDate && styles.dateInputPlaceholder]}>
+              {eventDate ? formatDT(eventDate) : 'Event date & time'}
+            </Text>
+            {eventDate ? (
+              <TouchableOpacity
+                onPress={() => setEventDate(null)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Icon name="close-circle" size={18} color={colors.status.error} />
+              </TouchableOpacity>
+            ) : (
+              <Icon name="chevron-right" size={18} color={colors.text.secondary} />
+            )}
+          </TouchableOpacity>
           <TextInput
             value={eventLocation}
             onChangeText={setEventLocation}
@@ -629,6 +647,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: colors.text.primary,
+  },
+  dateInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm + 3,
+  },
+  dateInputText: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text.primary,
+  },
+  dateInputPlaceholder: {
+    color: colors.text.secondary,
   },
   schedItem: {
     flexDirection: 'row',

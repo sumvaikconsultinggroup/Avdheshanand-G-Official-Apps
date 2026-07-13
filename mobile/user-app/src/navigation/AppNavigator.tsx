@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import { createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -180,25 +180,125 @@ function ProfileTabScreen({ navigation }: any) {
   return <ProfileScreen />;
 }
 
-function MainTabs() {
+const PILL_HEIGHT = 66;
+
+/**
+ * Fully custom bottom tab bar rendered as a floating "pill".
+ * Replaces React Navigation's default bar so there is NO opaque background
+ * behind it — the pill floats over the scrolling content. Icons + labels are
+ * centered inside the pill so nothing spills past its rounded edges.
+ */
+function FloatingPillTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const bottomPad = Math.max(insets.bottom, 6);
+  const { colors } = useTheme();
+  const pillBottom = Math.max(insets.bottom, 12);
+
+  return (
+    <View pointerEvents="box-none" style={pillStyles.wrap}>
+      <View
+        style={[
+          pillStyles.pill,
+          {
+            marginBottom: pillBottom,
+            backgroundColor: colors.background.warmWhite,
+            borderColor: colors.border.gold as string,
+          },
+        ]}
+      >
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const label = (options.title ?? route.name) as string;
+          const isFocused = state.index === index;
+          const tint = isFocused ? colors.primary.saffron : colors.text.secondary;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+          const onLongPress = () => {
+            navigation.emit({ type: 'tabLongPress', target: route.key });
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              activeOpacity={0.8}
+              style={pillStyles.item}
+            >
+              {options.tabBarIcon?.({ focused: isFocused, color: tint, size: 24 })}
+              <Text numberOfLines={1} style={[pillStyles.label, { color: tint }]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const pillStyles = StyleSheet.create({
+  wrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    height: PILL_HEIGHT,
+    borderRadius: PILL_HEIGHT / 2,
+    borderWidth: 1,
+    paddingHorizontal: 6,
+    // Detached shadow so the pill floats above the content.
+    shadowColor: '#3A1210',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  item: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    paddingVertical: 6,
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+});
+
+function MainTabs() {
   const { t } = useTranslation();
   const { colors } = useTheme();
 
+  // The floating pill is a fully custom `tabBar` (see FloatingPillTabBar) with a
+  // transparent scene behind it, so it floats directly over the live content.
+
   return (
     <Tab.Navigator
+      tabBar={(props) => <FloatingPillTabBar {...props} />}
       screenOptions={({ route }) => ({
+        // Transparent scene so the floating pill sits directly over the live
+        // content — nothing reserved/opaque behind it. Content scrolls under it.
+        sceneStyle: { backgroundColor: 'transparent' },
         tabBarActiveTintColor: colors.primary.saffron,
         tabBarInactiveTintColor: colors.text.secondary,
-        tabBarStyle: {
-          backgroundColor: colors.background.warmWhite,
-          borderTopColor: colors.border.gold as string,
-          borderTopWidth: 1,
-          paddingBottom: bottomPad,
-          paddingTop: 6,
-          height: 56 + bottomPad,
-        },
         headerStyle: {
           backgroundColor: colors.background.warmWhite,
         },
@@ -265,8 +365,20 @@ export function AppNavigator() {
   const { isLoading, isAuthenticated } = useAuth();
   const { isLoading: onboardingLoading, hasCompletedOnboarding } = useOnboarding();
   const { t } = useTranslation();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [drawerVisible, setDrawerVisible] = useState(false);
+
+  // Root navigation theme: use the page background instead of RN's default white
+  // so no white ever shows behind scenes or the floating pill tab bar.
+  const navTheme = {
+    ...DefaultTheme,
+    dark: isDark,
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.background.parchment,
+      card: colors.background.parchment,
+    },
+  };
 
   if (isLoading || onboardingLoading) {
     return (
@@ -287,7 +399,7 @@ export function AppNavigator() {
 
   return (
     <AppShellProvider value={{ openDrawer: () => setDrawerVisible(true), closeDrawer: () => setDrawerVisible(false) }}>
-      <NavigationContainer linking={linking}>
+      <NavigationContainer linking={linking} theme={navTheme}>
         <Stack.Navigator
           screenOptions={{
             headerShown: false,

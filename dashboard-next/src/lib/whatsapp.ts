@@ -18,11 +18,21 @@ type TemplatePayload = {
 };
 
 function getNormalizedPhone(to: string) {
-  const digits = String(to || '').replace(/\D/g, '');
+  let digits = String(to || '').replace(/\D/g, '');
   if (!digits) return null;
-  if (digits.startsWith('91') && digits.length >= 12) return digits;
+  // International "00" dialling prefix → drop it (e.g. 00919810445508).
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  // National trunk "0" before a 10-digit mobile → drop it (0 9810445508).
+  if (digits.length === 11 && digits.startsWith('0')) digits = digits.slice(1);
+  // Already country-coded: 91XXXXXXXXXX (12 digits).
+  if (digits.length === 12 && digits.startsWith('91')) return digits;
+  // 91 + an 11-digit body where the extra is a leading trunk 0 → 9109810445508.
+  if (digits.length === 13 && digits.startsWith('910')) return `91${digits.slice(3)}`;
+  // Bare 10-digit mobile → add India's country code.
   if (digits.length === 10) return `91${digits}`;
-  return digits;
+  // Anything else (e.g. an 11-digit number with an extra/typo'd digit) is
+  // malformed — return null so the caller reports a clear "invalid phone".
+  return null;
 }
 
 export async function sendWhatsAppMessage(to: string, message: string): Promise<WhatsAppResult> {
@@ -33,7 +43,10 @@ export async function sendWhatsAppMessage(to: string, message: string): Promise<
   const apiKey = process.env.WHATSAPP_API_KEY;
   const normalizedPhone = getNormalizedPhone(to);
 
-  if (!apiUrl || !normalizedPhone || !message) {
+  if (!normalizedPhone) {
+    return { success: false, error: `Invalid phone number: ${to}` };
+  }
+  if (!apiUrl || !message) {
     return { success: false, skipped: true, error: 'WhatsApp provider is not configured' };
   }
 
@@ -112,7 +125,10 @@ export async function sendWhatsAppImageMessage(
   const apiKey = process.env.WHATSAPP_API_KEY;
   const normalizedPhone = getNormalizedPhone(to);
 
-  if (!apiUrl || !normalizedPhone || !imageUrl) {
+  if (!normalizedPhone) {
+    return { success: false, error: `Invalid phone number: ${to}` };
+  }
+  if (!apiUrl || !imageUrl) {
     return { success: false, skipped: true, error: 'WhatsApp image provider is not configured' };
   }
 
@@ -180,7 +196,10 @@ export async function sendWhatsAppTemplateMessage({
   const apiKey = process.env.WHATSAPP_API_KEY;
   const normalizedPhone = getNormalizedPhone(to);
 
-  if (!apiUrl || !normalizedPhone || !templateName) {
+  if (!normalizedPhone) {
+    return { success: false, error: `Invalid phone number: ${to}` };
+  }
+  if (!apiUrl || !templateName) {
     return { success: false, skipped: true, error: 'WhatsApp template provider is not configured' };
   }
 

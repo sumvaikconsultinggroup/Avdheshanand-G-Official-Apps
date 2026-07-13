@@ -14,7 +14,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Card, FAB, ActivityIndicator, IconButton } from 'react-native-paper';
+import { Card, FAB, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -351,105 +351,135 @@ export function ScheduleScreen() {
   const renderScheduleItem = ({ item }: { item: Schedule }) => {
     const firstSlot = item.timeSlots?.[0];
     const period = firstSlot?.period;
+    const title = getPrimaryLocalizedValue(item.publicTitle, item.locations);
 
     return (
       <Card style={styles.card}>
-        <Card.Content style={styles.cardContent}>
+        <View style={styles.cardBody}>
           <View style={styles.leftStripe} />
           <View style={styles.detailsSection}>
-            <TouchableOpacity activeOpacity={0.7} onPress={() => setDetailSchedule(item)}>
-            <View style={styles.titleRow}>
-              <Text style={styles.locationText} numberOfLines={2}>
-                {getPrimaryLocalizedValue(item.publicTitle, item.locations)}
-              </Text>
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={22}
-                color={colors.gold.dark}
-                style={styles.titleChevron}
-              />
-            </View>
-            <Text style={styles.secondaryText}>
-              {item.baseLocation || 'Ashram schedule'}
-            </Text>
+            <TouchableOpacity activeOpacity={0.75} onPress={() => setDetailSchedule(item)}>
+              <View style={styles.titleRow}>
+                <View style={styles.titleTextWrap}>
+                  <Text style={styles.locationText} numberOfLines={2}>
+                    {title}
+                  </Text>
+                  <View style={styles.baseRow}>
+                    <MaterialCommunityIcons
+                      name="map-marker-outline"
+                      size={14}
+                      color={colors.gold.dark}
+                    />
+                    <Text style={styles.secondaryText} numberOfLines={2}>
+                      {item.baseLocation || 'Ashram schedule'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.chevronCircle}>
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={20}
+                    color={colors.primary.maroon}
+                  />
+                </View>
+              </View>
 
-            {item.dateRange ? <Text style={styles.dateRangeText}>{item.dateRange}</Text> : null}
-
-            <View style={styles.metaRow}>
-              {period ? (
-                <Badge
-                  label={period}
-                  tone={colors.gold.dark}
-                  variant="soft"
-                  icon="clock-outline"
-                />
+              {item.dateRange ? (
+                <View style={styles.dateRow}>
+                  <MaterialCommunityIcons
+                    name="calendar-range"
+                    size={15}
+                    color={colors.text.secondary}
+                  />
+                  <Text style={styles.dateRangeText}>{item.dateRange}</Text>
+                </View>
               ) : null}
 
-              {item.appointment ? (
-                <Badge
-                  label="Appointment open"
-                  tone={colors.status.success}
-                  variant="soft"
-                  dot
-                />
+              {period || item.appointment || item.isLastMinuteUpdate ? (
+                <View style={styles.metaRow}>
+                  {period ? (
+                    <Badge
+                      label={period}
+                      tone={colors.gold.dark}
+                      variant="soft"
+                      icon="clock-outline"
+                    />
+                  ) : null}
+
+                  {item.appointment ? (
+                    <Badge
+                      label="Appointment open"
+                      tone={colors.status.success}
+                      variant="soft"
+                      dot
+                    />
+                  ) : null}
+
+                  {item.isLastMinuteUpdate ? (
+                    <Badge
+                      label="Last-minute update"
+                      tone={colors.status.warning}
+                      variant="solid"
+                      icon="alert"
+                    />
+                  ) : null}
+                </View>
               ) : null}
 
-              {item.isLastMinuteUpdate ? (
-                <Badge
-                  label="Last-minute update"
-                  tone={colors.status.warning}
-                  variant="solid"
-                  icon="alert"
-                />
+              <View style={styles.capacityStrip}>
+                <View style={styles.capItem}>
+                  <Text style={styles.capValue}>{item.maxPeople ?? 100}</Text>
+                  <Text style={styles.capLabel}>Daily</Text>
+                </View>
+                <View style={styles.capDivider} />
+                <View style={styles.capItem}>
+                  <Text style={styles.capValue}>{item.currentAppointments ?? 0}</Text>
+                  <Text style={styles.capLabel}>Booked</Text>
+                </View>
+                <View style={styles.capDivider} />
+                <View style={[styles.capItem, styles.capItemAccent]}>
+                  <Text style={[styles.capValue, styles.capValueOpen]}>
+                    {item.remainingCapacity ?? '—'}
+                  </Text>
+                  <Text style={[styles.capLabel, styles.capLabelOpen]}>Open</Text>
+                </View>
+              </View>
+
+              {item.changeNote ? (
+                <View style={styles.changeNoteRow}>
+                  <MaterialCommunityIcons
+                    name="information-outline"
+                    size={15}
+                    color={colors.status.warning}
+                    style={styles.changeNoteIcon}
+                  />
+                  <Text style={styles.changeNoteText}>{item.changeNote}</Text>
+                </View>
               ) : null}
-            </View>
-
-            <View style={styles.capacityStrip}>
-              <View style={styles.capItem}>
-                <Text style={styles.capValue}>{item.maxPeople ?? 100}</Text>
-                <Text style={styles.capLabel}>Daily</Text>
-              </View>
-              <View style={styles.capDivider} />
-              <View style={styles.capItem}>
-                <Text style={styles.capValue}>{item.currentAppointments ?? 0}</Text>
-                <Text style={styles.capLabel}>Booked</Text>
-              </View>
-              <View style={styles.capDivider} />
-              <View style={styles.capItem}>
-                <Text style={[styles.capValue, { color: colors.status.success }]}>
-                  {item.remainingCapacity ?? '—'}
-                </Text>
-                <Text style={styles.capLabel}>Open</Text>
-              </View>
-            </View>
-
-            {item.changeNote ? (
-              <View style={styles.changeNoteRow}>
-                <MaterialCommunityIcons
-                  name="information-outline"
-                  size={14}
-                  color={colors.status.warning}
-                  style={styles.changeNoteIcon}
-                />
-                <Text style={styles.changeNoteText}>{item.changeNote}</Text>
-              </View>
-            ) : null}
             </TouchableOpacity>
 
             <View style={styles.cardActionRow}>
-              <TouchableOpacity style={styles.actionButton} onPress={() => openEditModal(item)}>
-                <IconButton icon="pencil" iconColor={colors.primary.maroon} size={18} />
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => openEditModal(item)}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons name="pencil" size={16} color={colors.primary.maroon} />
                 <Text style={styles.actionButtonText}>Edit</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton} onPress={() => handleDelete(item)}>
-                <IconButton icon="delete" iconColor={colors.status.error} size={18} />
+              <TouchableOpacity
+                style={[styles.actionButton, styles.actionButtonDanger]}
+                onPress={() => handleDelete(item)}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons name="delete" size={16} color={colors.status.error} />
                 <Text style={[styles.actionButtonText, { color: colors.status.error }]}>
                   Delete
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-        </Card.Content>
+        </View>
       </Card>
     );
   };
@@ -673,20 +703,28 @@ export function ScheduleScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.modalContent}>
+          <View style={styles.grabber} />
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>
-              {editingSchedule ? 'Edit Schedule' : 'Create Schedule'}
-            </Text>
-            <IconButton
-              icon="close"
-              iconColor={colors.text.primary}
-              size={24}
+            <View style={styles.modalHeaderText}>
+              <Text style={styles.modalEyebrow}>
+                {editingSchedule ? 'Update details' : 'New entry'}
+              </Text>
+              <Text style={styles.modalTitle}>
+                {editingSchedule ? 'Edit Schedule' : 'Create Schedule'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.modalClose}
               onPress={() => setModalVisible(false)}
-            />
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <MaterialCommunityIcons name="close" size={20} color={colors.primary.maroon} />
+            </TouchableOpacity>
           </View>
 
           <ScrollView
             style={styles.modalBody}
+            contentContainerStyle={styles.modalBodyContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
@@ -781,23 +819,29 @@ export function ScheduleScreen() {
               />
             ))}
 
-            <Text style={styles.inputLabel}>Start Date * (YYYY-MM-DD)</Text>
-            <TextInput
-              style={styles.textInput}
-              value={formData.startDate}
-              onChangeText={(value) => setFormData((prev) => ({ ...prev, startDate: value }))}
-              placeholder="2026-04-07"
-              placeholderTextColor={colors.text.secondary}
-            />
-
-            <Text style={styles.inputLabel}>End Date * (YYYY-MM-DD)</Text>
-            <TextInput
-              style={styles.textInput}
-              value={formData.endDate}
-              onChangeText={(value) => setFormData((prev) => ({ ...prev, endDate: value }))}
-              placeholder="2026-04-07"
-              placeholderTextColor={colors.text.secondary}
-            />
+            <View style={styles.fieldRow}>
+              <View style={styles.fieldCol}>
+                <Text style={styles.inputLabel}>Start Date *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={formData.startDate}
+                  onChangeText={(value) => setFormData((prev) => ({ ...prev, startDate: value }))}
+                  placeholder="2026-04-07"
+                  placeholderTextColor={colors.text.secondary}
+                />
+              </View>
+              <View style={styles.fieldCol}>
+                <Text style={styles.inputLabel}>End Date *</Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={formData.endDate}
+                  onChangeText={(value) => setFormData((prev) => ({ ...prev, endDate: value }))}
+                  placeholder="2026-04-07"
+                  placeholderTextColor={colors.text.secondary}
+                />
+              </View>
+            </View>
+            <Text style={styles.fieldHint}>Use ISO format, YYYY-MM-DD.</Text>
 
             <Text style={styles.inputLabel}>Meeting Window</Text>
             <TextInput
@@ -995,14 +1039,16 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: spacing.lg,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    minHeight: 46,
     marginHorizontal: spacing.md,
-    marginTop: spacing.md,
+    marginTop: spacing.lg,
+    marginBottom: spacing.xs,
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.gold.dark,
@@ -1022,6 +1068,7 @@ const styles = StyleSheet.create({
     ...typography.titleSm,
     color: colors.gold.light,
     flexShrink: 1,
+    letterSpacing: 0.3,
   },
   sectionBadge: {
     backgroundColor: colors.gold.main,
@@ -1036,19 +1083,21 @@ const styles = StyleSheet.create({
   },
   card: {
     marginHorizontal: spacing.md,
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
     backgroundColor: colors.background.warmWhite,
     borderRadius: borderRadius.xl,
     borderWidth: 1,
     borderColor: colors.border.gold,
+    overflow: 'hidden',
     ...shadows.soft,
   },
-  cardContent: {
+  cardBody: {
     flexDirection: 'row',
-    paddingVertical: spacing.sm,
+    padding: spacing.md,
   },
   leftStripe: {
     width: 4,
+    alignSelf: 'stretch',
     backgroundColor: colors.primary.maroon,
     borderRadius: borderRadius.full,
     marginRight: spacing.md,
@@ -1060,17 +1109,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: spacing.sm,
   },
-  titleChevron: {
-    marginTop: -2,
-    marginLeft: spacing.xs,
+  titleTextWrap: {
+    flex: 1,
+  },
+  chevronCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.background.parchment,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
   },
   locationText: {
-    ...typography.titleSm,
-    flex: 1,
+    ...typography.title,
     color: colors.primary.maroon,
     fontWeight: '700',
-    marginBottom: spacing.xs,
+  },
+  baseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   detailSheet: {
     backgroundColor: colors.background.warmWhite,
@@ -1230,58 +1294,80 @@ const styles = StyleSheet.create({
   secondaryText: {
     ...typography.bodySm,
     color: colors.text.secondary,
-    marginBottom: spacing.xs,
+    flex: 1,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.md,
   },
   dateRangeText: {
     ...typography.bodySm,
     color: colors.text.secondary,
-    marginBottom: spacing.sm,
+    fontWeight: '600',
+    flex: 1,
   },
   metaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: spacing.sm,
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
   },
   capacityStrip: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     backgroundColor: colors.background.parchment,
     borderWidth: 1,
     borderColor: colors.border.gold as string,
     borderRadius: borderRadius.lg,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     marginTop: spacing.md,
+    overflow: 'hidden',
   },
   capItem: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  capItemAccent: {
+    backgroundColor: `${colors.status.success}12`,
   },
   capValue: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '800',
     color: colors.primary.maroon,
+  },
+  capValueOpen: {
+    color: colors.status.success,
   },
   capLabel: {
     ...typography.micro,
     color: colors.text.secondary,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
-    marginTop: 1,
+    marginTop: 2,
+  },
+  capLabelOpen: {
+    color: colors.status.success,
   },
   capDivider: {
     width: 1,
-    height: 26,
+    alignSelf: 'center',
+    height: 30,
     backgroundColor: colors.border.gold as string,
   },
   changeNoteRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginTop: spacing.sm,
+    backgroundColor: `${colors.status.warning}10`,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
+    marginTop: spacing.md,
   },
   changeNoteIcon: {
-    marginTop: 2,
+    marginTop: 1,
     marginRight: spacing.xs,
   },
   changeNoteText: {
@@ -1292,20 +1378,28 @@ const styles = StyleSheet.create({
   cardActionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: spacing.sm,
+    gap: spacing.sm,
+    marginTop: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border.gold,
-    paddingTop: spacing.xs,
+    paddingTop: spacing.md,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    backgroundColor: `${colors.primary.maroon}0F`,
+  },
+  actionButtonDanger: {
+    backgroundColor: `${colors.status.error}0F`,
   },
   actionButtonText: {
     fontSize: 13,
     color: colors.primary.maroon,
-    fontWeight: '600',
-    marginLeft: -spacing.sm,
+    fontWeight: '700',
   },
   fab: {
     position: 'absolute',
@@ -1323,8 +1417,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.warmWhite,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xs,
     maxHeight: '92%',
+  },
+  grabber: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.border.gold as string,
+    marginBottom: spacing.md,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1333,15 +1437,53 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.gold,
-    paddingBottom: spacing.sm,
+    paddingBottom: spacing.md,
+  },
+  modalHeaderText: {
+    flex: 1,
+  },
+  modalEyebrow: {
+    ...typography.micro,
+    color: colors.gold.dark,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 2,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.primary.maroon,
   },
+  modalClose: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.background.parchment,
+    borderWidth: 1,
+    borderColor: colors.border.gold as string,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: spacing.md,
+  },
   modalBody: {
-    paddingBottom: spacing.xl,
+    marginHorizontal: -spacing.xs,
+  },
+  modalBodyContent: {
+    paddingHorizontal: spacing.xs,
+    paddingBottom: spacing.lg,
+  },
+  fieldRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  fieldCol: {
+    flex: 1,
+  },
+  fieldHint: {
+    ...typography.micro,
+    color: colors.text.secondary,
+    marginTop: -spacing.xs,
+    marginBottom: spacing.sm,
   },
   inputLabel: {
     fontSize: 14,
@@ -1424,18 +1566,21 @@ const styles = StyleSheet.create({
   },
   modalActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: spacing.xl,
     marginBottom: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.gold,
     gap: spacing.md,
   },
   cancelButton: {
-    paddingHorizontal: spacing.lg,
+    flex: 1,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.border.gold as string,
+    alignItems: 'center',
   },
   cancelButtonText: {
     color: colors.text.secondary,
@@ -1443,11 +1588,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   saveButton: {
+    flex: 1.6,
     backgroundColor: colors.primary.maroon,
-    paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.full,
-    minWidth: 120,
     alignItems: 'center',
     ...shadows.maroonGlow,
   },
