@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withSequence,
+  interpolateColor,
+} from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -18,6 +26,65 @@ import api from '../../services/api';
 import { FloatingInput } from '../../components/common';
 import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
+
+/** Animated selectable chip — smooth fill + spring "pop" on selection. */
+function OptionChip({
+  label,
+  icon,
+  selected,
+  onPress,
+  showCheck,
+  colors,
+  styles,
+}: {
+  label: string;
+  icon?: React.ComponentProps<typeof Icon>['name'];
+  selected: boolean;
+  onPress: () => void;
+  showCheck?: boolean;
+  colors: ColorPalette;
+  styles: ReturnType<typeof makeStyles>;
+}) {
+  const progress = useSharedValue(selected ? 1 : 0);
+  const scale = useSharedValue(1);
+
+  useEffect(() => {
+    progress.value = withTiming(selected ? 1 : 0, { duration: 190 });
+    scale.value = withSequence(
+      withTiming(selected ? 1.06 : 0.97, { duration: 110 }),
+      withSpring(1, { damping: 12, stiffness: 160 })
+    );
+  }, [selected, progress, scale]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [colors.background.parchment, colors.primary.maroon]
+    ),
+    borderColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      [String(colors.border.gold), colors.primary.maroon]
+    ),
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <TouchableOpacity style={styles.chipTouchable} onPress={onPress} activeOpacity={0.9}>
+      <Animated.View style={[styles.chip, animStyle]}>
+        {selected && showCheck ? (
+          <Icon name="check-circle" size={16} color={colors.text.white} />
+        ) : icon ? (
+          <Icon name={icon} size={16} color={selected ? colors.text.white : colors.primary.maroon} />
+        ) : null}
+        <Text style={[styles.chipText, selected && styles.chipTextSelected]} numberOfLines={1}>
+          {label}
+        </Text>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
 
 type OccupationType = 'student' | 'employed' | 'self-employed' | 'unemployed' | 'retired';
 
@@ -50,12 +117,16 @@ interface FormErrors {
   consent?: string;
 }
 
-const occupationOptions: { value: OccupationType; label: string }[] = [
-  { value: 'student', label: 'Student' },
-  { value: 'employed', label: 'Employed' },
-  { value: 'self-employed', label: 'Self-employed' },
-  { value: 'unemployed', label: 'Unemployed' },
-  { value: 'retired', label: 'Retired' },
+const occupationOptions: {
+  value: OccupationType;
+  label: string;
+  icon: React.ComponentProps<typeof Icon>['name'];
+}[] = [
+  { value: 'student', label: 'Student', icon: 'school-outline' },
+  { value: 'employed', label: 'Employed', icon: 'briefcase-outline' },
+  { value: 'self-employed', label: 'Self-employed', icon: 'store-outline' },
+  { value: 'unemployed', label: 'Unemployed', icon: 'account-search-outline' },
+  { value: 'retired', label: 'Retired', icon: 'account-clock-outline' },
 ];
 
 const availabilityOptions = ['Weekdays', 'Weekends', 'Mornings', 'Evenings', 'Flexible'];
@@ -87,7 +158,14 @@ export function VolunteerScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const updateField = (field: keyof FormData, value: string | string[] | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let next = value;
+    // Phone: digits only, hard-capped at 10 so it can never exceed while typing.
+    if (field === 'phone' && typeof value === 'string') {
+      next = value.replace(/\D/g, '').slice(0, 10);
+    } else if (field === 'age' && typeof value === 'string') {
+      next = value.replace(/\D/g, '').slice(0, 3);
+    }
+    setFormData((prev) => ({ ...prev, [field]: next }));
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -120,8 +198,8 @@ export function VolunteerScreen() {
     const phoneDigits = formData.phone.replace(/\D/g, '');
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
-    } else if (phoneDigits.length < 10) {
-      newErrors.phone = 'Please enter a valid phone number';
+    } else if (phoneDigits.length !== 10) {
+      newErrors.phone = 'Phone number must be exactly 10 digits';
     }
 
     const age = Number(formData.age);
@@ -246,9 +324,14 @@ export function VolunteerScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.introSection}>
-            <View style={styles.iconCircle}>
-              <Icon name="hand-heart" size={40} color={colors.primary.saffron} />
-            </View>
+            <LinearGradient
+              colors={[colors.gold.main, colors.primary.vermillion, colors.primary.maroon]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={styles.iconCircle}
+            >
+              <Icon name="hand-heart" size={40} color={colors.text.white} />
+            </LinearGradient>
             <Text style={styles.introTitle}>Join Our Seva Family</Text>
             <Text style={styles.introText}>
               Service to others is the highest form of devotion. Join us in spreading light and love.
@@ -264,6 +347,7 @@ export function VolunteerScreen() {
             {renderInput('phone', 'Phone Number', '10-digit mobile number', 'phone', {
               required: true,
               keyboardType: 'phone-pad',
+              maxLength: 10,
             })}
             {renderInput('age', 'Age', 'Your age (18+)', 'cake-variant-outline', {
               required: true,
@@ -280,21 +364,17 @@ export function VolunteerScreen() {
                 </Text>
               </View>
               <View style={styles.chipRow}>
-                {occupationOptions.map((option) => {
-                  const selected = formData.occupationType === option.value;
-                  return (
-                    <TouchableOpacity
-                      key={option.value}
-                      style={[styles.chip, selected && styles.chipSelected]}
-                      onPress={() => updateField('occupationType', option.value)}
-                      activeOpacity={0.85}
-                    >
-                      <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                {occupationOptions.map((option) => (
+                  <OptionChip
+                    key={option.value}
+                    label={option.label}
+                    icon={option.icon}
+                    selected={formData.occupationType === option.value}
+                    onPress={() => updateField('occupationType', option.value)}
+                    colors={colors}
+                    styles={styles}
+                  />
+                ))}
               </View>
               {errors.occupationType ? <Text style={styles.errorText}>{errors.occupationType}</Text> : null}
             </View>
@@ -324,24 +404,17 @@ export function VolunteerScreen() {
                 </Text>
               </View>
               <View style={styles.chipRow}>
-                {availabilityOptions.map((option) => {
-                  const selected = formData.availability.includes(option);
-                  return (
-                    <TouchableOpacity
-                      key={option}
-                      style={[styles.chip, selected && styles.chipSelected]}
-                      onPress={() => toggleAvailability(option)}
-                      activeOpacity={0.85}
-                    >
-                      {selected ? (
-                        <Icon name="check" size={14} color={colors.text.white} />
-                      ) : null}
-                      <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-                        {option}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                {availabilityOptions.map((option) => (
+                  <OptionChip
+                    key={option}
+                    label={option}
+                    selected={formData.availability.includes(option)}
+                    onPress={() => toggleAvailability(option)}
+                    showCheck
+                    colors={colors}
+                    styles={styles}
+                  />
+                ))}
               </View>
               {errors.availability ? <Text style={styles.errorText}>{errors.availability}</Text> : null}
             </View>
@@ -372,7 +445,7 @@ export function VolunteerScreen() {
 
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={submitting}>
             <LinearGradient
-              colors={[colors.primary.saffron, colors.primary.vermillion]}
+              colors={[colors.primary.maroon, colors.primary.deepRed]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.submitButtonGradient}
@@ -444,15 +517,13 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     marginBottom: spacing.xl,
   },
   iconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.background.cream,
+    width: 84,
+    height: 84,
+    borderRadius: 42,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.gold.main,
     marginBottom: spacing.md,
+    ...shadows.warm,
   },
   introTitle: {
     fontSize: 24,
@@ -533,26 +604,26 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.sm,
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+  },
+  chipTouchable: {
+    width: '48%',
+    marginBottom: spacing.sm + 2,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.border.gold as string,
-    backgroundColor: colors.background.parchment,
-  },
-  chipSelected: {
-    backgroundColor: colors.primary.maroon,
-    borderColor: colors.primary.maroon,
+    justifyContent: 'center',
+    gap: 7,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.md - 2,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1.5,
   },
   chipText: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 13.5,
+    fontWeight: '700',
     color: colors.primary.maroon,
   },
   chipTextSelected: {

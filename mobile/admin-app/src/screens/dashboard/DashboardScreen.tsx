@@ -230,6 +230,8 @@ export function DashboardScreen({ navigation }: any) {
         ]}
       />
 
+      <View style={styles.heroGap} />
+
       <AdminSectionHeader
         title="Priority work"
         subtitle="These are the sections most likely to need attention today."
@@ -300,6 +302,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingTop: spacing.xl,
     paddingBottom: spacing.xxl,
+  },
+  heroGap: {
+    height: spacing.xl,
   },
   languageWrap: {
     marginTop: spacing.md,

@@ -127,12 +127,9 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     flex: 1,
   },
   drawer: {
-    width: '85%',
-    maxWidth: 400,
+    width: '100%',
     backgroundColor: '#FFF8EB',
     overflow: 'hidden',
-    borderLeftWidth: 1,
-    borderColor: '#F0D8AF',
   },
   hero: {
     paddingTop: spacing.xxl,

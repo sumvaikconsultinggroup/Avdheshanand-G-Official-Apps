@@ -28,8 +28,8 @@ const BENEFITS: {
 ];
 
 export function OnboardingNotificationsScreen({ navigation }: any) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { colors, isDark } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark]);
   const { t } = useTranslation();
   const { updateState } = useOnboarding();
   const [submitting, setSubmitting] = useState(false);
@@ -123,7 +123,7 @@ export function OnboardingNotificationsScreen({ navigation }: any) {
   );
 }
 
-const makeStyles = (colors: ColorPalette) => StyleSheet.create({
+const makeStyles = (colors: ColorPalette, isDark: boolean) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: colors.background.parchment,
@@ -170,7 +170,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     marginTop: spacing.md,
     fontSize: 16,
     lineHeight: 25,
-    color: '#685646',
+    color: isDark ? colors.text.white : '#685646',
   },
   illustrationWrap: {
     marginTop: spacing.xl,
@@ -240,7 +240,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.text.primary,
+    color: '#3A2E22',
     fontWeight: '600',
   },
   footer: {

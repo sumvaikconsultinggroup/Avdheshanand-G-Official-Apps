@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import DailyVichar from "@/models/DailyVichar";
 import { generateDailyVichar } from "@/lib/dailyVicharGenerator";
+import { FALLBACK_VICHARS } from "@/lib/fallbackVichars";
 
 export async function GET() {
   try {
@@ -46,15 +47,30 @@ export async function GET() {
       }
     }
 
-    // 3) Fall back to the most recent past vichar if generation was unavailable.
+    // 3) Generation unavailable (e.g. OpenAI quota exhausted) — serve a curated
+    //    vichar rotated by the day so the message still CHANGES DAILY, and cache
+    //    it as today's so we don't re-hit the failing API on every request.
     if (!vichar) {
-      vichar = await DailyVichar.findOne({
-        isPublished: true,
-        isDeleted: false,
-        date: { $lt: today },
-      })
-        .sort({ date: -1 })
-        .lean();
+      const dayIndex = Math.floor(today.getTime() / 86400000);
+      const chosen = FALLBACK_VICHARS[dayIndex % FALLBACK_VICHARS.length];
+      try {
+        const created = await DailyVichar.create({
+          ...chosen,
+          date: today,
+          isPublished: true,
+          isDeleted: false,
+        });
+        vichar = created.toObject();
+      } catch {
+        // Race (another request saved today's) or save failure — re-read, or
+        // return the chosen one directly (still date-stable for the whole day).
+        vichar =
+          (await DailyVichar.findOne({
+            date: { $gte: today, $lt: tomorrow },
+            isPublished: true,
+            isDeleted: false,
+          }).lean()) || { ...chosen, date: today };
+      }
     }
 
     if (!vichar) {

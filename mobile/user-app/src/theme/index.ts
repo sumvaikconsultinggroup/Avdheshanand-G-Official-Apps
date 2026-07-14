@@ -48,12 +48,15 @@ export const lightColors = {
 // brand colours brightened so they stay readable both as text and as fills on
 // the dark surfaces. `text.white` stays white (used on coloured buttons).
 export const darkColors: typeof lightColors = {
+  // Brand identity stays the SAME maroon red in dark mode (no pink/orange shift).
+  // Buttons/headings use these tokens with white text, so the official brand red
+  // #9D1F1C reads correctly on the dark surfaces just like in light mode.
   primary: {
-    brand: '#E0552E',
-    saffron: '#E0552E',
-    maroon: '#E0607A',
-    deepRed: '#C03A50',
-    vermillion: '#FF6F5E',
+    brand: '#9D1F1C',
+    saffron: '#9D1F1C',
+    maroon: '#800020',
+    deepRed: '#6E0000',
+    vermillion: '#E34234',
   },
   gold: {
     main: '#E8B84B',
