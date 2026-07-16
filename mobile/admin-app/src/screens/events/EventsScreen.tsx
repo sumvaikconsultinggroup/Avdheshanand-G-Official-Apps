@@ -26,7 +26,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { colors, spacing, borderRadius, typography, shadows, gradients } from '../../theme';
+import { colors, spacing, borderRadius, typography, shadows, gradients, TAB_BAR_CLEARANCE } from '../../theme';
 import { AdminHero, Badge } from '../../components/common';
 import api from '../../services/api';
 import { Event } from '../../types';
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
-    paddingBottom: 120,
+    paddingBottom: TAB_BAR_CLEARANCE,
   },
   listHeader: {
     marginBottom: spacing.md,

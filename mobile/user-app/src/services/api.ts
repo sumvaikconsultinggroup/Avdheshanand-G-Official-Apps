@@ -7,7 +7,8 @@ const KNOWN_STALE_OR_NON_API_BASE_URLS = new Set([
   'https://www.avdheshanandg.org',
 ]);
 
-const PRODUCTION_API_FALLBACKS = ['https://admin.avdheshanandg.org'];
+// The one and only production backend for BOTH apps.
+const PRODUCTION_API_FALLBACKS = ['https://avdheshanandg-dashboard.vercel.app'];
 // The backend dev port. Kept first so a moved port is easy to update in one place.
 const DEV_PORTS = ['3031', '3001', '3000'];
 const LOCAL_DEV_API_FALLBACKS = [

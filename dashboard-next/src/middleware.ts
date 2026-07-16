@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyJwtToken } from "./utils/verifyJwtToken";
+import {
+  can,
+  isSuperadminOnlyPath,
+  permissionsFromTokenPayload,
+  resolveApiPermission,
+} from "./lib/permissions";
 
 const allowedOrigins = [
   "https://www.avdheshanandg.org",
@@ -51,49 +57,9 @@ const publicApiEndpoints: { path: string; methods?: string[] }[] = [
   { path: "/api/donations/recent", methods: ["GET"] },
 ];
 
-const adminOnlyApiPrefixes: string[] = [
-  "/api/admin/notification-devices",
-  "/api/users",
-  "/api/admin/team",
-  "/api/connect",
-  "/api/notifications/send",
-  "/api/notifications/broadcast",
-  "/api/notifications/admin-task-reminders",
-  "/api/sendemail",
-  "/api/images",
-  "/api/userphotos",
-  "/api/scheduleRegistration",
-  "/api/donationsRecord",
-  "/api/donations",
-  "/api/volunteer",
-  "/api/mantra-diksha",
-  "/api/seva-tasks",
-  "/api/smart-notes",
-];
-
-const adminOnlyMutationPrefixes: string[] = [
-  "/api/donate",
-  "/api/events",
-  "/api/schedule",
-  "/api/articles",
-  "/api/podcasts",
-  "/api/videoseries",
-  "/api/allbooks",
-  "/api/glimpse",
-  "/api/printmedia",
-  "/api/livestream",
-  "/api/tv-schedule",
-  "/api/mantra-diksha",
-  "/api/daily-vichar",
-  "/api/daily-events",
-  "/api/bookedroom",
-  "/api/roombooking",
-];
-
-const superadminOnlyApiPrefixes: string[] = [
-  "/api/users/permissions",
-  "/api/users/all-permissions",
-];
+// NOTE: the per-module route map (which API prefix belongs to which module, and
+// which reads are public) now lives in `src/lib/permissions.ts` — the single
+// source of truth shared by this middleware, the API routes and the admin app.
 
 function isPublicApiEndpoint(pathname: string, method: string): boolean {
   for (const endpoint of publicApiEndpoints) {
@@ -107,22 +73,15 @@ function isPublicApiEndpoint(pathname: string, method: string): boolean {
   return false;
 }
 
-function hasPathPrefix(pathname: string, prefixes: string[]): boolean {
-  return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(prefix + "/"));
-}
-
-function isAdminRole(role: string | undefined): boolean {
-  return role === "admin" || role === "superadmin";
-}
-
-function isSuperadminRole(role: string | undefined): boolean {
-  return role === "superadmin";
-}
-
-function getRoleFromTokenPayload(payload: unknown): string | undefined {
-  if (!payload || typeof payload !== "object") return undefined;
-  const role = (payload as { role?: unknown }).role;
-  return typeof role === "string" ? role.toLowerCase() : undefined;
+function denyJson(status: number, error: string, message: string, origin: string) {
+  return new NextResponse(JSON.stringify({ error, message }), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      ...(allowedOrigins.includes(origin) && { "Access-Control-Allow-Origin": origin }),
+      "Access-Control-Allow-Credentials": "true",
+    },
+  });
 }
 
 export async function middleware(req: NextRequest) {
@@ -153,7 +112,6 @@ export async function middleware(req: NextRequest) {
   const cookieToken = req.cookies.get("auth_token")?.value || req.cookies.get("token")?.value;
   const token = bearerToken || cookieToken;
   const verifiedToken = token ? await verifyJwtToken(token).catch(() => null) : null;
-  const role = getRoleFromTokenPayload(verifiedToken);
 
   const res = NextResponse.next();
 
@@ -183,52 +141,53 @@ export async function middleware(req: NextRequest) {
   // Protect API routes that are not public
   if (pathname.startsWith("/api") && !isPublicApiEndpoint(pathname, method)) {
     if (!verifiedToken) {
-      return new NextResponse(
-        JSON.stringify({ error: "Unauthorized", message: "Authentication required" }),
-        {
-          status: 401,
-          headers: {
-            "Content-Type": "application/json",
-            ...(allowedOrigins.includes(origin) && { "Access-Control-Allow-Origin": origin }),
-            "Access-Control-Allow-Credentials": "true",
-          },
-        }
-      );
+      return denyJson(401, "Unauthorized", "Authentication required", origin);
     }
 
-    const isMutationMethod = method !== "GET" && method !== "HEAD";
-    const requiresSuperadmin = hasPathPrefix(pathname, superadminOnlyApiPrefixes);
-    const requiresAdmin =
-      hasPathPrefix(pathname, adminOnlyApiPrefixes) ||
-      (isMutationMethod && hasPathPrefix(pathname, adminOnlyMutationPrefixes));
+    const payload = verifiedToken as {
+      adminId?: unknown;
+      role?: unknown;
+      perms?: unknown;
+      permissions?: unknown;
+    };
 
-    if (requiresSuperadmin && !isSuperadminRole(role)) {
-      return new NextResponse(
-        JSON.stringify({ error: "Forbidden", message: "Superadmin access required" }),
-        {
-          status: 403,
-          headers: {
-            "Content-Type": "application/json",
-            ...(allowedOrigins.includes(origin) && { "Access-Control-Allow-Origin": origin }),
-            "Access-Control-Allow-Credentials": "true",
-          },
-        }
-      );
-    }
+    // Which routes are governed by the module permission system?
+    const superadminOnly = isSuperadminOnlyPath(pathname);
+    const required = resolveApiPermission(pathname, method);
 
-    if (!requiresSuperadmin && requiresAdmin && !isAdminRole(role)) {
-      return new NextResponse(
-        JSON.stringify({ error: "Forbidden", message: "Admin access required" }),
-        {
-          status: 403,
-          headers: {
-            "Content-Type": "application/json",
-            ...(allowedOrigins.includes(origin) && { "Access-Control-Allow-Origin": origin }),
-            "Access-Control-Allow-Credentials": "true",
-          },
+    if (superadminOnly || required) {
+      // CRITICAL: only an ADMIN token may touch a module-governed route.
+      // Devotee tokens (issued by /api/creduser/*) carry `userId`, never
+      // `adminId`. Without this check a devotee's role would coerce to "viewer"
+      // — which can view everything — and they could read /api/users,
+      // /api/donations, the prayer inbox, and so on.
+      if (payload?.adminId === undefined || payload?.adminId === null) {
+        return denyJson(403, "Forbidden", "Admin access required", origin);
+      }
+
+      // The token carries the caller's role + (compact) per-module permission map.
+      // Falls back to the role template for tokens minted before per-module perms.
+      const { role, permissions } = permissionsFromTokenPayload(payload);
+
+      // Superadmin bypasses every check — including the permission map itself, so
+      // a superadmin can never lock themselves out.
+      if (role !== "superadmin") {
+        // Role/permission administration is superadmin-only, always.
+        if (superadminOnly) {
+          return denyJson(403, "Forbidden", "Superadmin access required", origin);
         }
-      );
+        if (required && !can(permissions, required.module, required.anyOf)) {
+          return denyJson(
+            403,
+            "Forbidden",
+            `You do not have permission to ${required.anyOf.join(" or ")} ${required.module}.`,
+            origin
+          );
+        }
+      }
     }
+    // Not a module-governed route → any authenticated caller (admin OR devotee),
+    // exactly as before. e.g. /api/my-donations, /api/event-registration.
   }
 
   return res;

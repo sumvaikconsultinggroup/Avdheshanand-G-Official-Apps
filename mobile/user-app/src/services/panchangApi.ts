@@ -9,7 +9,8 @@ const KNOWN_NON_API_BASE_URLS = new Set([
   'https://swami-g-dashboard.vercel.app',
   'https://www.avdheshanandg.org',
 ]);
-const PRODUCTION_API_FALLBACKS = ['https://admin.avdheshanandg.org'];
+// The one and only production backend for BOTH apps.
+const PRODUCTION_API_FALLBACKS = ['https://avdheshanandg-dashboard.vercel.app'];
 const LOCAL_PANCHANG_API_FALLBACKS = [
   'http://10.0.2.2:3000',
   'http://10.0.2.2:4010',

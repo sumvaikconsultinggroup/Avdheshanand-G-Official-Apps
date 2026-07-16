@@ -7,8 +7,11 @@ const KNOWN_NON_API_BASE_URLS = new Set([
   'https://www.avdheshanandg.org',
 ]);
 
+// The one and only production backend for BOTH apps. Used when
+// EXPO_PUBLIC_API_URL is missing/stale, and in dev when no local backend answers,
+// so the app degrades to production instead of failing with "API unavailable".
 const PRODUCTION_API_FALLBACKS = [
-  'https://admin.avdheshanandg.org',
+  'https://avdheshanandg-dashboard.vercel.app',
 ];
 // The backend dev port. 3031 first so a moved port is easy to update here.
 const DEV_PORTS = ['3031', '3001', '3000'];

@@ -16,7 +16,7 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { spacing, borderRadius, typography, type ColorPalette } from '../../theme';
+import { spacing, borderRadius, typography, TAB_BAR_CLEARANCE, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import { EmptyStateCard, FloatingInput, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
 
@@ -684,6 +684,7 @@ export function ScheduleScreen() {
       {activeTab === 'events' ? (
         <ScrollView
           style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -823,9 +824,12 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: TAB_BAR_CLEARANCE,
+  },
   listContent: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxl,
+    paddingBottom: TAB_BAR_CLEARANCE,
   },
   sectionWrap: {
     paddingHorizontal: spacing.lg,

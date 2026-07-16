@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { useAuth } from '../context/AuthContext';
+import { usePermissions } from '../context/PermissionContext';
 import { colors } from '../theme';
 import { useI18n } from '../i18n/I18nProvider';
 import { LoginScreen } from '../screens/auth/LoginScreen';
@@ -65,7 +66,9 @@ const linking: LinkingOptions<any> = {
   },
 };
 
-function TabIcon({ label, focused, color }: { label: string; focused: boolean; color: string }) {
+// Plain icon — the active state is conveyed purely by colour (no highlight box),
+// and the size is constant so every icon sits on the same baseline in the pill.
+function TabIcon({ label, color }: { label: string; focused?: boolean; color: string }) {
   const icons: Record<string, React.ComponentProps<typeof Icon>['name']> = {
     Dashboard: 'view-dashboard',
     Events: 'calendar-month',
@@ -73,20 +76,7 @@ function TabIcon({ label, focused, color }: { label: string; focused: boolean; c
     SmartNotes: 'note-text-outline',
     More: 'apps',
   };
-  return (
-    <View
-      style={{
-        width: 46,
-        height: 30,
-        borderRadius: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: focused ? 'rgba(163,18,58,0.13)' : 'transparent',
-      }}
-    >
-      <Icon name={icons[label] || 'circle'} size={focused ? 22 : 21} color={color} />
-    </View>
-  );
+  return <Icon name={icons[label] || 'circle'} size={24} color={color} />;
 }
 
 // Wrap each screen in its own stack for proper header
@@ -210,8 +200,8 @@ const pillStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
-    paddingVertical: 5,
+    gap: 3,
+    paddingVertical: 6,
   },
   label: {
     fontSize: 10.5,
@@ -221,6 +211,7 @@ const pillStyles = StyleSheet.create({
 
 function AdminTabs() {
   const { t } = useI18n();
+  const { canAccessModule } = usePermissions();
 
   return (
     <Tab.Navigator
@@ -245,10 +236,21 @@ function AdminTabs() {
         headerTitleStyle: { fontWeight: '700' as const, fontSize: 18 },
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: t('tabs.dashboard') }} />
-      <Tab.Screen name="Events" component={EventsScreen} options={{ title: t('tabs.events') }} />
-      <Tab.Screen name="Donations" component={DonationsScreen} options={{ title: t('tabs.donations') }} />
-      <Tab.Screen name="SmartNotes" component={SmartNotesScreen} options={{ title: t('admin.smartNotes'), tabBarLabel: t('tabs.notes') }} />
+      {/* Tabs are gated on the caller's permissions — a member never sees a tab
+          whose API would 403 them. `More` is always present (it self-filters) so
+          the navigator can never end up with zero screens. */}
+      {canAccessModule('dashboard') && (
+        <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: t('tabs.dashboard') }} />
+      )}
+      {canAccessModule('events') && (
+        <Tab.Screen name="Events" component={EventsScreen} options={{ title: t('tabs.events') }} />
+      )}
+      {canAccessModule('donations') && (
+        <Tab.Screen name="Donations" component={DonationsScreen} options={{ title: t('tabs.donations') }} />
+      )}
+      {canAccessModule('smartNotes') && (
+        <Tab.Screen name="SmartNotes" component={SmartNotesScreen} options={{ title: t('admin.smartNotes'), tabBarLabel: t('tabs.notes') }} />
+      )}
       <Tab.Screen name="More" component={MoreScreen} options={{ title: t('tabs.more'), headerShown: false }} />
     </Tab.Navigator>
   );

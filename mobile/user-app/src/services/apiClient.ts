@@ -7,7 +7,8 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 import * as SecureStore from 'expo-secure-store';
 
 // ─── Config ──────────────────────────────────────────────────────────
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://swami-g-dashboard.vercel.app';
+// Falls back to the one and only production backend for BOTH apps.
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://avdheshanandg-dashboard.vercel.app';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 const REQUEST_TIMEOUT_MS = 30000;

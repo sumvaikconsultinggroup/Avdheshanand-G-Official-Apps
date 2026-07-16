@@ -23,7 +23,7 @@ import {
   SegmentedButtons,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors, spacing, borderRadius, shadows, gradients } from '../../theme';
+import { colors, spacing, borderRadius, shadows, gradients, TAB_BAR_CLEARANCE } from '../../theme';
 import { Badge, Avatar } from '../../components/common';
 import api from '../../services/api';
 import { DonationAnalytics, DonationCampaign, DonationRecord, LocalizedText } from '../../types';
@@ -924,7 +924,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.md,
-    paddingBottom: 100,
+    paddingBottom: TAB_BAR_CLEARANCE,
   },
 
   // ── Tab bar ──

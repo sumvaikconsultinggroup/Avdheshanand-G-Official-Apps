@@ -12,7 +12,7 @@ import {
   AdminSurface,
 } from '../../components/common';
 import type { ModuleId } from '../../context/PermissionContext';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, colors, spacing, typography, TAB_BAR_CLEARANCE } from '../../theme';
 
 interface StatCard {
   title: string;
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.xxl,
+    paddingBottom: TAB_BAR_CLEARANCE,
   },
   heroGap: {
     height: spacing.xl,
