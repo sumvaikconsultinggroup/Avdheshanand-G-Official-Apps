@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppShell } from '../../context/AppShellContext';
 import api from '../../services/api';
-import { spacing, borderRadius, shadows, typography, type ColorPalette } from '../../theme';
+import { spacing, borderRadius, shadows, typography, TAB_BAR_CLEARANCE, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import { AppButton, FloatingInput, ScreenHeader, SectionHeader, SurfaceCard } from '../../components/common';
 
@@ -424,7 +424,7 @@ export function DonateScreen() {
     <>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{ paddingTop: insets.top }}
+        contentContainerStyle={{ paddingTop: insets.top, paddingBottom: TAB_BAR_CLEARANCE }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

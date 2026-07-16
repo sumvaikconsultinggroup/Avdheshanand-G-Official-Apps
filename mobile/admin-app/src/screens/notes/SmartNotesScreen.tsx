@@ -26,7 +26,7 @@ import {
   Avatar,
   Badge,
 } from '../../components/common';
-import { borderRadius, colors, shadows, spacing, typography } from '../../theme';
+import { borderRadius, colors, shadows, spacing, typography, TAB_BAR_CLEARANCE } from '../../theme';
 
 type FilterKey = 'all' | 'open' | 'assigned' | 'auto_assigned' | 'acknowledged' | 'completed';
 type Priority = 'low' | 'medium' | 'high';
@@ -534,7 +534,7 @@ export function SmartNotesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background.parchment },
-  content: { padding: spacing.md, paddingBottom: 96 },
+  content: { padding: spacing.md, paddingBottom: TAB_BAR_CLEARANCE },
   metricGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -14,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { useAppShell } from '../../context/AppShellContext';
-import { borderRadius, spacing, typography, type ColorPalette } from '../../theme';
+import { borderRadius, spacing, typography, TAB_BAR_CLEARANCE, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import LanguageDrawer from '../../components/LanguageDrawer';
 import { AppButton, ScreenHeader, SurfaceCard } from '../../components/common';
@@ -149,7 +149,7 @@ export function ProfileScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: insets.top }}
+      contentContainerStyle={{ paddingTop: insets.top, paddingBottom: TAB_BAR_CLEARANCE }}
       showsVerticalScrollIndicator={false}
     >
       <ScreenHeader

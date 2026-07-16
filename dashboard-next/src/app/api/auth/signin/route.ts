@@ -1,10 +1,10 @@
 import { connectDB } from '../../../../utils/mongodbConnect';
 import { Collection, Document } from 'mongodb';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import { authLimiter, getClientIp } from '@/lib/rateLimiter';
 import { checkAccountLockout, recordFailedAttempt, clearLockout } from '@/lib/security';
+import { buildAdminSession } from '@/lib/adminSession';
 
 export async function POST(req: Request) {
   try {
@@ -58,23 +58,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: msg }, { status: 401 });
     }
 
+    // A deactivated member must not be able to sign in, even with the right
+    // password. (Previously `isActive` was written but never checked.)
+    if (admin.isActive === false) {
+      return NextResponse.json(
+        { success: false, message: 'This account has been deactivated. Contact a super admin.' },
+        { status: 403 }
+      );
+    }
+
     // Successful login — clear lockout
     clearLockout(lockoutKey);
 
-    const token = jwt.sign(
-      {
-        adminId: admin._id,
-        name: admin.name,
-        role: admin.role || 'admin',
-        permissions: admin.permissions || {},
-        allowedService: admin.allowedService || [],
-      },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '24h' }
-    );
-
-    // Exclude sensitive fields before sending to client
-    const { password: _, otp: _o, otpExpiry: _e, ...safeAdmin } = admin;
+    // Mints the JWT carrying role + the compact per-module permission map that
+    // the middleware enforces on every subsequent request.
+    const { token, user: safeAdmin } = buildAdminSession(admin);
 
     const response = NextResponse.json(
       {

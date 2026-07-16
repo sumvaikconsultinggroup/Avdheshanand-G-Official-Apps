@@ -15,7 +15,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
-import { borderRadius, spacing, typography, type ColorPalette } from '../../theme';
+import { borderRadius, spacing, typography, TAB_BAR_CLEARANCE, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import { EmptyStateCard, ScreenHeader, SurfaceCard } from '../../components/common';
 
@@ -539,7 +539,7 @@ const makeStyles = (colors: ColorPalette) => StyleSheet.create({
     alignItems: 'center',
   },
   listContainer: {
-    paddingBottom: spacing.xxl,
+    paddingBottom: TAB_BAR_CLEARANCE,
   },
   galleryContainer: {
     paddingHorizontal: spacing.md,

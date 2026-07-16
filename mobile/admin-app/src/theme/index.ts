@@ -57,6 +57,13 @@ export const spacing = {
   xxl: 48,
 };
 
+/**
+ * Bottom padding every TAB screen's scroll content needs so its last row can be
+ * scrolled clear of the floating pill tab bar (which overlays the content).
+ * Pill height (66) + bottom safe-area (up to ~34) + breathing room.
+ */
+export const TAB_BAR_CLEARANCE = 112;
+
 export const borderRadius = {
   sm: 8,
   md: 12,

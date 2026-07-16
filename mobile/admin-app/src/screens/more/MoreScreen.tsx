@@ -6,7 +6,7 @@ import { usePermissions } from '../../context/PermissionContext';
 import type { ModuleId } from '../../context/PermissionContext';
 import { useI18n } from '../../i18n/I18nProvider';
 import { AdminHero, AdminSectionHeader, AdminSurface } from '../../components/common';
-import { borderRadius, colors, spacing, typography } from '../../theme';
+import { borderRadius, colors, spacing, typography, TAB_BAR_CLEARANCE } from '../../theme';
 
 const MODULE_ICONS: Record<string, React.ComponentProps<typeof Icon>['name']> = {
   ScheduleStack: 'calendar-clock',
@@ -39,6 +39,7 @@ const SCREEN_TO_MODULE: Record<string, ModuleId> = {
   BroadcasterStack: 'notifications',
   MantraDikshaStack: 'mantraDiksha',
   SevaBoardStack: 'sevaBoard',
+  SmartNotesStack: 'smartNotes',
   TeamStack: 'users',
 };
 
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: TAB_BAR_CLEARANCE,
   },
   groupBlock: {
     marginTop: spacing.lg,
