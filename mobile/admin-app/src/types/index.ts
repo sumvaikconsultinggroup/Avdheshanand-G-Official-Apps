@@ -42,6 +42,7 @@ export interface User {
 }
 
 export interface Event {
+  publicationStatus?: 'draft' | 'published';
   _id: string;
   eventName: string;
   eventDate: string;

@@ -45,3 +45,4 @@ yarn.lock
 
 *next.config.ts
 next.config.js
+.env*

@@ -28,7 +28,7 @@ export default function SignInForm() {
 
       if (res.ok) {
         localStorage.setItem('user', JSON.stringify(data.user));
-        router.push('/dashboard');
+        router.push(process.env.NEXT_PUBLIC_APP_ENV === 'development' ? '/dashboard/events' : '/dashboard');
       } else {
         setError(data.message || 'Invalid credentials');
       }

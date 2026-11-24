@@ -1,3 +1,4 @@
+import { listEvents } from '@/lib/eventList';
 import { NextRequest, NextResponse } from 'next/server';
 import Event from '@/models/Event';
 import { connectDB } from '@/lib/mongodb';
@@ -50,88 +51,8 @@ const uploadToCloudinary = async (file: File): Promise<string> => {
   }
 };
 
-// GET all events (with optional pagination)
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
-  try {
-    await connectDB();
-
-    const url = new URL(req.url);
-    const page = parseInt(url.searchParams.get('page') || '0', 10);
-    const limit = Math.min(parseInt(url.searchParams.get('limit') || '0', 10), 100);
-    const search = url.searchParams.get('search') || '';
-
-    const filter: Record<string, unknown> = { isDeleted: { $ne: true } };
-
-    // Optional text search
-    if (search) {
-      const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-      filter.$or = [{ eventName: regex }, { description: regex }, { eventLocation: regex }];
-    }
-
-    // If pagination params are provided, use paginated response
-    if (page > 0 && limit > 0) {
-      const skip = (page - 1) * limit;
-      const [events, total] = await Promise.all([
-        Event.find(filter).sort({ eventDate: -1 }).skip(skip).limit(limit).select('-__v').lean(),
-        Event.countDocuments(filter),
-      ]);
-
-      const sanitizedEvents = JSON.parse(JSON.stringify(events));
-      const totalPages = Math.ceil(total / limit);
-
-      return NextResponse.json(
-        {
-          success: true,
-          message: 'Events fetched successfully',
-          data: sanitizedEvents,
-          meta: { page, limit, total, totalPages, hasNextPage: page < totalPages, hasPrevPage: page > 1 },
-        },
-        {
-          status: 200,
-          headers: { 'Cache-Control': 'public, max-age=120, stale-while-revalidate=60', 'X-Total-Count': String(total) },
-        }
-      );
-    }
-
-    // Legacy: return all events (backward compatible)
-    const events = await Event.find(filter)
-      .sort({ eventDate: 1 })
-      .select('-__v')
-      .lean();
-
-    if (!events?.length) {
-      return NextResponse.json(
-        { success: true, message: 'No events found', data: [] },
-        { status: 200 }
-      );
-    }
-
-    const sanitizedEvents = JSON.parse(JSON.stringify(events));
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Events fetched successfully',
-        data: sanitizedEvents,
-      },
-      { 
-        status: 200, 
-        headers: {
-          'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
-        } 
-      }
-    );
-  } catch (error) {
-    console.error('GET Events Error:', error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Failed to fetch events',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
-  }
+export async function GET(req: NextRequest) {
+  return listEvents(req, false);
 }
 
 // POST create new event
@@ -148,6 +69,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       description: form.get('description') as string,
       file: form.get('eventImage') as File,
     };
+
+    const publicationStatus = form.get('publicationStatus') ?? 'published';
+    if (publicationStatus !== 'published' && publicationStatus !== 'draft') {
+      return NextResponse.json({ success: false, message: 'Invalid publication status' }, { status: 400 });
+    }
 
     // Basic validation
     if (!data.eventName || !data.eventLocation || !data.description) {
@@ -171,7 +97,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     }
 
     // Set default image path
-    let eventImagePath = '/assets/events/event-placeholder.jpg';
+    let eventImagePath = '/images/swamiji-hero.jpg';
 
     // Handle file upload if provided
     if (data.file && data.file.size > 0) {
@@ -209,6 +135,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       eventLocation: data.eventLocation,
       description: data.description,
       eventImage: eventImagePath,
+      publicationStatus,
       registeredUsers: [],
     });
 

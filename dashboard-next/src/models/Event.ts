@@ -7,6 +7,7 @@ export interface IEvent extends Document {
   eventLocation: string;
   description: string;
   eventImage: string;
+  publicationStatus: "draft" | "published";
   registeredUsers: mongoose.Types.ObjectId[];
   isDeleted: boolean;  // New field
   createdAt: Date;
@@ -45,6 +46,7 @@ const eventSchema: Schema<IEvent> = new Schema(
       required: [true, "Event image is required"],
       trim: true,
     },
+    publicationStatus: { type: String, enum: ["draft", "published"], default: "published" },
     registeredUsers: [
       {
         type: mongoose.Schema.Types.ObjectId,

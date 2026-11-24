@@ -325,6 +325,7 @@ const API_MODULE_RULES: { prefix: string; module: ModuleId }[] = [
   { prefix: '/api/notifications/admin-task-reminders', module: 'notifications' },
   { prefix: '/api/admin/notification-devices', module: 'notifications' },
   { prefix: '/api/admin/team', module: 'users' },
+  { prefix: '/api/admin/events', module: 'events' },
 
   { prefix: '/api/users', module: 'users' },
   { prefix: '/api/connect', module: 'messages' },

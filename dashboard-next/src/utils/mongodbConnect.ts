@@ -29,7 +29,7 @@ export async function connectDB(clusterKey: keyof typeof uris, dbName: string): 
 
   try {
     await client.connect();
-    const db = client.db(dbName);
+    const db = client.db(process.env.MONGODB_DB_NAME || dbName);
     
 
     cachedClients[clusterKey] = client;

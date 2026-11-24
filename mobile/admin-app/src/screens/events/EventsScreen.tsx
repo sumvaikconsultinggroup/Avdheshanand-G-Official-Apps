@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { usePermissions } from '../../context/PermissionContext';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,6 +13,7 @@ import {
   ScrollView,
   Image,
   Platform,
+  AppState,
 } from 'react-native';
 import {
   Card,
@@ -57,6 +60,11 @@ const emptyForm: EventFormData = {
 };
 
 export function EventsScreen() {
+  const { can } = usePermissions();
+  const mayEdit = can('events', 'edit');
+  const mayCreate = can('events', 'create');
+  const mayDelete = can('events', 'delete');
+  const [publishing, setPublishing] = useState<string | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -77,7 +85,7 @@ export function EventsScreen() {
   const fetchEvents = useCallback(async () => {
     try {
       setError(null);
-      const response = await api.get('/events');
+      const response = await api.get('/admin/events');
       const data = response.data?.events || response.data || [];
       setEvents(data.filter((e: Event) => !e.isDeleted));
     } catch (err) {
@@ -89,9 +97,11 @@ export function EventsScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+  useFocusEffect(useCallback(() => {
+    void fetchEvents();
+    const timer = setInterval(() => { if (AppState.currentState === 'active') void fetchEvents(); }, 5000);
+    return () => clearInterval(timer);
+  }, [fetchEvents]));
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -114,7 +124,7 @@ export function EventsScreen() {
 
   const isValidIsoDate = (value: string) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-    const parsed = new Date(`${value}T00:00:00`);
+    const parsed = new Date(`${value}T00:00:00Z`);
     return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
   };
 
@@ -168,6 +178,7 @@ export function EventsScreen() {
     fd.append('eventDate', form.eventDate);
     fd.append('eventLocation', form.eventLocation);
     fd.append('description', form.description);
+    if (!editingEvent) fd.append('publicationStatus', 'draft');
 
     if (form.imageUri && form.imageName) {
       const ext = form.imageName.split('.').pop()?.toLowerCase() || 'jpeg';
@@ -213,10 +224,10 @@ export function EventsScreen() {
         if (updatedEvent) {
           setEvents(prev => prev.map(e => e._id === editingEvent._id ? { ...e, ...updatedEvent } : e));
         }
-        Alert.alert('Event updated', 'Your changes are now live on the user app and the website.');
+        Alert.alert('Event updated', 'Your changes have been saved.');
       } else {
         await api.post('/events', fd, config);
-        Alert.alert('Event published', 'The new event is now live on the user app and the website.');
+        Alert.alert('Draft saved', 'Publish it from the events list when it is ready.');
       }
 
       setModalVisible(false);
@@ -231,6 +242,20 @@ export function EventsScreen() {
       console.error('Event submit error:', JSON.stringify(err?.response?.data || err?.message));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const changePublication = async (event: Event) => {
+    const publicationStatus = event.publicationStatus === 'draft' ? 'published' : 'draft';
+    setPublishing(event._id);
+    try {
+      const response = await api.patch(`/events/${event._id}`, { publicationStatus });
+      setEvents(previous => previous.map(item => item._id === event._id ? response.data : item));
+      await fetchEvents();
+    } catch (err: any) {
+      Alert.alert('Could not update visibility', err?.response?.data?.message || 'Please try again.');
+    } finally {
+      setPublishing(null);
     }
   };
 
@@ -264,15 +289,16 @@ export function EventsScreen() {
     const eventDate = new Date(item.eventDate);
     return (
       <TouchableOpacity
-        onPress={() => openEditModal(item)}
-        onLongPress={() => confirmDelete(item)}
+        accessible={false}
+        onPress={mayEdit ? () => openEditModal(item) : undefined}
+        onLongPress={mayDelete ? () => confirmDelete(item) : undefined}
         activeOpacity={0.85}
       >
-        <Card style={styles.card}>
+        <Card style={styles.card} accessible={false}>
           {item.eventImage ? (
             <View style={styles.cardImageWrap}>
               <Image
-                source={{ uri: item.eventImage }}
+                source={{ uri: item.eventImage.startsWith('/') ? process.env.EXPO_PUBLIC_API_URL + item.eventImage : item.eventImage }}
                 style={styles.cardImage}
                 resizeMode="cover"
               />
@@ -334,16 +360,19 @@ export function EventsScreen() {
             ) : null}
 
             <View style={styles.cardFooter}>
-              <Badge label="Live on app & website" tone={colors.status.success} variant="soft" dot />
+              <Badge label={item.publicationStatus === 'draft' ? 'Draft' : 'Published'} tone={item.publicationStatus === 'draft' ? colors.primary.maroon : colors.status.success} variant="soft" dot />
               <View style={styles.footerActions}>
-                <TouchableOpacity style={styles.footerBtn} onPress={() => openEditModal(item)} activeOpacity={0.8}>
+                 {mayEdit && <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${item.publicationStatus === 'draft' ? 'Publish' : 'Unpublish'} ${item.eventName}`} style={styles.footerBtn} disabled={publishing !== null} onPress={() => changePublication(item)} activeOpacity={0.8}>
+                  <Text style={styles.footerBtnText}>{publishing === item._id ? 'Saving…' : item.publicationStatus === 'draft' ? 'Publish' : 'Unpublish'}</Text>
+                </TouchableOpacity>}
+                {mayEdit && <TouchableOpacity style={styles.footerBtn} onPress={() => openEditModal(item)} activeOpacity={0.8}>
                   <MaterialCommunityIcons name="pencil" size={16} color={colors.primary.maroon} />
                   <Text style={styles.footerBtnText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.footerBtnDelete} onPress={() => confirmDelete(item)} activeOpacity={0.8}>
+                </TouchableOpacity>}
+                {mayDelete && <TouchableOpacity style={styles.footerBtnDelete} onPress={() => confirmDelete(item)} activeOpacity={0.8}>
                   <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.status.error} />
                   <Text style={styles.footerBtnDeleteText}>Delete</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
               </View>
             </View>
           </Card.Content>
@@ -407,9 +436,9 @@ export function EventsScreen() {
             <AdminHero
               eyebrow="Manage"
               title="Events"
-              subtitle="Publish once — every event appears instantly on the user app and the website."
-              badge={`${events.length} live`}
-              actions={[{ label: 'New Event', icon: 'plus', onPress: openCreateModal }]}
+              subtitle="Draft and publish events for the website and public app."
+              badge={`${events.filter(e => e.publicationStatus !== 'draft').length} published`}
+              actions={mayCreate ? [{ label: 'New Event', icon: 'plus', onPress: openCreateModal }] : []}
             />
           </View>
         }
@@ -425,12 +454,12 @@ export function EventsScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      <FAB
+      {mayCreate && <FAB
         icon="plus"
         style={styles.fab}
         onPress={openCreateModal}
         color={colors.text.white}
-      />
+      />}
 
       {/* ── Create / Edit Modal ── */}
       <Modal
@@ -467,7 +496,7 @@ export function EventsScreen() {
               <View style={styles.infoBanner}>
                 <MaterialCommunityIcons name="broadcast" size={16} color={colors.status.success} />
                 <Text style={styles.infoBannerText}>
-                  Saved events publish instantly to the user app and the website.
+                  {editingEvent?.publicationStatus === 'published' ? 'Changes will appear on the public website and app.' : 'Only staff can see this draft until you publish it.'}
                 </Text>
               </View>
 
@@ -576,7 +605,7 @@ export function EventsScreen() {
                       <ActivityIndicator size={18} color={colors.text.white} />
                     ) : (
                       <Text style={styles.submitButtonText}>
-                        {editingEvent ? 'Update' : 'Create'}
+                        {editingEvent ? 'Save changes' : 'Save draft'}
                       </Text>
                     )}
                   </LinearGradient>

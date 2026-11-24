@@ -1,3 +1,4 @@
+import { developmentApiOrigin } from './developmentApi';
 import axios, { AxiosError } from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
@@ -136,6 +137,11 @@ async function probeBaseUrl(baseUrl: string): Promise<boolean> {
 }
 
 export async function resolveUserApiBaseUrl(): Promise<string> {
+  const developmentOrigin = developmentApiOrigin();
+  if (developmentOrigin) {
+    cachedWorkingBaseUrl = developmentOrigin;
+    return developmentOrigin;
+  }
   if (cachedWorkingBaseUrl) return cachedWorkingBaseUrl;
 
   const candidates = getCandidateBaseUrls();

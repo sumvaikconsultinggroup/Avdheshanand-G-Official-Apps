@@ -38,7 +38,7 @@ export function LoginScreen() {
     try {
       await login(username.trim(), password);
     } catch (error: any) {
-      Alert.alert(t('auth.loginFailed'), error.response?.data?.message || t('auth.invalidCredentials'));
+      Alert.alert(t('auth.loginFailed'), error.response?.data?.message || (process.env.EXPO_PUBLIC_STAGE === 'development' && error.message) || t('auth.invalidCredentials'));
     } finally {
       setLoading(false);
     }

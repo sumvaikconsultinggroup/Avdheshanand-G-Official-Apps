@@ -1,3 +1,4 @@
+import { developmentApiOrigin } from './developmentApi';
 /**
  * Enterprise-grade API service with retry logic, request deduplication,
  * and exponential backoff for the User Mobile App.
@@ -8,7 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // ─── Config ──────────────────────────────────────────────────────────
 // Falls back to the one and only production backend for BOTH apps.
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://avdheshanandg-dashboard.vercel.app';
+const API_URL = developmentApiOrigin() || process.env.EXPO_PUBLIC_API_URL || 'https://avdheshanandg-dashboard.vercel.app';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 const REQUEST_TIMEOUT_MS = 30000;

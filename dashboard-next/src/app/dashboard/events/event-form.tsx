@@ -19,6 +19,7 @@ interface EventFormProps {
     eventDate?: string;
     eventLocation?: string;
     description?: string;
+    publicationStatus?: 'draft' | 'published';
     eventImage?: string;
   };
 }
@@ -28,6 +29,7 @@ interface EventFormData {
   eventDate: string; // Will be converted to Date on submit
   eventLocation: string;
   description: string;
+  publicationStatus: 'draft' | 'published';
   eventImage?: FileList; // For file input
 }
 
@@ -47,6 +49,7 @@ export function EventForm({ initialData }: EventFormProps) {
       eventDate: initialData?.eventDate ? new Date(initialData.eventDate).toISOString().split('T')[0] : '',
       eventLocation: initialData?.eventLocation || '',
       description: initialData?.description || '',
+      publicationStatus: initialData ? initialData.publicationStatus || 'published' : 'draft',
     },
   });
 
@@ -72,6 +75,7 @@ export function EventForm({ initialData }: EventFormProps) {
       formData.append('eventDate', new Date(data.eventDate).toISOString());
       formData.append('eventLocation', data.eventLocation);
       formData.append('description', data.description);
+      formData.append('publicationStatus', data.publicationStatus);
       
       // Only append image if it exists
       if (data.eventImage && data.eventImage[0]) {
@@ -170,6 +174,13 @@ export function EventForm({ initialData }: EventFormProps) {
             </div>
 
             <div className="grid gap-3">
+              <Label htmlFor="publicationStatus">Visibility</Label>
+              <select id="publicationStatus" className="rounded-md border bg-background p-2" {...register('publicationStatus')}>
+                <option value="draft">Draft · staff only</option>
+                <option value="published">Published · public website and app</option>
+              </select>
+            </div>
+            <div className="grid gap-3">
               <Label htmlFor="eventImage">Event Image</Label>
               <Input
                 id="eventImage"
@@ -229,7 +240,7 @@ export function EventForm({ initialData }: EventFormProps) {
           type="submit"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : initialData?.id ? 'Update Event' : 'Create Event'}
+          {isSubmitting ? 'Saving...' : watch('publicationStatus') === 'draft' ? 'Save draft' : 'Save published event'}
         </Button>
       </div>
     </form>

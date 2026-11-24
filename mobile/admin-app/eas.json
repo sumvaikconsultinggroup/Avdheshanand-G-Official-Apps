@@ -11,7 +11,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://avdheshanandg-dashboard.vercel.app"
+        "EXPO_PUBLIC_STAGE": "development",
+        "EXPO_PUBLIC_API_URL": "https://agm-development-admin.vercel.app"
       }
     },
     "preview": {
@@ -20,7 +21,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://avdheshanandg-dashboard.vercel.app"
+        "EXPO_PUBLIC_STAGE": "development",
+        "EXPO_PUBLIC_API_URL": "https://agm-development-admin.vercel.app"
       }
     },
     "production": {
@@ -30,6 +32,12 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://avdheshanandg-dashboard.vercel.app"
+      }
+    },
+    "development-simulator": {
+      "extends": "development",
+      "ios": {
+        "simulator": true
       }
     }
   },

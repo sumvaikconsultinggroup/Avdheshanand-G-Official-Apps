@@ -7,7 +7,10 @@ import {
   resolveApiPermission,
 } from "./lib/permissions";
 
-const allowedOrigins = [
+const allowedOrigins = process.env.AGM_ENVIRONMENT === "development" ? [
+  "https://development.avdheshanandg.org", "https://agm-development-website.vercel.app",
+  "https://admin-development.avdheshanandg.org", "https://agm-development-admin.vercel.app",
+] : [
   "https://www.avdheshanandg.org",
   "https://www.avdheshanandgmission.org",
   "https://avdheshanandgmission.org",
@@ -104,6 +107,14 @@ export async function middleware(req: NextRequest) {
     return preflight;
   }
 
+  if (process.env.AGM_ENVIRONMENT === "development" && pathname.startsWith("/api/")) {
+    const eventWrite = /^\/api\/events(?:\/[a-f0-9]{24})?$/i.test(pathname);
+    const staffSession = ["/api/auth/signin", "/api/auth/logout", "/api/verify-session", "/api/admin/me"].includes(pathname);
+    if (pathname.startsWith("/api/cron") || (!["GET", "HEAD"].includes(method) && !eventWrite && !staffSession)) {
+      return denyJson(403, "Development environment", "This operation is disabled in the event preview.", origin);
+    }
+  }
+
   // Normal flow
   const authHeader = req.headers.get("authorization");
   const bearerToken = authHeader?.startsWith("Bearer ")
@@ -125,17 +136,12 @@ export async function middleware(req: NextRequest) {
 "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Sentry-Trace, Baggage"
   );
 
-  // Auth redirect logic
-  if (pathname.startsWith("/signin") && verifiedToken) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  if (pathname.startsWith("/dashboard") && !verifiedToken) {
-    return NextResponse.redirect(new URL("/signin", req.url));
-  }
-
-  if (pathname === "/") {
-    return NextResponse.redirect(new URL(verifiedToken ? "/dashboard" : "/signin", req.url));
+  // A relative Location keeps the browser on the same host when a preview is proxied.
+  const staffHome = process.env.AGM_ENVIRONMENT === "development" ? "/dashboard/events" : "/dashboard";
+  const landing = verifiedToken ? staffHome : "/signin";
+  if (pathname === "/" || (pathname.startsWith("/signin") && verifiedToken) ||
+      (pathname.startsWith("/dashboard") && !verifiedToken)) {
+    return new NextResponse(null, { status: 307, headers: { Location: landing } });
   }
 
   // Protect API routes that are not public

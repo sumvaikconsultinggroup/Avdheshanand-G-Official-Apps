@@ -14,7 +14,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
-import api from '../../services/api';
+import api, { getResolvedUserApiBaseUrl } from '../../services/api';
 import { spacing, borderRadius, shadows, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
 import { Event } from '../../types';
@@ -121,7 +121,7 @@ export function EventDetailScreen() {
         {/* Event Image */}
         <View style={styles.imageContainer}>
           {event.eventImage ? (
-            <Image source={{ uri: event.eventImage }} style={styles.eventImage} />
+            <Image source={{ uri: event.eventImage.startsWith('/') ? getResolvedUserApiBaseUrl() + event.eventImage : event.eventImage }} style={styles.eventImage} />
           ) : (
             <LinearGradient
               colors={[colors.primary.saffron, colors.primary.maroon]}

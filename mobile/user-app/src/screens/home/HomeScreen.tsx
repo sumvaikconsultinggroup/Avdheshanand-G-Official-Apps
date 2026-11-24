@@ -1,3 +1,5 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { AppState } from 'react-native';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
@@ -15,7 +17,7 @@ import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import api from '../../services/api';
+import api, { getResolvedUserApiBaseUrl } from '../../services/api';
 import { useAppShell } from '../../context/AppShellContext';
 import { spacing, borderRadius, shadows, typography, TAB_BAR_CLEARANCE, type ColorPalette } from '../../theme';
 import { useTheme } from '../../context/ThemeContext';
@@ -90,6 +92,18 @@ export function HomeScreen() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useFocusEffect(useCallback(() => {
+    let mounted = true;
+    const timer = setInterval(async () => {
+      if (AppState.currentState !== 'active') return;
+      try {
+        const result = await api.get('/events');
+        if (mounted && Array.isArray(result.data)) setEvents(result.data.slice(0, 5));
+      } catch { /* The next refresh can retry. */ }
+    }, 5000);
+    return () => { mounted = false; clearInterval(timer); };
+  }, []));
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -273,7 +287,6 @@ export function HomeScreen() {
       <View style={styles.section}>
         <SectionHeader
           title={t('home.upcomingEvents')}
-          subtitle={t('schedule.emptyEventsSubtitle')}
           actionLabel={t('home.seeAll')}
           onActionPress={() => navigation.navigate('Schedule')}
           icon="calendar-star"
@@ -291,7 +304,7 @@ export function HomeScreen() {
                 <SurfaceCard compact style={styles.eventCardSurface}>
                   <View style={styles.eventImagePlaceholder}>
                     {event.eventImage ? (
-                      <Image source={{ uri: event.eventImage }} style={styles.eventImage} />
+                      <Image source={{ uri: event.eventImage.startsWith('/') ? getResolvedUserApiBaseUrl() + event.eventImage : event.eventImage }} style={styles.eventImage} />
                     ) : (
                       <Icon name="calendar-star" size={32} color={colors.gold.main} />
                     )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  AppState,
   View,
   Text,
   StyleSheet,
@@ -13,6 +14,7 @@ import {
   TextInput,
 } from 'react-native';
 import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -26,6 +28,10 @@ interface Event {
   eventDate: string;
   eventLocation?: string;
   description?: string;
+}
+
+function byEventDate(a: Event, b: Event) {
+  return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
 }
 
 interface LocalizedText {
@@ -163,9 +169,7 @@ export function ScheduleScreen() {
       ]);
 
       if (eventsRes.status === 'fulfilled') {
-        const sortedEvents = (eventsRes.value.data || []).sort(
-          (a: Event, b: Event) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
-        );
+        const sortedEvents = (eventsRes.value.data || []).sort(byEventDate);
         setEvents(sortedEvents);
       } else {
         console.error('Error fetching events:', eventsRes.reason);
@@ -196,6 +200,23 @@ export function ScheduleScreen() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useFocusEffect(useCallback(() => {
+    if (activeTab !== 'events') return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = async () => {
+      try {
+        if (AppState.currentState === 'active') {
+          const result = await api.get<Event[]>('/events', { signal: controller.signal });
+          if (!controller.signal.aborted && Array.isArray(result.data)) setEvents(result.data.sort(byEventDate));
+        }
+      } catch { /* Keep the last successful list while the network reconnects. */ }
+      if (!controller.signal.aborted) timer = setTimeout(refresh, 5000);
+    };
+    void refresh();
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [activeTab]));
 
   useEffect(() => {
     setRequestForm((prev) => ({
@@ -644,7 +665,7 @@ export function ScheduleScreen() {
         compact
         eyebrow={t('schedule.title')}
         title={activeTab === 'schedules' ? t('schedule.title') : t('explore.events')}
-        subtitle={activeTab === 'schedules' ? t('schedule.emptySchedulesSubtitle') : t('schedule.emptyEventsSubtitle')}
+        subtitle={activeTab === 'schedules' && !schedules.length ? t('schedule.emptySchedulesSubtitle') : undefined}
         icon={activeTab === 'schedules' ? 'calendar-clock' : 'calendar-star'}
       />
 
@@ -698,7 +719,6 @@ export function ScheduleScreen() {
           <View style={styles.sectionWrap}>
             <SectionHeader
               title={t('home.upcomingEvents')}
-              subtitle={t('schedule.emptyEventsSubtitle')}
               icon="calendar-star"
             />
           </View>

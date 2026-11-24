@@ -43,6 +43,7 @@ async function configureAndroidChannels() {
 }
 
 export async function registerAdminPushNotifications() {
+  if (process.env.EXPO_PUBLIC_STAGE === 'development') return null;
   await configureAndroidChannels();
 
   const currentPermissions = await Notifications.getPermissionsAsync();

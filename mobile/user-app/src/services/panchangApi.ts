@@ -1,3 +1,4 @@
+import { developmentApiOrigin } from './developmentApi';
 import axios, { AxiosError } from 'axios';
 import Constants from 'expo-constants';
 import { getResolvedUserApiBaseUrl, resolveUserApiBaseUrl } from './api';
@@ -52,6 +53,8 @@ function getExpoHostIp(): string | null {
 }
 
 function getCandidateBaseUrls(): string[] {
+  const developmentOrigin = developmentApiOrigin();
+  if (developmentOrigin) return [developmentOrigin];
   const fromEnv = normalizeBaseUrl(process.env.EXPO_PUBLIC_API_URL);
   const expoHost = getExpoHostIp();
   const shouldPreferLocalDev =

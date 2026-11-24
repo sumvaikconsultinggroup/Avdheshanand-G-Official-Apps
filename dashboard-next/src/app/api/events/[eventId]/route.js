@@ -10,7 +10,7 @@ import path from 'path';
 async function deleteOldImage(imagePath) {
   try {
     // Skip if the path is empty or default image
-    if (!imagePath || imagePath.startsWith('assets/')) {
+    if (typeof imagePath !== 'string' || !/^\/uploads\/events\/[^/\\]+$/.test(imagePath)) {
       return false;
     }
     
@@ -36,7 +36,7 @@ async function deleteOldImage(imagePath) {
 export async function PUT(req, { params }) {
   try {
     await connectDB();
-    const { eventId } = params;
+    const { eventId } = await params;
 
     if (!eventId) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function PUT(req, { params }) {
     }
 
     // First fetch the existing event to get the current image path
-    const existingEvent = await Event.findById(eventId);
+    const existingEvent = await Event.findOne({ _id: eventId, isDeleted: { $ne: true } });
     if (!existingEvent) {
       return NextResponse.json(
         {
@@ -96,6 +96,12 @@ export async function PUT(req, { params }) {
       description,
     };
 
+    const status = formData.get('publicationStatus');
+    if (status !== null) {
+      if (!['draft', 'published'].includes(status)) return NextResponse.json({ success: false, message: 'Invalid publication status' }, { status: 400 });
+      updateData.publicationStatus = status;
+    }
+
     // Handle image upload and old image deletion
     if (eventImage && eventImage.size > 0) {
       const { writeFile, mkdir } = require('fs/promises');
@@ -118,7 +124,7 @@ export async function PUT(req, { params }) {
       }
     }
 
-    const updatedEvent = await Event.findByIdAndUpdate(eventId, updateData, {
+    const updatedEvent = await Event.findOneAndUpdate({ _id: eventId, isDeleted: { $ne: true } }, updateData, {
       new: true,
       runValidators: true,
     });
@@ -157,7 +163,7 @@ export async function PUT(req, { params }) {
 export async function DELETE(req, { params }) {
   try {
     await connectDB();
-    const { eventId } = params;
+    const { eventId } = await params;
 
     if (!eventId) {
       return NextResponse.json(
@@ -205,7 +211,7 @@ export async function DELETE(req, { params }) {
 export async function GET(req, { params }) {
   try {
     await connectDB();
-    const { eventId } = params;
+    const { eventId } = await params;
 
     if (!eventId) {
       return NextResponse.json(
@@ -217,7 +223,7 @@ export async function GET(req, { params }) {
       );
     }
 
-    const event = await Event.findById(eventId).where({ isDeleted: false });
+    const event = await Event.findOne({ _id: eventId, isDeleted: { $ne: true }, publicationStatus: { $ne: 'draft' } }).select('-registeredUsers');
 
     if (!event) {
       return NextResponse.json(
@@ -248,4 +254,20 @@ export async function GET(req, { params }) {
       { status: 500 }
     );
   }
+}
+
+// A publication change touches only this field, so a concurrent edit keeps its other values.
+export async function PATCH(req, { params }) {
+  const { eventId } = await params;
+  const body = await req.json().catch(() => null);
+  if (!/^[a-f0-9]{24}$/i.test(eventId) || !['draft', 'published'].includes(body?.publicationStatus)) {
+    return NextResponse.json({ success: false, message: 'Invalid event or publication status' }, { status: 400 });
+  }
+  await connectDB();
+  const event = await Event.findOneAndUpdate(
+    { _id: eventId, isDeleted: { $ne: true } },
+    { $set: { publicationStatus: body.publicationStatus } },
+    { new: true, runValidators: true }
+  ).lean();
+  return NextResponse.json({ success: Boolean(event), data: event }, { status: event ? 200 : 404 });
 }

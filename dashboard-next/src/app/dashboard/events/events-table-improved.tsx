@@ -48,10 +48,11 @@ interface Event {
   eventLocation: string;
   description: string;
   eventImage: string;
+  publicationStatus?: 'draft' | 'published';
   registeredUsers: string[];
 }
 
-export function EventsTable() {
+export function EventsTable({ actions }: { actions: { create: boolean; edit: boolean; delete: boolean } }) {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,12 +64,17 @@ export function EventsTable() {
   // Fetch events when component mounts
   useEffect(() => {
     fetchEvents();
+    const refresh = () => { if (!document.hidden) void fetchEvents(false); };
+    const timer = window.setInterval(refresh, 5000);
+    window.addEventListener('focus', refresh);
+    return () => { clearInterval(timer); window.removeEventListener('focus', refresh); };
   }, []);
 
-  const fetchEvents = async () => {
+  const fetchEvents = async (showLoading = true) => {
     try {
-      setLoading(true);
-      const response = await axios.get('/api/events');
+      if (showLoading) setLoading(true);
+      const response = await axios.get('/api/admin/events');
+      setError(null);
       
       if (response.data.success) {
         setEvents(response.data.data || []);
@@ -175,29 +181,30 @@ export function EventsTable() {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-semibold text-base truncate">{event.eventName}</h3>
-              <DropdownMenu>
+              <span className="text-xs">{event.publicationStatus === "draft" ? "Draft" : "Published"}</span>
+              {(actions.edit || actions.delete) && <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={(e) => {
+                  {actions.edit && <DropdownMenuItem onClick={(e) => {
                     e.stopPropagation();
                     window.location.href = `/dashboard/events/edit/${event._id}`;
                   }}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
+                  </DropdownMenuItem>}
+                  {actions.delete && <DropdownMenuItem
                     className="text-red-600"
                     onClick={(e) => handleDelete(event._id, e)}
                   >
                     <Trash className="mr-2 h-4 w-4" />
                     Delete
-                  </DropdownMenuItem>
+                  </DropdownMenuItem>}
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu>}
             </div>
 
             <div className="mt-2 space-y-1.5 text-sm text-muted-foreground">
@@ -282,7 +289,7 @@ export function EventsTable() {
         </div>
         <h3 className="text-lg font-semibold mb-2">Unable to load events</h3>
         <p className="text-sm text-muted-foreground mb-6">{error}</p>
-        <Button onClick={fetchEvents}>Try Again</Button>
+        <Button onClick={() => fetchEvents()}>Try Again</Button>
       </div>
     );
   }
@@ -295,10 +302,7 @@ export function EventsTable() {
           <Calendar className="h-6 w-6 text-muted-foreground" />
         </div>
         <h3 className="text-lg font-semibold mb-2">No events found</h3>
-        <p className="text-sm text-muted-foreground mb-6">Get started by creating your first event.</p>
-        <Button asChild>
-          <Link href="/dashboard/events/new">Create a new event</Link>
-        </Button>
+        {actions.create && <p className="text-sm text-muted-foreground mb-6">Use New Event to create your first draft.</p>}
       </div>
     );
   }
@@ -342,7 +346,7 @@ export function EventsTable() {
                     getEventIcon(event.eventName)
                   )}
                 </TableCell>
-                <TableCell className="font-medium">{event.eventName}</TableCell>
+                <TableCell className="font-medium">{event.eventName}<div className="mt-1 text-xs text-muted-foreground">{event.publicationStatus === "draft" ? "Draft" : "Published"}</div></TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -362,7 +366,7 @@ export function EventsTable() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <DropdownMenu>
+                  {(actions.edit || actions.delete) && <DropdownMenu>
                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                       <Button variant="ghost" size="icon">
                         <MoreHorizontal className="h-4 w-4" />
@@ -370,22 +374,22 @@ export function EventsTable() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => {
+                      {actions.edit && <DropdownMenuItem onClick={(e) => {
                         e.stopPropagation();
                         window.location.href = `/dashboard/events/edit/${event._id}`;
                       }}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
+                      </DropdownMenuItem>}
+                      {actions.delete && <DropdownMenuItem
                         className="text-red-600"
                         onClick={(e) => handleDelete(event._id, e)}
                       >
                         <Trash className="mr-2 h-4 w-4" />
                         Delete
-                      </DropdownMenuItem>
+                      </DropdownMenuItem>}
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu>}
                 </TableCell>
               </TableRow>
             ))}
@@ -471,13 +475,13 @@ export function EventsTable() {
               )}
 
               <div className="flex flex-col sm:flex-row gap-2 pt-4">
-                <Button asChild className="flex-1">
+                {actions.edit && <Button asChild className="flex-1">
                   <Link href={`/dashboard/events/edit/${selectedEvent._id}`}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit Event
                   </Link>
-                </Button>
-                <Button
+                </Button>}
+                {actions.delete && <Button
                   variant="outline"
                   className="flex-1 text-red-600 hover:text-red-700"
                   onClick={() => {
@@ -487,7 +491,7 @@ export function EventsTable() {
                 >
                   <Trash className="mr-2 h-4 w-4" />
                   Delete Event
-                </Button>
+                </Button>}
               </div>
             </div>
           )}

@@ -53,7 +53,7 @@ export async function POST(req) {
     const user = await User.findById(userId);
 
     // Check event
-    const event = await Event.findById(eventId);
+    const event = await Event.findOne({ _id: eventId, isDeleted: { $ne: true }, publicationStatus: { $ne: 'draft' } });
 
     // Check if the user and event exist
     if (!user || !event) {

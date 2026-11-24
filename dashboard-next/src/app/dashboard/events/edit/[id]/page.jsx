@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { EventForm } from '../../event-form';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function EditEventPage({ params }) {
+  const { id } = use(params);
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,7 +17,7 @@ export default function EditEventPage({ params }) {
     async function fetchEventData() {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/events/${params.id}`);
+        const response = await axios.get(`/api/admin/events/${id}`);
 
         if (response.data.success) {
           setEvent(response.data.data);
@@ -31,10 +32,10 @@ export default function EditEventPage({ params }) {
       }
     }
 
-    if (params.id) {
+    if (id) {
       fetchEventData();
     }
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -88,6 +89,7 @@ export default function EditEventPage({ params }) {
           eventLocation: event.eventLocation,
           description: event.description,
           eventImage: event.eventImage,
+          publicationStatus: event.publicationStatus,
         }}
       />
     </div>
