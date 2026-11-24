@@ -136,12 +136,19 @@ export async function middleware(req: NextRequest) {
 "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, Sentry-Trace, Baggage"
   );
 
-  // A relative Location keeps the browser on the same host when a preview is proxied.
+  // The relay can supply an internal origin. Only the two staff preview hosts may receive a redirect.
   const staffHome = process.env.AGM_ENVIRONMENT === "development" ? "/dashboard/events" : "/dashboard";
   const landing = verifiedToken ? staffHome : "/signin";
   if (pathname === "/" || (pathname.startsWith("/signin") && verifiedToken) ||
       (pathname.startsWith("/dashboard") && !verifiedToken)) {
-    return new NextResponse(null, { status: 307, headers: { Location: landing } });
+    let base = req.nextUrl.origin;
+    if (process.env.AGM_ENVIRONMENT === "development") {
+      const requestedHost = req.headers.get("x-forwarded-host") || req.headers.get("host");
+      const staffHost = requestedHost === "admin-development.avdheshanandg.org"
+        ? requestedHost : "agm-development-admin.vercel.app";
+      base = `https://${staffHost}`;
+    }
+    return NextResponse.redirect(new URL(landing, base));
   }
 
   // Protect API routes that are not public
